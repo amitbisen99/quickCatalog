@@ -1,0 +1,29 @@
+const express = require('express');
+
+const authRoutes = require('./auth.routes');
+const userRoutes = require('./user.routes');
+const catalogRoutes = require('./catalog.routes');
+const productsRoutes = require('./products.routes');
+const categoryRoutes = require('./category.routes');
+const specificationRoutes = require('./specification.routes');
+const enquiryRoutes = require('./enquiry.routes');
+const analyticsRoutes = require('./analytics.routes');
+const uploadRoutes = require('./upload.routes');
+const publicRoutes = require('./public.routes');
+const adminRoutes = require('./admin.routes');
+
+const router = express.Router();
+
+router.use('/auth', authRoutes);
+router.use('/users', userRoutes);
+router.use('/catalogs', catalogRoutes);
+router.use('/products', productsRoutes);
+router.use('/categories', categoryRoutes);
+router.use('/specifications', specificationRoutes);
+router.use('/enquiries', enquiryRoutes);
+router.use('/analytics', analyticsRoutes);
+router.use('/upload', uploadRoutes);
+router.use('/public', publicRoutes);
+router.use('/admin', adminRoutes);
+
+module.exports = router;

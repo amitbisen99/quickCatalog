@@ -1,0 +1,63 @@
+// Matches a number token (with optional comma thousands-separators and a
+// decimal part) anywhere in the string, ignoring surrounding currency
+// symbols/text. A naive "strip everything but digits and dots" approach
+// breaks on abbreviations like "Rs." — the period gets mistaken for a
+// decimal point (e.g. "Rs. 1,999" -> "1.999" -> 1.999 instead of 1999).
+const NUMBER_PATTERN = /\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?/;
+
+/** Extracts and parses a finite, non-negative number from a messy price string. */
+function parsePrice(raw) {
+  if (raw === undefined || raw === null || raw === '') return null;
+  const match = String(raw).match(NUMBER_PATTERN);
+  if (!match) return null;
+  const value = parseFloat(match[0].replace(/,/g, ''));
+  return Number.isFinite(value) && value >= 0 ? value : null;
+}
+
+/** Splits on comma/semicolon/pipe/newline, trims, drops blanks, caps at 3. */
+function parseImageUrls(raw) {
+  if (!raw) return [];
+  return String(raw)
+    .split(/[,;|\n]+/)
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .slice(0, 3);
+}
+
+/**
+ * Applies the vendor's field mappings to one parsed Excel row and
+ * validates it. No AI — plain rules for the fields that actually need
+ * parsing (price), everything else is a direct/trimmed passthrough.
+ */
+function normalizeProductRow(record, fieldMappings) {
+  const get = (field) => {
+    const column = fieldMappings[field];
+    if (!column) return '';
+    const value = record[column];
+    return value === undefined || value === null ? '' : String(value).trim();
+  };
+
+  const name = get('productName');
+  if (!name) {
+    return { error: 'Product name is required' };
+  }
+
+  const price = parsePrice(get('price'));
+  if (price === null) {
+    return { error: 'Price is missing or not a valid number' };
+  }
+
+  return {
+    data: {
+      name,
+      description: get('description'),
+      price,
+      unit: get('unit') || 'pcs',
+      images: parseImageUrls(get('imageUrl')),
+      video: get('videoUrl'),
+      categoryName: get('category') || null,
+    },
+  };
+}
+
+module.exports = { normalizeProductRow, parsePrice, parseImageUrls };

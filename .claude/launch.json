@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "frontend",
+      "runtimeExecutable": "C:\\xampp\\htdocs\\Quickcatalog\\scripts\\dev-frontend.cmd",
+      "runtimeArgs": [],
+      "port": 3010
+    }
+  ]
+}
