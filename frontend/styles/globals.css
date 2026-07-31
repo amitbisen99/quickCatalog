@@ -12,3 +12,27 @@ body {
 * {
   box-sizing: border-box;
 }
+
+/* Marketing homepage only (pages/index.tsx) — not used elsewhere. */
+.text-gradient {
+  background: linear-gradient(135deg, #4f46e5 0%, #db2777 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-grid-bg {
+  background-image: linear-gradient(rgba(79, 70, 229, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(79, 70, 229, 0.06) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.feature-tab-active {
+  background: #4f46e5;
+  color: white;
+}
+
+.feature-tab-inactive {
+  background: white;
+  color: #6b6891;
+}

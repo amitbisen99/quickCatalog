@@ -11,6 +11,14 @@ export default function Document() {
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="QuickCatalog" />
+        {/* Icons for the marketing homepage (pages/index.tsx) — CSS-only kit,
+            no JS-based SVG replacement, so it doesn't fight React's DOM. */}
+        <link
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+          crossOrigin="anonymous"
+          referrerPolicy="no-referrer"
+        />
       </Head>
       <body>
         <Main />
