@@ -18,7 +18,7 @@ export default function Login() {
 
   const justVerified = router.query.verified === '1';
 
-  // Already logged in (e.g. came back to /auth/login manually) — skip
+  // Already logged in (e.g. came back to /login manually) — skip
   // straight to the dashboard instead of showing the form again.
   useEffect(() => {
     if (user) router.replace('/dashboard');
@@ -76,7 +76,7 @@ export default function Login() {
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                 Password
               </label>
-              <Link href="/auth/forgot-password" className="text-sm font-medium text-primary-700 hover:text-primary-800">
+              <Link href="/forgot-password" className="text-sm font-medium text-primary-700 hover:text-primary-800">
                 Forgot password?
               </Link>
             </div>
@@ -112,7 +112,7 @@ export default function Login() {
 
         <p className="mt-6 text-center text-sm text-gray-600">
           Don&apos;t have an account?{' '}
-          <Link href="/auth/signup" className="font-medium text-primary-700 hover:text-primary-800">
+          <Link href="/signup" className="font-medium text-primary-700 hover:text-primary-800">
             Sign up
           </Link>
         </p>

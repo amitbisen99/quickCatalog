@@ -55,7 +55,7 @@ export default function Signup() {
       if (result.devOtp) {
         sessionStorage.setItem('qc_dev_otp', result.devOtp);
       }
-      router.push(`/auth/verify-email?email=${encodeURIComponent(email)}`);
+      router.push(`/verify-email?email=${encodeURIComponent(email)}`);
     } catch (err) {
       if (err instanceof ApiError) {
         if (err.errors?.length) {
@@ -176,7 +176,7 @@ export default function Signup() {
 
         <p className="mt-6 text-center text-sm text-gray-600">
           Already have an account?{' '}
-          <Link href="/auth/login" className="font-medium text-primary-700 hover:text-primary-800">
+          <Link href="/login" className="font-medium text-primary-700 hover:text-primary-800">
             Log in
           </Link>
         </p>

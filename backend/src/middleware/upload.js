@@ -36,7 +36,10 @@ const ZIP_MIME_TYPES = ['application/zip', 'application/x-zip-compressed', 'appl
 
 const bulkImportUploader = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 20 * 1024 * 1024 }, // 20MB — a zip of product photos can be bigger than a lone Excel file
+  // 900MB — a zip of full-size product photos (hundreds of products,
+  // several photos each) can get large; raised well past the old 20MB
+  // default to support real-world-sized test/import photo sets.
+  limits: { fileSize: 900 * 1024 * 1024 },
   fileFilter(req, file, cb) {
     if (file.fieldname === 'file') {
       const isExcel = EXCEL_MIME_TYPES.includes(file.mimetype) || /\.(xlsx|xls)$/i.test(file.originalname);
@@ -61,7 +64,7 @@ function bulkImportUpload(req, res, next) {
   ])(req, res, (err) => {
     if (!err) return next();
     if (err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE') {
-      return next(new AppError('File is too large — the limit is 20MB', 400));
+      return next(new AppError('File is too large — the limit is 900MB', 400));
     }
     next(err);
   });

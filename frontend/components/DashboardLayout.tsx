@@ -69,7 +69,7 @@ export default function DashboardLayout({ title, children }: Props) {
 
   async function handleLogout() {
     await logout();
-    router.push('/auth/login');
+    router.push('/login');
   }
 
   function NavLinks() {

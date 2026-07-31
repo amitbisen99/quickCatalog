@@ -58,7 +58,7 @@ export default function ForgotPassword() {
               </Alert>
             )}
             <p className="text-center text-sm text-gray-600">
-              <Link href="/auth/login" className="font-medium text-primary-700 hover:text-primary-800">
+              <Link href="/login" className="font-medium text-primary-700 hover:text-primary-800">
                 Back to login
               </Link>
             </p>
@@ -95,7 +95,7 @@ export default function ForgotPassword() {
             </form>
 
             <p className="mt-6 text-center text-sm text-gray-600">
-              <Link href="/auth/login" className="font-medium text-primary-700 hover:text-primary-800">
+              <Link href="/login" className="font-medium text-primary-700 hover:text-primary-800">
                 Back to login
               </Link>
             </p>

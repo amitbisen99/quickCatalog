@@ -53,7 +53,7 @@ export default function ResetPassword() {
           <div className="mt-6 space-y-4">
             <Alert variant="success">Your password has been reset. You can now log in.</Alert>
             <p className="text-center text-sm text-gray-600">
-              <Link href="/auth/login" className="font-medium text-primary-700 hover:text-primary-800">
+              <Link href="/login" className="font-medium text-primary-700 hover:text-primary-800">
                 Go to login
               </Link>
             </p>

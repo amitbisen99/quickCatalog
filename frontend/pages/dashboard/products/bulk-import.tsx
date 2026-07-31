@@ -8,7 +8,7 @@ import { apiFetch, ApiError } from '@/utils/api';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 const MAX_EXCEL_SIZE = 10 * 1024 * 1024; // 10MB
-const MAX_ZIP_SIZE = 20 * 1024 * 1024; // 20MB
+const MAX_ZIP_SIZE = 900 * 1024 * 1024; // 900MB — matches the backend's bulkImportUpload limit
 
 interface ImportResult {
   productsCreated: number;
@@ -51,7 +51,7 @@ function BulkImportProducts() {
       return;
     }
     if (selected.size > MAX_ZIP_SIZE) {
-      setError('ZIP file is too large — the limit is 20MB');
+      setError('ZIP file is too large — the limit is 900MB');
       return;
     }
     setZipFile(selected);
@@ -136,7 +136,7 @@ function BulkImportProducts() {
             <label className="block text-sm font-medium text-gray-700">Product images (optional)</label>
             <input type="file" accept=".zip" onChange={handleZipChange} className="mt-1 w-full text-sm text-gray-600" />
             <p className="mt-1 text-xs text-gray-400">
-              A .zip of photos, referenced by filename in the sheet's Image Filename column. Max 20MB.
+              A .zip of photos, referenced by filename in the sheet's Image Filename column. Max 900MB.
             </p>
           </div>
 

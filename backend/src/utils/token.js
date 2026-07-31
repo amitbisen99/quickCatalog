@@ -46,6 +46,56 @@ function clearAuthCookies(res) {
   res.clearCookie('refreshToken', { path: '/api/auth' });
 }
 
+// ── Super admin (single env-based credential, no User doc — see
+// adminAuth.controller.js) ─────────────────────────────────────────
+// Distinct cookie names (adminAccessToken/adminRefreshToken) from the
+// vendor cookies above so a browser can hold an admin session and a
+// vendor session at the same time without either clobbering the other.
+
+function generateAdminAccessToken() {
+  return jwt.sign({ role: 'admin' }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN || '7d',
+  });
+}
+
+function generateAdminRefreshToken() {
+  return jwt.sign({ role: 'admin' }, process.env.JWT_REFRESH_SECRET, {
+    expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '30d',
+  });
+}
+
+function adminAccessCookieOptions() {
+  return {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 7 * DAY_MS,
+  };
+}
+
+// Scoped to /api/admin/auth so this cookie is only ever sent to the
+// admin refresh/logout endpoints, not on every API request.
+function adminRefreshCookieOptions() {
+  return {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/api/admin/auth',
+    maxAge: 30 * DAY_MS,
+  };
+}
+
+function setAdminAuthCookies(res) {
+  res.cookie('adminAccessToken', generateAdminAccessToken(), adminAccessCookieOptions());
+  res.cookie('adminRefreshToken', generateAdminRefreshToken(), adminRefreshCookieOptions());
+}
+
+function clearAdminAuthCookies(res) {
+  res.clearCookie('adminAccessToken', { path: '/' });
+  res.clearCookie('adminRefreshToken', { path: '/api/admin/auth' });
+}
+
 module.exports = {
   generateAccessToken,
   generateRefreshToken,
@@ -53,4 +103,10 @@ module.exports = {
   refreshCookieOptions,
   setAuthCookies,
   clearAuthCookies,
+  generateAdminAccessToken,
+  generateAdminRefreshToken,
+  adminAccessCookieOptions,
+  adminRefreshCookieOptions,
+  setAdminAuthCookies,
+  clearAdminAuthCookies,
 };

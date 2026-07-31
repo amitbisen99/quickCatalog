@@ -1,10 +1,10 @@
 const express = require('express');
 const adminController = require('../controllers/admin.controller');
-const { authenticate, authorize } = require('../middleware/auth');
+const { authenticateAdmin, authorize } = require('../middleware/auth');
 
 const router = express.Router();
 
-router.use(authenticate, authorize('admin'));
+router.use(authenticateAdmin, authorize('admin'));
 
 router.get('/users', adminController.getUsers);
 router.put('/users/:userId/status', adminController.updateUserStatus);

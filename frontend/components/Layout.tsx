@@ -42,8 +42,8 @@ export default function Layout({ title, children }: LayoutProps) {
 
           <nav className="hidden items-center gap-6 text-sm font-medium text-gray-600 sm:flex">
             <a href="/" className="hover:text-primary-700">Home</a>
-            <a href="/auth/login" className="hover:text-primary-700">Login</a>
-            <a href="/auth/signup" className="rounded-lg bg-primary-700 px-4 py-2 text-white hover:bg-primary-800">
+            <a href="/login" className="hover:text-primary-700">Login</a>
+            <a href="/signup" className="rounded-lg bg-primary-700 px-4 py-2 text-white hover:bg-primary-800">
               Get started
             </a>
           </nav>
@@ -52,8 +52,8 @@ export default function Layout({ title, children }: LayoutProps) {
         {mobileMenuOpen && (
           <nav className="flex flex-col gap-1 border-t border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-600 sm:hidden">
             <a href="/" className="rounded-md px-3 py-2 hover:bg-gray-100">Home</a>
-            <a href="/auth/login" className="rounded-md px-3 py-2 hover:bg-gray-100">Login</a>
-            <a href="/auth/signup" className="rounded-md px-3 py-2 hover:bg-gray-100">Get started</a>
+            <a href="/login" className="rounded-md px-3 py-2 hover:bg-gray-100">Login</a>
+            <a href="/signup" className="rounded-md px-3 py-2 hover:bg-gray-100">Get started</a>
           </nav>
         )}
       </header>

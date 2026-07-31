@@ -59,7 +59,7 @@ export default function VerifyEmail() {
       });
       sessionStorage.removeItem('qc_verify_email');
       sessionStorage.removeItem('qc_dev_otp');
-      router.push('/auth/login?verified=1');
+      router.push('/login?verified=1');
     } catch (err) {
       setFormError(err instanceof ApiError ? err.message : 'Something went wrong. Please try again.');
     } finally {

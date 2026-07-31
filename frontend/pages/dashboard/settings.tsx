@@ -143,7 +143,7 @@ function Settings() {
     setDeleteError('');
     try {
       await apiFetch('/users/account', { method: 'DELETE' });
-      router.push('/auth/login');
+      router.push('/login');
     } catch (err) {
       setDeleteError(err instanceof ApiError ? err.message : 'Something went wrong. Please try again.');
     }
