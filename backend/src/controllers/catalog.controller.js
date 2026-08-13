@@ -7,15 +7,20 @@ const slugify = require('../utils/slugify');
 const generateQrCodeDataUrl = require('../utils/qrCode');
 const { parseWorkbook } = require('../utils/excelParser');
 const { normalizeProductRow } = require('../utils/normalizeProductRow');
+const readImagesZip = require('../utils/readImagesZip');
+const resolveRowImages = require('../utils/resolveRowImages');
 const asyncHandler = require('../utils/asyncHandler');
 const AppError = require('../utils/AppError');
 const notImplemented = require('../utils/notImplemented');
 const { CATALOG_TEMPLATE_IDS, DEFAULT_CATALOG_TEMPLATE } = require('../utils/catalogTemplates');
+const { FREE_CATALOG_LIMIT, FREE_PRODUCT_LIMIT, exceedsFreeProductLimit } = require('../utils/planLimits');
 const findOrCreateCategory = require('../utils/findOrCreateCategory');
 const generateCatalogPdf = require('../utils/generateCatalogPdf');
 
-async function toCatalogResponse(catalog) {
-  const productsCount = await Product.countDocuments({ catalogIds: catalog._id });
+// knownCount lets a caller that just inserted the products (and so already
+// knows the exact count) skip the extra countDocuments round-trip.
+async function toCatalogResponse(catalog, knownCount) {
+  const productsCount = knownCount !== undefined ? knownCount : await Product.countDocuments({ catalogIds: catalog._id });
   return {
     id: catalog._id,
     name: catalog.name,
@@ -45,8 +50,11 @@ async function generateUniqueSlug(name) {
 async function createCatalogRecord(user, name, description, template) {
   if (user.subscriptionType !== 'paid') {
     const existingCount = await Catalog.countDocuments({ vendorId: user._id });
-    if (existingCount >= 1) {
-      throw new AppError('Free plan is limited to 1 catalog. Upgrade to create more.', 403);
+    if (existingCount >= FREE_CATALOG_LIMIT) {
+      throw new AppError(
+        `Free plan is limited to ${FREE_CATALOG_LIMIT} catalog. Upgrade to create more.`,
+        403
+      );
     }
   }
 
@@ -148,7 +156,8 @@ exports.deleteCatalog = asyncHandler(async (req, res) => {
 });
 
 exports.createFromFile = asyncHandler(async (req, res) => {
-  if (!req.file) {
+  const excelFile = req.files?.file?.[0];
+  if (!excelFile) {
     throw new AppError('No file uploaded', 400);
   }
 
@@ -171,14 +180,23 @@ exports.createFromFile = asyncHandler(async (req, res) => {
   }
 
   const user = await User.findById(req.user.id);
-  const { records } = parseWorkbook(req.file.buffer);
+  const { records } = parseWorkbook(excelFile.buffer);
   if (records.length === 0) {
     throw new AppError('No product rows found in this file', 400);
   }
 
+  const zipFile = req.files?.imagesZip?.[0];
+  const zipEntries = zipFile ? readImagesZip(zipFile.buffer) : null;
+
   const validRows = [];
   const errors = [];
+  const warnings = [];
   const categoryCache = new Map();
+
+  // Free tier: rows beyond this position get truncated below regardless,
+  // so skip their category lookups and image resolution — no point paying
+  // for DB writes / sharp compression on rows that get thrown away.
+  const effectiveLimit = user.subscriptionType === 'paid' ? Infinity : FREE_PRODUCT_LIMIT;
 
   for (let i = 0; i < records.length; i += 1) {
     const rowNumber = i + 2; // +1 for header row, +1 for 1-indexing
@@ -188,23 +206,34 @@ exports.createFromFile = asyncHandler(async (req, res) => {
       continue;
     }
 
+    const willBeInserted = validRows.length < effectiveLimit;
+
     let categoryId;
-    if (data.categoryName) {
+    if (data.categoryName && willBeInserted) {
       // eslint-disable-next-line no-await-in-loop
       categoryId = await findOrCreateCategory(user._id, data.categoryName, categoryCache);
     }
 
-    validRows.push({ ...data, categoryId });
+    // eslint-disable-next-line no-await-in-loop
+    const images = willBeInserted ? await resolveRowImages(data, zipEntries, rowNumber, warnings) : data.images;
+
+    validRows.push({ ...data, categoryId, images });
   }
 
   if (validRows.length === 0) {
     throw new AppError('No valid product rows found — check the column mapping and try again', 400);
   }
 
+  // Free tier: cap products per catalog rather than reject the whole
+  // import — the vendor still gets a usable catalog, just capped, and can
+  // upgrade to bring the rest in. slice(0, Infinity) is a no-op for paid.
+  const rowsToInsert = validRows.slice(0, effectiveLimit);
+  const isCapped = exceedsFreeProductLimit(user, 0, validRows.length);
+
   const catalog = await createCatalogRecord(user, catalogName, catalogDescription);
 
   const createdProducts = await Product.insertMany(
-    validRows.map((row) => ({
+    rowsToInsert.map((row) => ({
       vendorId: user._id,
       catalogIds: [catalog._id],
       name: row.name,
@@ -217,12 +246,18 @@ exports.createFromFile = asyncHandler(async (req, res) => {
     }))
   );
 
+  const planLimit = isCapped
+    ? { limit: FREE_PRODUCT_LIMIT, totalValidRows: validRows.length, imported: createdProducts.length }
+    : null;
+
   res.status(201).json({
     success: true,
     message: `Catalog created with ${createdProducts.length} product${createdProducts.length === 1 ? '' : 's'}`,
-    catalog: await toCatalogResponse(catalog),
+    catalog: await toCatalogResponse(catalog, createdProducts.length),
     productsCreated: createdProducts.length,
     errors,
+    warnings,
+    planLimit,
   });
 });
 

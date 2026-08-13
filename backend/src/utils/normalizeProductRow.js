@@ -53,7 +53,12 @@ function normalizeProductRow(record, fieldMappings) {
       description: get('description'),
       price,
       unit: get('unit') || 'pcs',
+      // Image URL takes priority; Image Filename (matched against an
+      // uploaded ZIP) is only used as a fallback when no URL is given —
+      // resolved by the controller, which is the only place that has the
+      // ZIP's contents. Mirrors normalizeBulkProductRow.js's same split.
       images: parseImageUrls(get('imageUrl')),
+      imageFilenames: parseImageUrls(get('imageFilename')),
       video: get('videoUrl'),
       categoryName: get('category') || null,
     },

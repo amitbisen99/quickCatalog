@@ -4,25 +4,49 @@ const Product = require('../models/Product');
 const Catalog = require('../models/Catalog');
 const Category = require('../models/Category');
 const Specification = require('../models/Specification');
+const User = require('../models/User');
 const { compressImageToDataUrl } = require('../utils/imageProcessor');
 const { parseWorkbook } = require('../utils/excelParser');
 const { normalizeBulkProductRow, HEADERS: BULK_HEADERS } = require('../utils/normalizeBulkProductRow');
 const findOrCreateCategory = require('../utils/findOrCreateCategory');
 const findOrCreateSpecification = require('../utils/findOrCreateSpecification');
 const readImagesZip = require('../utils/readImagesZip');
+const resolveRowImages = require('../utils/resolveRowImages');
 const asyncHandler = require('../utils/asyncHandler');
 const AppError = require('../utils/AppError');
+const { FREE_PRODUCT_LIMIT, exceedsFreeProductLimit } = require('../utils/planLimits');
 
 const PAGE_SIZE = 20;
 
-async function requireOwnedCatalog(catalogId, vendorId) {
+// additionalCount > 0 also enforces the free-tier per-catalog product cap
+// — pass the number of products this request is about to add (e.g. 1 for
+// a single create/link). Callers that only read or remove products (list,
+// unlink) leave it at 0 and skip the check (and its extra queries)
+// entirely. When a cap check is needed, the catalog/user/existing-count
+// lookups don't depend on each other, so they run in parallel.
+async function requireOwnedCatalog(catalogId, vendorId, additionalCount = 0) {
   if (!mongoose.Types.ObjectId.isValid(catalogId)) {
     throw new AppError('Catalog not found', 404);
   }
-  const catalog = await Catalog.findOne({ _id: catalogId, vendorId });
+
+  const needsCapCheck = additionalCount > 0;
+  const [catalog, user, existingCount] = await Promise.all([
+    Catalog.findOne({ _id: catalogId, vendorId }),
+    needsCapCheck ? User.findById(vendorId).select('subscriptionType') : null,
+    needsCapCheck ? Product.countDocuments({ catalogIds: catalogId }) : null,
+  ]);
+
   if (!catalog) {
     throw new AppError('Catalog not found', 404);
   }
+
+  if (needsCapCheck && exceedsFreeProductLimit(user, existingCount, additionalCount)) {
+    throw new AppError(
+      `Free plan is limited to ${FREE_PRODUCT_LIMIT} products per catalog. Upgrade to add more.`,
+      403
+    );
+  }
+
   return catalog;
 }
 
@@ -94,7 +118,7 @@ exports.getProductsInCatalog = asyncHandler(async (req, res) => {
 
 exports.createProduct = asyncHandler(async (req, res) => {
   const { catalogId } = req.params;
-  await requireOwnedCatalog(catalogId, req.user.id);
+  await requireOwnedCatalog(catalogId, req.user.id, 1);
 
   const { name, description, price, unit, minimumOrderQuantity, categoryId, video, taxPercent } = req.body;
   const images = (await Promise.all((req.files || []).map((f) => compressImageToDataUrl(f.buffer)))).slice(0, 3);
@@ -125,7 +149,7 @@ exports.createProduct = asyncHandler(async (req, res) => {
 // Adds an existing (already-owned) product to another catalog.
 exports.linkExistingProduct = asyncHandler(async (req, res) => {
   const { catalogId, productId } = req.params;
-  await requireOwnedCatalog(catalogId, req.user.id);
+  await requireOwnedCatalog(catalogId, req.user.id, 1);
 
   if (!mongoose.Types.ObjectId.isValid(productId)) {
     throw new AppError('Product not found', 404);
@@ -373,26 +397,8 @@ exports.bulkImportProducts = asyncHandler(async (req, res) => {
       await findOrCreateSpecification(req.user.id, specNames[s], specCache);
     }
 
-    // Image URL wins if present; Image Filename is only resolved against
-    // the ZIP as a fallback when no URL was given for that row.
-    let images = data.images;
-    if (images.length === 0 && data.imageFilenames.length > 0) {
-      if (!zipEntries) {
-        warnings.push({ rowNumber, warning: 'Image Filename given but no images ZIP was uploaded' });
-      } else {
-        const resolvedBuffers = [];
-        data.imageFilenames.forEach((filename) => {
-          const buffer = zipEntries.get(filename.toLowerCase());
-          if (buffer) {
-            resolvedBuffers.push(buffer);
-          } else {
-            warnings.push({ rowNumber, warning: `Image file "${filename}" not found in the uploaded ZIP` });
-          }
-        });
-        // eslint-disable-next-line no-await-in-loop
-        images = await Promise.all(resolvedBuffers.map((buffer) => compressImageToDataUrl(buffer)));
-      }
-    }
+    // eslint-disable-next-line no-await-in-loop
+    const images = await resolveRowImages(data, zipEntries, rowNumber, warnings);
 
     validRows.push({ ...data, categoryId, images });
   }

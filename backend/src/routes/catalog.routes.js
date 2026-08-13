@@ -4,7 +4,7 @@ const enquiryController = require('../controllers/enquiry.controller');
 const productRoutes = require('./product.routes');
 const { authenticate, authorize } = require('../middleware/auth');
 const validate = require('../middleware/validate');
-const { excelUpload } = require('../middleware/upload');
+const { bulkImportUpload } = require('../middleware/upload');
 const { createCatalogValidators, updateCatalogValidators } = require('../validators/catalog.validators');
 const { createEnquiryValidators } = require('../validators/enquiry.validators');
 
@@ -16,7 +16,7 @@ router.post(
   '/create-from-file',
   authenticate,
   authorize('vendor'),
-  excelUpload,
+  bulkImportUpload,
   catalogController.createFromFile
 );
 

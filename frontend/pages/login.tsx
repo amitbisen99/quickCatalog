@@ -16,6 +16,10 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // verify-email now logs the vendor straight into the catalog wizard, so
+  // this page no longer sits in that path — ?verified=1 only shows up if
+  // someone lands here by hand (e.g. an old bookmarked link), in which
+  // case a normal login to /dashboard is still the right outcome.
   const justVerified = router.query.verified === '1';
 
   // Already logged in (e.g. came back to /login manually) — skip

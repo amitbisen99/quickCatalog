@@ -75,7 +75,13 @@ exports.verifyEmail = asyncHandler(async (req, res) => {
   user.otpExpiresAt = undefined;
   await user.save();
 
-  res.json({ success: true, message: 'Account verified successfully' });
+  // Log the vendor straight in — verification is the last step of
+  // registration, so there's no reason to make them re-enter their
+  // password on a separate login screen right after. Same cookies login()
+  // sets, just issued here instead.
+  setAuthCookies(res, user, false);
+
+  res.json({ success: true, message: 'Account verified successfully', user: toSafeUser(user) });
 });
 
 exports.resendVerification = asyncHandler(async (req, res) => {

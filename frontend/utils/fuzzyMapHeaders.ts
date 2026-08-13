@@ -6,6 +6,10 @@ const FIELD_SYNONYMS: Record<string, string[]> = {
   price: ['price', 'cost', 'rate', 'mrp', 'amount', 'unit price'],
   category: ['category', 'cat', 'type', 'group'],
   unit: ['unit', 'uom', 'measure', 'unit of measure'],
+  // Checked before imageUrl below — its own substring pass ("image" is one
+  // of its synonyms) would otherwise swallow an "Image Filename" column
+  // first, since object key order is the field-processing order here.
+  imageFilename: ['image filename', 'photo filename', 'filename', 'file name', 'image file name', 'picture filename'],
   imageUrl: ['image', 'images', 'image url', 'image urls', 'photo', 'picture'],
   videoUrl: ['video', 'video url', 'video link'],
 };

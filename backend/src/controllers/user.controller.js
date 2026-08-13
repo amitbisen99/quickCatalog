@@ -58,3 +58,19 @@ exports.changePassword = asyncHandler(async (req, res) => {
 });
 
 exports.deleteAccount = notImplemented('DELETE /api/users/account');
+
+// Records a plan choice — there's no payment gateway wired up yet, so this
+// is a direct, honest "trust upgrade" rather than a real billing charge.
+// Kept as its own endpoint (not folded into updateProfile) so swapping in
+// real billing later doesn't have to touch unrelated profile-edit code.
+exports.upgradePlan = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user.id);
+  if (!user) {
+    throw new AppError('User not found', 404);
+  }
+
+  user.subscriptionType = 'paid';
+  await user.save();
+
+  res.json({ success: true, message: 'Plan upgraded successfully', user: toSafeUser(user) });
+});

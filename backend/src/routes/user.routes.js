@@ -12,6 +12,7 @@ router.use(authenticate, authorize('vendor'));
 router.get('/profile', userController.getProfile);
 router.put('/profile', profileImagesUpload, updateProfileValidators, validate, userController.updateProfile);
 router.put('/change-password', changePasswordValidators, validate, userController.changePassword);
+router.put('/upgrade-plan', userController.upgradePlan);
 router.delete('/account', userController.deleteAccount);
 
 module.exports = router;

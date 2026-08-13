@@ -4,11 +4,13 @@ import Layout from '@/components/Layout';
 import Alert from '@/components/Alert';
 import { apiFetch, ApiError } from '@/utils/api';
 import { BUSINESS_TYPES, INDUSTRIES } from '@/utils/constants';
+import { useAuth } from '@/context/AuthContext';
 
 const RESEND_COOLDOWN_SECONDS = 60;
 
 export default function VerifyEmail() {
   const router = useRouter();
+  const { refreshUser } = useAuth();
 
   const [email, setEmail] = useState('');
   const [devOtp, setDevOtp] = useState('');
@@ -59,7 +61,11 @@ export default function VerifyEmail() {
       });
       sessionStorage.removeItem('qc_verify_email');
       sessionStorage.removeItem('qc_dev_otp');
-      router.push('/login?verified=1');
+      // verify-email now logs the vendor in directly (same cookies login()
+      // sets) — pull that session into AuthContext so /create-catalog sees
+      // an authenticated user immediately, no separate login step.
+      await refreshUser();
+      router.push('/create-catalog');
     } catch (err) {
       setFormError(err instanceof ApiError ? err.message : 'Something went wrong. Please try again.');
     } finally {
