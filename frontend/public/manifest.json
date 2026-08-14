@@ -2,7 +2,7 @@
   "name": "QuickCatalog",
   "short_name": "QuickCatalog",
   "description": "Build and share product catalogs in minutes.",
-  "start_url": "/",
+  "start_url": "/login",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",

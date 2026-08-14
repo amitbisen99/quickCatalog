@@ -14,12 +14,13 @@ import {
   HelpIcon,
   SlidersIcon,
   LogoutIcon,
-  MenuIcon,
-  XIcon,
   ChevronDownIcon,
   LayoutIcon,
+  DotsIcon,
+  XIcon,
 } from '@/components/icons';
 
+// Full nav, used as-is by the desktop sidebar.
 const NAV_GROUPS: { label: string | null; items: { label: string; href: string; icon: typeof HomeIcon }[] }[] = [
   { label: null, items: [{ label: 'Dashboard', href: '/dashboard', icon: HomeIcon }] },
   {
@@ -48,6 +49,40 @@ const NAV_GROUPS: { label: string | null; items: { label: string; href: string; 
   },
 ];
 
+// The mobile bottom tab bar only has room for a handful of destinations —
+// these are the ones a vendor reaches for constantly. Everything else
+// (Templates, Categories, Specifications, Analytics, Support, Settings)
+// lives one tap away behind "More", which opens as a bottom sheet rather
+// than a side drawer to match the tab bar's own bottom-anchored feel.
+const PRIMARY_TABS: { label: string; href: string; icon: typeof HomeIcon }[] = [
+  { label: 'Home', href: '/dashboard', icon: HomeIcon },
+  { label: 'Catalogs', href: '/dashboard/catalogs', icon: GridIcon },
+  { label: 'Products', href: '/dashboard/products', icon: BoxIcon },
+  { label: 'Enquiries', href: '/dashboard/enquiries', icon: MailIcon },
+];
+
+const MORE_GROUPS: { label: string | null; items: { label: string; href: string; icon: typeof HomeIcon }[] }[] = [
+  {
+    label: 'Catalog',
+    items: [
+      { label: 'Templates', href: '/dashboard/templates', icon: LayoutIcon },
+      { label: 'Categories', href: '/dashboard/categories', icon: TagIcon },
+      { label: 'Specifications', href: '/dashboard/specifications', icon: ListIcon },
+    ],
+  },
+  {
+    label: 'Engagement',
+    items: [{ label: 'Analytics', href: '/dashboard/analytics', icon: ChartBarIcon }],
+  },
+  {
+    label: null,
+    items: [
+      { label: 'Support', href: '/dashboard/support', icon: HelpIcon },
+      { label: 'Settings', href: '/dashboard/settings', icon: SlidersIcon },
+    ],
+  },
+];
+
 interface Props {
   title?: string;
   children: ReactNode;
@@ -62,10 +97,11 @@ function initialsOf(name: string): string {
 export default function DashboardLayout({ title, children }: Props) {
   const { user, logout } = useAuth();
   const router = useRouter();
-  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [moreSheetOpen, setMoreSheetOpen] = useState(false);
   const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
 
   const vendorName = user?.businessName || user?.email || '';
+  const moreActive = MORE_GROUPS.some((g) => g.items.some((i) => i.href === router.pathname));
 
   async function handleLogout() {
     await logout();
@@ -88,7 +124,6 @@ export default function DashboardLayout({ title, children }: Props) {
                   <Link
                     key={item.href}
                     href={item.href}
-                    onClick={() => setMobileNavOpen(false)}
                     className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
                       active ? 'bg-primary-50 font-semibold text-primary-800' : 'text-gray-600 hover:bg-gray-50'
                     }`}
@@ -127,58 +162,11 @@ export default function DashboardLayout({ title, children }: Props) {
           </nav>
         </aside>
 
-        {/* Mobile sidebar drawer */}
-        {mobileNavOpen && (
-          <div className="fixed inset-0 z-40 lg:hidden">
-            <div className="absolute inset-0 bg-black/40" onClick={() => setMobileNavOpen(false)} />
-            <aside className="absolute left-0 top-0 flex h-full w-72 flex-col bg-white">
-              <div className="flex items-center justify-between px-5 py-6">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-700 text-sm font-bold text-secondary-500">
-                    Q
-                  </div>
-                  <span className="text-lg font-bold text-gray-900">QuickCatalog</span>
-                </div>
-                <button
-                  onClick={() => setMobileNavOpen(false)}
-                  aria-label="Close menu"
-                  className="rounded-md p-1 text-gray-500 hover:bg-gray-100"
-                >
-                  <XIcon className="h-5 w-5" />
-                </button>
-              </div>
-              <nav className="flex-1 overflow-y-auto px-3 pb-4">
-                <NavLinks />
-              </nav>
-              <div className="border-t border-gray-200 p-3">
-                <button
-                  onClick={handleLogout}
-                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-600 hover:bg-red-50 hover:text-red-700"
-                >
-                  <LogoutIcon className="h-5 w-5 shrink-0" />
-                  Logout
-                </button>
-              </div>
-            </aside>
-          </div>
-        )}
-
         {/* Main column */}
         <div className="flex min-w-0 flex-1 flex-col">
           <header className="sticky top-0 z-20 border-b border-gray-200 bg-white">
             <div className="flex items-center justify-between px-4 py-3.5 sm:px-6">
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  className="rounded-md p-2 text-gray-600 hover:bg-gray-100 lg:hidden"
-                  aria-label="Toggle menu"
-                  aria-expanded={mobileNavOpen}
-                  onClick={() => setMobileNavOpen((open) => !open)}
-                >
-                  <MenuIcon className="h-6 w-6" />
-                </button>
-                <span className="text-lg font-semibold text-gray-900">{pageLabel}</span>
-              </div>
+              <span className="text-lg font-semibold text-gray-900">{pageLabel}</span>
 
               <div className="relative">
                 <button
@@ -217,11 +205,110 @@ export default function DashboardLayout({ title, children }: Props) {
             </div>
           </header>
 
-          <main className="min-w-0 flex-1 px-4 py-8 sm:px-6">
+          <main className="min-w-0 flex-1 px-4 pb-24 pt-8 sm:px-6 lg:pb-8">
             <div className="mx-auto max-w-6xl">{children}</div>
           </main>
         </div>
       </div>
+
+      {/* Bottom tab bar (mobile/tablet) — the vendor-app-as-native-app nav.
+          Replaces the old side drawer; "More" opens a bottom sheet for
+          everything that doesn't fit here. */}
+      <nav
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-white pb-[env(safe-area-inset-bottom)] lg:hidden"
+        aria-label="Primary"
+      >
+        <div className="flex items-stretch justify-around">
+          {PRIMARY_TABS.map((item) => {
+            const active = router.pathname === item.href;
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] font-medium"
+              >
+                <Icon className={`h-6 w-6 ${active ? 'text-primary-700' : 'text-gray-400'}`} />
+                <span className={active ? 'text-primary-700' : 'text-gray-500'}>{item.label}</span>
+              </Link>
+            );
+          })}
+          <button
+            type="button"
+            onClick={() => setMoreSheetOpen(true)}
+            aria-label="More"
+            className="flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] font-medium"
+          >
+            <DotsIcon className={`h-6 w-6 ${moreActive ? 'text-primary-700' : 'text-gray-400'}`} />
+            <span className={moreActive ? 'text-primary-700' : 'text-gray-500'}>More</span>
+          </button>
+        </div>
+      </nav>
+
+      {/* "More" bottom sheet */}
+      {moreSheetOpen && (
+        <div className="fixed inset-0 z-50 flex items-end lg:hidden">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setMoreSheetOpen(false)} />
+          <div className="relative flex max-h-[80vh] w-full flex-col rounded-t-2xl bg-white pb-[env(safe-area-inset-bottom)] shadow-xl">
+            <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-700 text-xs font-semibold text-white">
+                  {vendorName ? initialsOf(vendorName) : ''}
+                </div>
+                <span className="text-sm font-semibold text-gray-900">{vendorName}</span>
+              </div>
+              <button
+                onClick={() => setMoreSheetOpen(false)}
+                aria-label="Close menu"
+                className="rounded-md p-1 text-gray-500 hover:bg-gray-100"
+              >
+                <XIcon className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="overflow-y-auto px-3 py-3">
+              {MORE_GROUPS.map((group, i) => (
+                <div key={i} className={i > 0 ? 'mt-4' : ''}>
+                  {group.label && (
+                    <p className="px-3 pb-1.5 text-xs font-semibold uppercase tracking-wider text-gray-400">
+                      {group.label}
+                    </p>
+                  )}
+                  <div className="flex flex-col gap-0.5">
+                    {group.items.map((item) => {
+                      const active = router.pathname === item.href;
+                      const Icon = item.icon;
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => setMoreSheetOpen(false)}
+                          className={`flex items-center gap-3 rounded-lg px-3 py-3 text-sm transition-colors ${
+                            active ? 'bg-primary-50 font-semibold text-primary-800' : 'text-gray-600 hover:bg-gray-50'
+                          }`}
+                        >
+                          <Icon className={`h-5 w-5 shrink-0 ${active ? 'text-primary-700' : 'text-gray-400'}`} />
+                          {item.label}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="border-t border-gray-100 p-3">
+              <button
+                onClick={handleLogout}
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-gray-600 hover:bg-red-50 hover:text-red-700"
+              >
+                <LogoutIcon className="h-5 w-5 shrink-0" />
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

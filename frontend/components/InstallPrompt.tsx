@@ -35,6 +35,12 @@ export default function InstallPrompt() {
 
   if (!onVendorAppPage || isInstalled || dismissed || !(isInstallable || showIOSInstructions)) return null;
 
+  // /dashboard/* pages render a fixed bottom tab bar on mobile
+  // (DashboardLayout) — sit above it there instead of flush with the
+  // screen edge, where it would overlap. /login has no tab bar, so
+  // bottom-0 is correct there.
+  const onDashboard = router.pathname.startsWith('/dashboard');
+
   const dismiss = () => {
     window.localStorage.setItem(DISMISSED_KEY, 'true');
     setDismissed(true);
@@ -46,7 +52,11 @@ export default function InstallPrompt() {
   };
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 flex flex-col gap-3 border-t border-gray-200 bg-white p-4 shadow-lg sm:inset-x-auto sm:bottom-4 sm:right-4 sm:w-80 sm:rounded-xl sm:border">
+    <div
+      className={`fixed inset-x-0 z-50 flex flex-col gap-3 border-t border-gray-200 bg-white p-4 shadow-lg sm:inset-x-auto sm:bottom-4 sm:right-4 sm:w-80 sm:rounded-xl sm:border ${
+        onDashboard ? 'bottom-[calc(4.75rem+env(safe-area-inset-bottom))]' : 'bottom-0'
+      }`}
+    >
       {showIOSInstructions ? (
         <>
           <div>

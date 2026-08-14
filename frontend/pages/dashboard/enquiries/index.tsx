@@ -95,10 +95,10 @@ function EnquiriesPage() {
               <thead className="border-b border-gray-200 bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
                 <tr>
                   <th className="px-4 py-3 font-medium">Customer</th>
-                  <th className="px-4 py-3 font-medium">Catalog</th>
-                  <th className="px-4 py-3 font-medium">Products</th>
-                  <th className="px-4 py-3 font-medium">Status</th>
-                  <th className="px-4 py-3 font-medium">Date</th>
+                  <th className="hidden px-4 py-3 font-medium sm:table-cell">Catalog</th>
+                  <th className="hidden px-4 py-3 font-medium sm:table-cell">Products</th>
+                  <th className="hidden px-4 py-3 font-medium sm:table-cell">Status</th>
+                  <th className="hidden px-4 py-3 font-medium sm:table-cell">Date</th>
                   <th className="px-4 py-3 font-medium">Actions</th>
                 </tr>
               </thead>
@@ -109,16 +109,18 @@ function EnquiriesPage() {
                       <p className="font-medium text-gray-900">{enquiry.customerName}</p>
                       <p className="text-xs text-gray-500">{enquiry.customerMobile}</p>
                     </td>
-                    <td className="px-4 py-3 text-gray-600">{enquiry.catalogName}</td>
-                    <td className="px-4 py-3 text-gray-600">
+                    <td className="hidden px-4 py-3 text-gray-600 sm:table-cell">{enquiry.catalogName}</td>
+                    <td className="hidden px-4 py-3 text-gray-600 sm:table-cell">
                       {enquiry.items.length} product{enquiry.items.length === 1 ? '' : 's'}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="hidden px-4 py-3 sm:table-cell">
                       <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${STATUS_STYLES[enquiry.status]}`}>
                         {enquiry.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-gray-500">{new Date(enquiry.createdAt).toLocaleDateString()}</td>
+                    <td className="hidden px-4 py-3 text-gray-500 sm:table-cell">
+                      {new Date(enquiry.createdAt).toLocaleDateString()}
+                    </td>
                     <td className="px-4 py-3">
                       <button onClick={() => setSelected(enquiry)} className="text-xs font-semibold text-primary-700 hover:text-primary-800">
                         View

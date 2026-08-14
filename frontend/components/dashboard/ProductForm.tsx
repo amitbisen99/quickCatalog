@@ -1,11 +1,11 @@
-import { useEffect, useState, DragEvent } from 'react';
+import { useEffect, useRef, useState, DragEvent } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import DOMPurify from 'dompurify';
 import 'react-quill/dist/quill.snow.css';
 import Alert from '@/components/Alert';
-import { TrashIcon, CameraIcon } from '@/components/icons';
+import { TrashIcon, CameraIcon, GalleryIcon, UploadIcon } from '@/components/icons';
 import { apiFetch, ApiError } from '@/utils/api';
 import { UNITS } from '@/utils/constants';
 import { currencySymbol } from '@/utils/currency';
@@ -87,6 +87,13 @@ export default function ProductForm({ catalogId, mode, productId, initial }: Pro
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
+
+  // "Upload" opens a bottom sheet rather than a plain file picker so a
+  // phone can choose Camera vs Gallery explicitly — a bare <input capture>
+  // forces one or the other depending on browser, it can't offer both.
+  const [uploadSheetOpen, setUploadSheetOpen] = useState(false);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     apiFetch<{ categories: Category[] }>('/categories')
@@ -432,7 +439,7 @@ export default function ProductForm({ catalogId, mode, productId, initial }: Pro
 
         <div>
           <label className="block text-sm font-medium text-gray-700">Images (up to 3)</label>
-          <div className="mt-2 flex gap-3">
+          <div className="mt-2 flex flex-wrap gap-3">
             {slots.map((slot, index) => (
               <div
                 key={slot.key}
@@ -440,7 +447,7 @@ export default function ProductForm({ catalogId, mode, productId, initial }: Pro
                 onDragStart={() => setDragIndex(index)}
                 onDragOver={(e: DragEvent) => e.preventDefault()}
                 onDrop={() => handleDrop(index)}
-                className="group relative h-24 w-24 cursor-move overflow-hidden rounded-lg border border-gray-200"
+                className="group relative h-24 w-24 shrink-0 cursor-move overflow-hidden rounded-lg border border-gray-200"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={slot.previewUrl} alt="" className="h-full w-full object-cover" />
@@ -454,38 +461,83 @@ export default function ProductForm({ catalogId, mode, productId, initial }: Pro
               </div>
             ))}
             {slots.length < 3 && (
-              <>
-                <label className="flex h-24 w-24 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-gray-300 text-xs text-gray-400 hover:border-primary-400 hover:text-primary-600">
-                  + Add
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    className="hidden"
-                    onChange={(e) => handleImagesPicked(e.target.files)}
-                  />
-                </label>
-                {/* Distinct from the gallery picker above — `capture`
-                    tells a mobile browser/PWA to launch the camera
-                    directly instead of the file/photo chooser. Desktop
-                    browsers ignore `capture` and just fall back to a
-                    normal file picker, so this is harmless there. */}
-                <label className="flex h-24 w-24 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-gray-300 text-xs text-gray-400 hover:border-primary-400 hover:text-primary-600 sm:hidden">
-                  <CameraIcon className="h-5 w-5" />
-                  Camera
-                  <input
-                    type="file"
-                    accept="image/*"
-                    capture="environment"
-                    className="hidden"
-                    onChange={(e) => handleImagesPicked(e.target.files)}
-                  />
-                </label>
-              </>
+              <button
+                type="button"
+                onClick={() => setUploadSheetOpen(true)}
+                className="flex h-24 w-24 shrink-0 flex-col items-center justify-center gap-1 rounded-lg border-2 border-primary-300 bg-primary-50 text-xs font-semibold text-primary-700 hover:border-primary-400 hover:bg-primary-100"
+              >
+                <UploadIcon className="h-5 w-5" />
+                Upload
+              </button>
             )}
+            {/* Hidden inputs the bottom sheet's two options trigger — kept
+                out of tab order/layout, only ever opened programmatically. */}
+            <input
+              ref={galleryInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={(e) => {
+                handleImagesPicked(e.target.files);
+                e.target.value = '';
+              }}
+            />
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={(e) => {
+                handleImagesPicked(e.target.files);
+                e.target.value = '';
+              }}
+            />
           </div>
           <p className="mt-1 text-xs text-gray-400">Drag to reorder. Max 5MB each — resized automatically.</p>
         </div>
+
+        {uploadSheetOpen && (
+          <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
+            <div className="absolute inset-0 bg-black/40" onClick={() => setUploadSheetOpen(false)} />
+            <div className="relative w-full rounded-t-2xl bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-xl sm:max-w-sm sm:rounded-2xl sm:p-5">
+              <div className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-gray-200 sm:hidden" />
+              <p className="px-1 text-sm font-semibold text-gray-900">Add a photo</p>
+              <div className="mt-3 flex flex-col gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setUploadSheetOpen(false);
+                    cameraInputRef.current?.click();
+                  }}
+                  className="flex items-center gap-3 rounded-xl border border-gray-200 px-4 py-3 text-left text-sm font-medium text-gray-900 hover:bg-gray-50"
+                >
+                  <CameraIcon className="h-5 w-5 text-primary-700" />
+                  Camera
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setUploadSheetOpen(false);
+                    galleryInputRef.current?.click();
+                  }}
+                  className="flex items-center gap-3 rounded-xl border border-gray-200 px-4 py-3 text-left text-sm font-medium text-gray-900 hover:bg-gray-50"
+                >
+                  <GalleryIcon className="h-5 w-5 text-primary-700" />
+                  Gallery
+                </button>
+              </div>
+              <button
+                type="button"
+                onClick={() => setUploadSheetOpen(false)}
+                className="mt-3 w-full rounded-xl border border-gray-200 px-4 py-3 text-sm font-medium text-gray-500 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
 
         <div>
           <label className="block text-sm font-medium text-gray-700">Video URL</label>

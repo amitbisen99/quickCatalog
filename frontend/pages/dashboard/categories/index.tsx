@@ -8,7 +8,6 @@ import { apiFetch, ApiError } from '@/utils/api';
 interface Category {
   id: string;
   name: string;
-  description?: string;
   productCount: number;
 }
 
@@ -17,12 +16,10 @@ function CategoriesPage() {
   const [error, setError] = useState('');
 
   const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
   const [adding, setAdding] = useState(false);
 
   const [editingId, setEditingId] = useState('');
   const [editName, setEditName] = useState('');
-  const [editDescription, setEditDescription] = useState('');
   const [saving, setSaving] = useState(false);
 
   function loadCategories() {
@@ -41,11 +38,10 @@ function CategoriesPage() {
     try {
       const res = await apiFetch<{ category: Category }>('/categories', {
         method: 'POST',
-        body: { name: name.trim(), description },
+        body: { name: name.trim() },
       });
       setCategories((prev) => [...(prev || []), res.category].sort((a, b) => a.name.localeCompare(b.name)));
       setName('');
-      setDescription('');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Could not create category.');
     } finally {
@@ -56,7 +52,6 @@ function CategoriesPage() {
   function startEdit(category: Category) {
     setEditingId(category.id);
     setEditName(category.name);
-    setEditDescription(category.description || '');
   }
 
   async function handleSaveEdit(id: string) {
@@ -66,7 +61,7 @@ function CategoriesPage() {
     try {
       const res = await apiFetch<{ category: Category }>(`/categories/${id}`, {
         method: 'PUT',
-        body: { name: editName.trim(), description: editDescription },
+        body: { name: editName.trim() },
       });
       setCategories((prev) => prev?.map((c) => (c.id === id ? res.category : c)) || null);
       setEditingId('');
@@ -110,14 +105,6 @@ function CategoriesPage() {
             className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-600"
           />
         </div>
-        <div className="flex-1 min-w-[200px]">
-          <label className="block text-xs font-medium text-gray-700">Description (optional)</label>
-          <input
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-600"
-          />
-        </div>
         <button
           type="submit"
           disabled={adding || !name.trim()}
@@ -141,7 +128,6 @@ function CategoriesPage() {
               <thead className="border-b border-gray-200 bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
                 <tr>
                   <th className="px-4 py-3 font-medium">Name</th>
-                  <th className="px-4 py-3 font-medium">Description</th>
                   <th className="px-4 py-3 font-medium">Products</th>
                   <th className="px-4 py-3 font-medium">Actions</th>
                 </tr>
@@ -154,13 +140,6 @@ function CategoriesPage() {
                         <input
                           value={editName}
                           onChange={(e) => setEditName(e.target.value)}
-                          className="w-full rounded-lg border border-gray-300 px-2 py-1.5 text-sm focus:border-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-600"
-                        />
-                      </td>
-                      <td className="px-4 py-2">
-                        <input
-                          value={editDescription}
-                          onChange={(e) => setEditDescription(e.target.value)}
                           className="w-full rounded-lg border border-gray-300 px-2 py-1.5 text-sm focus:border-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-600"
                         />
                       </td>
@@ -183,7 +162,6 @@ function CategoriesPage() {
                   ) : (
                     <tr key={category.id}>
                       <td className="px-4 py-3 font-medium text-gray-900">{category.name}</td>
-                      <td className="px-4 py-3 text-gray-600">{category.description || '—'}</td>
                       <td className="px-4 py-3 text-gray-600">{category.productCount}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-4">

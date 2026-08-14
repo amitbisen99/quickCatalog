@@ -36,6 +36,16 @@ export function CameraIcon(props: IconProps) {
   );
 }
 
+export function GalleryIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <circle cx="8.5" cy="9.5" r="1.75" />
+      <path d="M3 16.5 8.5 11l4 4 2.5-2.5L21 17" />
+    </svg>
+  );
+}
+
 export function HomeIcon(props: IconProps) {
   return (
     <svg {...base} {...props}>
@@ -138,6 +148,16 @@ export function MenuIcon(props: IconProps) {
   return (
     <svg {...base} {...props}>
       <path d="M4 6h16M4 12h16M4 18h16" />
+    </svg>
+  );
+}
+
+export function DotsIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="5" cy="12" r="1.25" fill="currentColor" />
+      <circle cx="12" cy="12" r="1.25" fill="currentColor" />
+      <circle cx="19" cy="12" r="1.25" fill="currentColor" />
     </svg>
   );
 }
