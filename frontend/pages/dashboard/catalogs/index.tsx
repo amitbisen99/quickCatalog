@@ -6,9 +6,7 @@ import withAuth from '@/components/withAuth';
 import Alert from '@/components/Alert';
 import CreateCatalogModal from '@/components/dashboard/CreateCatalogModal';
 import { CopyIcon, DownloadIcon, EyeIcon, PencilIcon, TrashIcon } from '@/components/icons';
-import { apiFetch, ApiError } from '@/utils/api';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+import { apiFetch, ApiError, API_URL } from '@/utils/api';
 
 interface Catalog {
   id: string;

@@ -35,6 +35,7 @@ function CheckItem({ children, muted }: { children: React.ReactNode; muted?: boo
 export default function Home() {
   const [activeTab, setActiveTab] = useState<FeatureTabId>('builder');
   const [ctaEmail, setCtaEmail] = useState('');
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   function handleCtaSubmit(e: FormEvent) {
     e.preventDefault();
@@ -48,29 +49,60 @@ export default function Home() {
       </Head>
 
       {/* Navigation */}
-      <nav className="fixed top-5 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-7xl bg-white/90 backdrop-blur-xl border border-brand-border rounded-full px-6 py-3 flex items-center justify-between shadow-lg shadow-brand-accent/5">
-        <div className="flex items-center gap-8">
-          <a href="#" className="text-xl font-black tracking-tight flex items-center gap-2 text-brand-text">
-            <span className="w-7 h-7 bg-brand-accent rounded-lg flex items-center justify-center">
-              <i className="fa-solid fa-layer-group text-white text-xs"></i>
-            </span>
-            QuickCatalog
-          </a>
-          <div className="hidden md:flex items-center gap-7 text-sm font-semibold text-brand-muted">
-            <a href="#features" className="hover:text-brand-accent transition-colors">Features</a>
-            <a href="#benefits" className="hover:text-brand-accent transition-colors">Benefits</a>
-            <a href="#who" className="hover:text-brand-accent transition-colors">Who It&apos;s For</a>
-            <a href="#pricing" className="hover:text-brand-accent transition-colors">Pricing</a>
+      <nav className="fixed top-5 left-1/2 z-50 w-[92%] max-w-7xl -translate-x-1/2">
+        <div className="flex items-center justify-between rounded-full border border-brand-border bg-white/90 px-6 py-3 shadow-lg shadow-brand-accent/5 backdrop-blur-xl">
+          <div className="flex items-center gap-8">
+            <a href="#" className="text-xl font-black tracking-tight flex items-center gap-2 text-brand-text">
+              <span className="w-7 h-7 bg-brand-accent rounded-lg flex items-center justify-center">
+                <i className="fa-solid fa-layer-group text-white text-xs"></i>
+              </span>
+              QuickCatalog
+            </a>
+            <div className="hidden md:flex items-center gap-7 text-sm font-semibold text-brand-muted">
+              <a href="#features" className="hover:text-brand-accent transition-colors">Features</a>
+              <a href="#benefits" className="hover:text-brand-accent transition-colors">Benefits</a>
+              <a href="#who" className="hover:text-brand-accent transition-colors">Who It&apos;s For</a>
+              <a href="#pricing" className="hover:text-brand-accent transition-colors">Pricing</a>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link href="/login" className="hidden text-sm font-semibold text-brand-muted transition-colors hover:text-brand-text md:block px-4 py-2">
+              Log In
+            </Link>
+            <Link href="/signup" className="bg-brand-accent text-white px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-indigo-700 transition-all shadow-md shadow-brand-accent/30">
+              Start Free
+            </Link>
+            <button
+              type="button"
+              onClick={() => setMobileNavOpen((open) => !open)}
+              aria-label="Toggle menu"
+              aria-expanded={mobileNavOpen}
+              className="flex h-9 w-9 items-center justify-center rounded-full text-brand-text hover:bg-brand-border/40 md:hidden"
+            >
+              <i className={`fa-solid ${mobileNavOpen ? 'fa-xmark' : 'fa-bars'}`}></i>
+            </button>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <Link href="/login" className="text-sm font-semibold text-brand-muted hover:text-brand-text transition-colors hidden sm:block px-4 py-2">
-            Log In
-          </Link>
-          <Link href="/signup" className="bg-brand-accent text-white px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-indigo-700 transition-all shadow-md shadow-brand-accent/30">
-            Start Free
-          </Link>
-        </div>
+
+        {mobileNavOpen && (
+          <div className="mt-2 flex flex-col gap-1 rounded-2xl border border-brand-border bg-white/95 p-4 shadow-lg shadow-brand-accent/5 backdrop-blur-xl md:hidden">
+            <a href="#features" onClick={() => setMobileNavOpen(false)} className="rounded-lg px-3 py-2.5 text-sm font-semibold text-brand-muted hover:bg-brand-border/40 hover:text-brand-text">
+              Features
+            </a>
+            <a href="#benefits" onClick={() => setMobileNavOpen(false)} className="rounded-lg px-3 py-2.5 text-sm font-semibold text-brand-muted hover:bg-brand-border/40 hover:text-brand-text">
+              Benefits
+            </a>
+            <a href="#who" onClick={() => setMobileNavOpen(false)} className="rounded-lg px-3 py-2.5 text-sm font-semibold text-brand-muted hover:bg-brand-border/40 hover:text-brand-text">
+              Who It&apos;s For
+            </a>
+            <a href="#pricing" onClick={() => setMobileNavOpen(false)} className="rounded-lg px-3 py-2.5 text-sm font-semibold text-brand-muted hover:bg-brand-border/40 hover:text-brand-text">
+              Pricing
+            </a>
+            <Link href="/login" onClick={() => setMobileNavOpen(false)} className="rounded-lg px-3 py-2.5 text-sm font-semibold text-brand-muted hover:bg-brand-border/40 hover:text-brand-text">
+              Log In
+            </Link>
+          </div>
+        )}
       </nav>
 
       {/* Hero Section */}

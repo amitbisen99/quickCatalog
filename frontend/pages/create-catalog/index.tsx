@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
-import { apiFetch, ApiError } from '@/utils/api';
+import { apiFetch, ApiError, API_URL } from '@/utils/api';
 import { autoMapHeaders } from '@/utils/fuzzyMapHeaders';
 
 // Standalone "create your catalog" funnel — deliberately separate from the
@@ -470,7 +470,7 @@ export default function CreateCatalogWizard() {
             <p className="mt-2 text-sm text-brand-muted">
               We&apos;ll turn your spreadsheet into a full catalog automatically.{' '}
               <a
-                href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products/bulk-import-sample`}
+                href={`${API_URL}/products/bulk-import-sample`}
                 className="font-bold text-brand-accent hover:text-indigo-700"
               >
                 Download sample template

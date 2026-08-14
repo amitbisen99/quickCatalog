@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import DOMPurify from 'dompurify';
 import 'react-quill/dist/quill.snow.css';
 import Alert from '@/components/Alert';
-import { TrashIcon } from '@/components/icons';
+import { TrashIcon, CameraIcon } from '@/components/icons';
 import { apiFetch, ApiError } from '@/utils/api';
 import { UNITS } from '@/utils/constants';
 import { currencySymbol } from '@/utils/currency';
@@ -270,7 +270,7 @@ export default function ProductForm({ catalogId, mode, productId, initial }: Pro
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label className="block text-sm font-medium text-gray-700">Price</label>
             <div className="mt-1 flex rounded-lg border border-gray-300 focus-within:border-primary-600 focus-within:ring-1 focus-within:ring-primary-600">
@@ -301,7 +301,7 @@ export default function ProductForm({ catalogId, mode, productId, initial }: Pro
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label className="block text-sm font-medium text-gray-700">Tax (%)</label>
             <input
@@ -318,7 +318,7 @@ export default function ProductForm({ catalogId, mode, productId, initial }: Pro
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label className="block text-sm font-medium text-gray-700">Minimum Order Quantity</label>
             <input
@@ -454,16 +454,34 @@ export default function ProductForm({ catalogId, mode, productId, initial }: Pro
               </div>
             ))}
             {slots.length < 3 && (
-              <label className="flex h-24 w-24 cursor-pointer items-center justify-center rounded-lg border border-dashed border-gray-300 text-xs text-gray-400 hover:border-primary-400 hover:text-primary-600">
-                + Add
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  className="hidden"
-                  onChange={(e) => handleImagesPicked(e.target.files)}
-                />
-              </label>
+              <>
+                <label className="flex h-24 w-24 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-gray-300 text-xs text-gray-400 hover:border-primary-400 hover:text-primary-600">
+                  + Add
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={(e) => handleImagesPicked(e.target.files)}
+                  />
+                </label>
+                {/* Distinct from the gallery picker above — `capture`
+                    tells a mobile browser/PWA to launch the camera
+                    directly instead of the file/photo chooser. Desktop
+                    browsers ignore `capture` and just fall back to a
+                    normal file picker, so this is harmless there. */}
+                <label className="flex h-24 w-24 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-gray-300 text-xs text-gray-400 hover:border-primary-400 hover:text-primary-600 sm:hidden">
+                  <CameraIcon className="h-5 w-5" />
+                  Camera
+                  <input
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    className="hidden"
+                    onChange={(e) => handleImagesPicked(e.target.files)}
+                  />
+                </label>
+              </>
             )}
           </div>
           <p className="mt-1 text-xs text-gray-400">Drag to reorder. Max 5MB each — resized automatically.</p>

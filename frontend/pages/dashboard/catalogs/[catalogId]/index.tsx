@@ -5,7 +5,7 @@ import DashboardLayout from '@/components/DashboardLayout';
 import withAuth from '@/components/withAuth';
 import Alert from '@/components/Alert';
 import { CopyIcon, DownloadIcon, PencilIcon, TrashIcon } from '@/components/icons';
-import { apiFetch, ApiError } from '@/utils/api';
+import { apiFetch, ApiError, API_URL } from '@/utils/api';
 import { getCatalogTemplate } from '@/components/catalog-templates/registry';
 
 interface Catalog {
@@ -20,7 +20,6 @@ interface Catalog {
 }
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3010';
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 function CatalogDetail() {
   const router = useRouter();

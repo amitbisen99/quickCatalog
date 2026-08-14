@@ -4,9 +4,7 @@ import AdminLayout from '@/components/AdminLayout';
 import withAdminAuth from '@/components/withAdminAuth';
 import Alert from '@/components/Alert';
 import { EyeIcon, DownloadIcon } from '@/components/icons';
-import { apiFetch, ApiError } from '@/utils/api';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+import { apiFetch, ApiError, API_URL } from '@/utils/api';
 
 interface VendorSummary {
   id: string;

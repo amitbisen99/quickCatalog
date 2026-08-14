@@ -1,4 +1,13 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+// In production, default to a same-origin relative path rather than an
+// absolute one — the root vercel.json rewrites /api/* through to the
+// Render backend on the frontend's own domain, which keeps auth cookies
+// first-party. An absolute cross-origin fallback here would make every
+// cookie third-party, and iOS Safari (especially inside an installed
+// PWA, which gets no exceptions at all) blocks those outright — the
+// vendor would look logged out every time they reopen the app. Explicit
+// env var still wins if one is set.
+export const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? '/api' : 'http://localhost:5000/api');
 
 export class ApiError extends Error {
   status: number;

@@ -26,13 +26,14 @@ export default function InstallPrompt() {
     setDismissed(window.localStorage.getItem(DISMISSED_KEY) === 'true');
   }, []);
 
-  // This is the vendor's install prompt for the dashboard app — a visitor
-  // browsing a public catalog page isn't "using QuickCatalog" and
-  // shouldn't be asked to install it.
-  const onPublicPage = router.pathname.startsWith('/public');
+  // This is the vendor's install prompt for the dashboard app — only
+  // relevant on the login screen and inside the vendor dashboard itself.
+  // Everywhere else (marketing site, signup/verify, admin panel, public
+  // catalog pages) isn't "using QuickCatalog" as an app yet.
+  const onVendorAppPage = router.pathname === '/login' || router.pathname.startsWith('/dashboard');
   const showIOSInstructions = isIOS && !isInstalled && !isInstallable;
 
-  if (onPublicPage || isInstalled || dismissed || !(isInstallable || showIOSInstructions)) return null;
+  if (!onVendorAppPage || isInstalled || dismissed || !(isInstallable || showIOSInstructions)) return null;
 
   const dismiss = () => {
     window.localStorage.setItem(DISMISSED_KEY, 'true');

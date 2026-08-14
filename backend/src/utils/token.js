@@ -26,13 +26,20 @@ function accessCookieOptions() {
 
 // Scoped to /api/auth so this cookie is only ever sent to the
 // refresh/logout endpoints, not on every API request.
+//
+// Always carries an explicit maxAge — never a session-only cookie. A
+// session cookie (no Max-Age/Expires) is unreliable on mobile: the OS
+// frequently kills a backgrounded PWA and treats relaunch as a fresh
+// browsing session, silently wiping it and forcing a re-login every time
+// even though the JWT inside it is still perfectly valid. rememberMe only
+// changes how long that persistence lasts, not whether it persists.
 function refreshCookieOptions(rememberMe) {
   return {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/api/auth',
-    ...(rememberMe ? { maxAge: 30 * DAY_MS } : {}),
+    maxAge: (rememberMe ? 30 : 7) * DAY_MS,
   };
 }
 

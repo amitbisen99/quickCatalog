@@ -4,9 +4,8 @@ import DashboardLayout from '@/components/DashboardLayout';
 import withAuth from '@/components/withAuth';
 import Alert from '@/components/Alert';
 import { DownloadIcon, UploadIcon } from '@/components/icons';
-import { apiFetch, ApiError } from '@/utils/api';
+import { apiFetch, ApiError, API_URL } from '@/utils/api';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 const MAX_EXCEL_SIZE = 10 * 1024 * 1024; // 10MB
 const MAX_ZIP_SIZE = 900 * 1024 * 1024; // 900MB — matches the backend's bulkImportUpload limit
 

@@ -126,64 +126,66 @@ function SpecificationsPage() {
             <p className="mt-1 text-sm text-gray-500">Add your first specification field above.</p>
           </div>
         ) : (
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-gray-200 bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
-              <tr>
-                <th className="px-4 py-3 font-medium">Name</th>
-                <th className="px-4 py-3 font-medium">Products</th>
-                <th className="px-4 py-3 font-medium">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {specifications.map((spec) =>
-                editingId === spec.id ? (
-                  <tr key={spec.id}>
-                    <td className="px-4 py-2">
-                      <input
-                        value={editName}
-                        onChange={(e) => setEditName(e.target.value)}
-                        className="w-full rounded-lg border border-gray-300 px-2 py-1.5 text-sm focus:border-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-600"
-                      />
-                    </td>
-                    <td className="px-4 py-3 text-gray-600">{spec.productCount}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        <button
-                          onClick={() => handleSaveEdit(spec.id)}
-                          disabled={saving}
-                          className="text-xs font-semibold text-primary-700 hover:text-primary-800"
-                        >
-                          Save
-                        </button>
-                        <button onClick={() => setEditingId('')} className="text-xs font-medium text-gray-500 hover:text-gray-700">
-                          Cancel
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ) : (
-                  <tr key={spec.id}>
-                    <td className="px-4 py-3 font-medium text-gray-900">{spec.name}</td>
-                    <td className="px-4 py-3 text-gray-600">{spec.productCount}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-4">
-                        <button onClick={() => startEdit(spec)} className="text-gray-400 hover:text-primary-700" title="Rename">
-                          <PencilIcon className="h-5 w-5" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(spec.id, spec.name)}
-                          className="text-gray-400 hover:text-red-600"
-                          title="Delete"
-                        >
-                          <TrashIcon className="h-5 w-5" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                )
-              )}
-            </tbody>
-          </table>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="border-b border-gray-200 bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+                <tr>
+                  <th className="px-4 py-3 font-medium">Name</th>
+                  <th className="px-4 py-3 font-medium">Products</th>
+                  <th className="px-4 py-3 font-medium">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {specifications.map((spec) =>
+                  editingId === spec.id ? (
+                    <tr key={spec.id}>
+                      <td className="px-4 py-2">
+                        <input
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
+                          className="w-full rounded-lg border border-gray-300 px-2 py-1.5 text-sm focus:border-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-600"
+                        />
+                      </td>
+                      <td className="px-4 py-3 text-gray-600">{spec.productCount}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() => handleSaveEdit(spec.id)}
+                            disabled={saving}
+                            className="text-xs font-semibold text-primary-700 hover:text-primary-800"
+                          >
+                            Save
+                          </button>
+                          <button onClick={() => setEditingId('')} className="text-xs font-medium text-gray-500 hover:text-gray-700">
+                            Cancel
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    <tr key={spec.id}>
+                      <td className="px-4 py-3 font-medium text-gray-900">{spec.name}</td>
+                      <td className="px-4 py-3 text-gray-600">{spec.productCount}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-4">
+                          <button onClick={() => startEdit(spec)} className="text-gray-400 hover:text-primary-700" title="Rename">
+                            <PencilIcon className="h-5 w-5" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(spec.id, spec.name)}
+                            className="text-gray-400 hover:text-red-600"
+                            title="Delete"
+                          >
+                            <TrashIcon className="h-5 w-5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                )}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </DashboardLayout>

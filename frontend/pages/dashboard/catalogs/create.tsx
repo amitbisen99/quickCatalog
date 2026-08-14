@@ -13,7 +13,7 @@ import {
   BoxIcon,
   DownloadIcon,
 } from '@/components/icons';
-import { apiFetch, ApiError } from '@/utils/api';
+import { apiFetch, ApiError, API_URL } from '@/utils/api';
 import { autoMapHeaders } from '@/utils/fuzzyMapHeaders';
 
 // Reached via CreateCatalogModal's "Import File" option on
@@ -25,8 +25,6 @@ import { autoMapHeaders } from '@/utils/fuzzyMapHeaders';
 // free-tier plan-limit handling), just re-skinned to the dashboard's own
 // navy/gold theme and running inside DashboardLayout since the vendor is
 // already logged in and already inside the panel.
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 // Mirrors backend/src/utils/planLimits.js — the server is the real
 // enforcer, these only drive display copy and when the Plan step shows.
