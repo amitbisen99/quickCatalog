@@ -1,4 +1,4 @@
-const { parsePrice, parseImageUrls } = require('./normalizeProductRow');
+const { parsePrice, parseImageUrls, parseSpecifications } = require('./normalizeProductRow');
 
 // Column headers must match products.controller.js's bulkImportSample
 // template exactly — this is a fixed format (unlike the catalog-from-file
@@ -16,24 +16,6 @@ const HEADERS = {
   imageFilename: 'Image Filename',
   videoUrl: 'Video URL',
 };
-
-/** Parses "Color: Red; Size: Large" into { Color: 'Red', Size: 'Large' }. A pair with no colon is dropped rather than failing the whole row. */
-function parseSpecifications(raw) {
-  if (!raw) return {};
-  const result = {};
-  String(raw)
-    .split(';')
-    .map((s) => s.trim())
-    .filter(Boolean)
-    .forEach((pair) => {
-      const idx = pair.indexOf(':');
-      if (idx === -1) return;
-      const key = pair.slice(0, idx).trim();
-      const value = pair.slice(idx + 1).trim();
-      if (key) result[key] = value;
-    });
-  return result;
-}
 
 function normalizeBulkProductRow(record) {
   const get = (key) => {

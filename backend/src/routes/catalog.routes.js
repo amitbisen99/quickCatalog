@@ -19,6 +19,12 @@ router.post(
   bulkImportUpload,
   catalogController.createFromFile
 );
+router.get(
+  '/create-from-file-sample',
+  authenticate,
+  authorize('vendor'),
+  catalogController.getCreateFromFileSample
+);
 
 router.get('/', authenticate, authorize('vendor'), catalogController.getCatalogs);
 router.post('/', authenticate, authorize('vendor'), createCatalogValidators, validate, catalogController.createCatalog);

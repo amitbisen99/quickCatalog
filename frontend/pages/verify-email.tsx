@@ -62,10 +62,13 @@ export default function VerifyEmail() {
       sessionStorage.removeItem('qc_verify_email');
       sessionStorage.removeItem('qc_dev_otp');
       // verify-email now logs the vendor in directly (same cookies login()
-      // sets) — pull that session into AuthContext so /create-catalog sees
-      // an authenticated user immediately, no separate login step.
+      // sets) — pull that session into AuthContext so the dashboard sees
+      // an authenticated user immediately, no separate login step. Lands
+      // on the Catalogs screen (not /create-catalog, the standalone
+      // pre-login wizard) — "Create Catalog" → "Import File" there runs
+      // the same guided flow inside the vendor panel.
       await refreshUser();
-      router.push('/create-catalog');
+      router.push('/dashboard/catalogs');
     } catch (err) {
       setFormError(err instanceof ApiError ? err.message : 'Something went wrong. Please try again.');
     } finally {

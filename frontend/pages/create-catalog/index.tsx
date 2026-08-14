@@ -14,10 +14,20 @@ import { autoMapHeaders } from '@/utils/fuzzyMapHeaders';
 // theme, so it reads as a continuation of the site the visitor just clicked
 // from.
 //
-// Account creation is NOT a step in this wizard. The real path in is:
-//   "Start Free" (pages/index.tsx) → /signup → /verify-email → /login → here.
-// /verify-email already collects businessName/businessType/industry as the
-// final step of registration — this wizard does not ask for that again.
+// Account creation is NOT a step in this wizard — /verify-email already
+// collects businessName/businessType/industry as the final step of
+// registration and logs the vendor straight in, so this wizard does not
+// ask for any of that again.
+//
+// NOT currently in the normal signup path: /verify-email now redirects to
+// /dashboard/catalogs (the vendor panel) rather than here — "Create
+// Catalog" → "Create Manually" there runs the same guided flow as this
+// page (see frontend/pages/dashboard/catalogs/create.tsx), just re-skinned
+// to the dashboard's theme. This standalone page is left intact per
+// explicit request and still fully works for anyone who lands on it
+// directly (already-authenticated visitors only — the guard below still
+// redirects everyone else to /signup), it's just no longer where the
+// normal signup flow sends people.
 //
 // FUNCTIONAL: every step now calls the real API.
 //   Upload → Preview: POST /upload/parse-catalog (Excel only — headers,
@@ -35,9 +45,10 @@ import { autoMapHeaders } from '@/utils/fuzzyMapHeaders';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3010';
 
-// Mirrors backend/src/utils/planLimits.js's FREE_PRODUCT_LIMIT — the
-// server is the real enforcer, this only drives when the Plan step shows.
-const FREE_PRODUCT_LIMIT = 10;
+// Mirrors backend/src/utils/planLimits.js — the server is the real
+// enforcer, these only drive display copy and when the Plan step shows.
+const FREE_PRODUCT_LIMIT = 500;
+const FREE_CATALOG_LIMIT: number = 20;
 
 type WizardStep = 1 | 2 | 3 | 4 | 5;
 
@@ -773,7 +784,8 @@ export default function CreateCatalogWizard() {
                     <i className="fa-solid fa-check text-brand-green" /> Up to {FREE_PRODUCT_LIMIT} products
                   </li>
                   <li className="flex items-center gap-2.5">
-                    <i className="fa-solid fa-check text-brand-green" /> 1 catalog
+                    <i className="fa-solid fa-check text-brand-green" /> {FREE_CATALOG_LIMIT} catalog
+                    {FREE_CATALOG_LIMIT === 1 ? '' : 's'}
                   </li>
                   <li className="flex items-center gap-2.5">
                     <i className="fa-solid fa-check text-brand-green" /> Shareable public link

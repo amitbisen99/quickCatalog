@@ -285,3 +285,53 @@ export function TrashIcon(props: IconProps) {
     </svg>
   );
 }
+
+export function CheckCircleIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="m8.5 12.5 2.5 2.5 4.5-5" />
+    </svg>
+  );
+}
+
+export function ExclamationTriangleIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M12 3.5 21.5 20h-19L12 3.5Z" />
+      <path d="M12 10v4" />
+      <circle cx="12" cy="17" r="0.75" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+export function ExclamationCircleIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 8v5" />
+      <circle cx="12" cy="16" r="0.75" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+// Consumers pair this with a Tailwind `animate-spin` className for loading
+// states — the icon itself is just a partial ring.
+export function SpinnerIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="12" cy="12" r="9" opacity="0.25" />
+      <path d="M21 12a9 9 0 0 0-9-9" />
+    </svg>
+  );
+}
+
+export function ExternalLinkIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M14 5h5v5" />
+      <path d="M19 5 10 14" />
+      <path d="M18 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" />
+    </svg>
+  );
+}

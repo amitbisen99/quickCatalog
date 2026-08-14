@@ -90,6 +90,12 @@ function Catalogs() {
           <div className="p-10 text-center">
             <p className="text-sm font-medium text-gray-900">No catalogs yet</p>
             <p className="mt-1 text-sm text-gray-500">Create your first catalog to get started.</p>
+            <button
+              onClick={() => setModalOpen(true)}
+              className="mt-4 rounded-lg bg-primary-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-800"
+            >
+              Create Catalog
+            </button>
           </div>
         ) : (
           <div className="overflow-x-auto">

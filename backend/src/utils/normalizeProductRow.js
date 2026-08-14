@@ -24,6 +24,24 @@ function parseImageUrls(raw) {
     .slice(0, 3);
 }
 
+/** Parses "Color: Red; Size: Large" into { Color: 'Red', Size: 'Large' }. A pair with no colon is dropped rather than failing the whole row. */
+function parseSpecifications(raw) {
+  if (!raw) return {};
+  const result = {};
+  String(raw)
+    .split(';')
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .forEach((pair) => {
+      const idx = pair.indexOf(':');
+      if (idx === -1) return;
+      const key = pair.slice(0, idx).trim();
+      const value = pair.slice(idx + 1).trim();
+      if (key) result[key] = value;
+    });
+  return result;
+}
+
 /**
  * Applies the vendor's field mappings to one parsed Excel row and
  * validates it. No AI — plain rules for the fields that actually need
@@ -61,8 +79,9 @@ function normalizeProductRow(record, fieldMappings) {
       imageFilenames: parseImageUrls(get('imageFilename')),
       video: get('videoUrl'),
       categoryName: get('category') || null,
+      specifications: parseSpecifications(get('specifications')),
     },
   };
 }
 
-module.exports = { normalizeProductRow, parsePrice, parseImageUrls };
+module.exports = { normalizeProductRow, parsePrice, parseImageUrls, parseSpecifications };

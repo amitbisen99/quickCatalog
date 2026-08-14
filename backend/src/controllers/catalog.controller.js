@@ -1,7 +1,9 @@
 const mongoose = require('mongoose');
+const XLSX = require('xlsx');
 const Catalog = require('../models/Catalog');
 const Product = require('../models/Product');
 const Category = require('../models/Category');
+const Specification = require('../models/Specification');
 const User = require('../models/User');
 const slugify = require('../utils/slugify');
 const generateQrCodeDataUrl = require('../utils/qrCode');
@@ -15,6 +17,7 @@ const notImplemented = require('../utils/notImplemented');
 const { CATALOG_TEMPLATE_IDS, DEFAULT_CATALOG_TEMPLATE } = require('../utils/catalogTemplates');
 const { FREE_CATALOG_LIMIT, FREE_PRODUCT_LIMIT, exceedsFreeProductLimit } = require('../utils/planLimits');
 const findOrCreateCategory = require('../utils/findOrCreateCategory');
+const findOrCreateSpecification = require('../utils/findOrCreateSpecification');
 const generateCatalogPdf = require('../utils/generateCatalogPdf');
 
 // knownCount lets a caller that just inserted the products (and so already
@@ -192,6 +195,7 @@ exports.createFromFile = asyncHandler(async (req, res) => {
   const errors = [];
   const warnings = [];
   const categoryCache = new Map();
+  const specCache = new Map();
 
   // Free tier: rows beyond this position get truncated below regardless,
   // so skip their category lookups and image resolution — no point paying
@@ -212,6 +216,16 @@ exports.createFromFile = asyncHandler(async (req, res) => {
     if (data.categoryName && willBeInserted) {
       // eslint-disable-next-line no-await-in-loop
       categoryId = await findOrCreateCategory(user._id, data.categoryName, categoryCache);
+    }
+
+    // Keeps the vendor's Specification master list in sync — the value
+    // itself is stored on the product keyed by name, not by this id.
+    if (willBeInserted) {
+      const specNames = Object.keys(data.specifications);
+      for (let s = 0; s < specNames.length; s += 1) {
+        // eslint-disable-next-line no-await-in-loop
+        await findOrCreateSpecification(user._id, specNames[s], specCache);
+      }
     }
 
     // eslint-disable-next-line no-await-in-loop
@@ -243,6 +257,7 @@ exports.createFromFile = asyncHandler(async (req, res) => {
       images: row.images,
       video: row.video || undefined,
       categoryId: row.categoryId,
+      specifications: row.specifications,
     }))
   );
 
@@ -259,6 +274,41 @@ exports.createFromFile = asyncHandler(async (req, res) => {
     warnings,
     planLimit,
   });
+});
+
+// Sample template for the create-catalog wizard's Upload step — mirrors
+// products.controller.js's bulkImportSample, but only the columns this
+// wizard's own field-mapping actually reads (no Minimum Order Quantity /
+// Tax %, which belong to the separate product bulk-import flow and would
+// otherwise go silently unused here).
+exports.getCreateFromFileSample = asyncHandler(async (req, res) => {
+  const headers = ['Product Name', 'Price', 'Description', 'Category', 'Unit', 'Specifications', 'Image URL', 'Image Filename', 'Video URL'];
+  const examples = [
+    ['Cotton T-Shirt', 499, 'Premium cotton round-neck t-shirt', 'Apparel', 'pcs', 'Color: Red; Size: Large', 'https://example.com/image1.jpg', '', ''],
+    ['Ceramic Mug', 149, 'Matte-finish 350ml mug', 'Home & Kitchen', 'pcs', 'Material: Ceramic', '', 'mug1.jpg', ''],
+  ];
+
+  const workbook = XLSX.utils.book_new();
+  const productsSheet = XLSX.utils.aoa_to_sheet([headers, ...examples]);
+  XLSX.utils.book_append_sheet(workbook, productsSheet, 'Products');
+
+  const [categories, specifications] = await Promise.all([
+    Category.find({ vendorId: req.user.id }).sort({ name: 1 }),
+    Specification.find({ vendorId: req.user.id }).sort({ name: 1 }),
+  ]);
+  const refRowCount = Math.max(categories.length, specifications.length, 1);
+  const refRows = [['Your Existing Categories', 'Your Existing Specifications']];
+  for (let i = 0; i < refRowCount; i += 1) {
+    refRows.push([categories[i]?.name || '', specifications[i]?.name || '']);
+  }
+  const referenceSheet = XLSX.utils.aoa_to_sheet(refRows);
+  XLSX.utils.book_append_sheet(workbook, referenceSheet, 'Reference');
+
+  const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.setHeader('Content-Disposition', 'attachment; filename="create-catalog-sample.xlsx"');
+  res.send(buffer);
 });
 
 exports.getCatalogStats = notImplemented('GET /api/catalogs/:catalogId/stats');

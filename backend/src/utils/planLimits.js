@@ -1,7 +1,9 @@
 // Free-tier limits, centralized here so both numbers live in one place
 // instead of scattered magic numbers across catalog/product controllers.
-const FREE_CATALOG_LIMIT = 1;
-const FREE_PRODUCT_LIMIT = 10;
+// Temporarily raised while the app is in testing — drop back to the real
+// launch limits (1 catalog / 10 products) before going live.
+const FREE_CATALOG_LIMIT = 20;
+const FREE_PRODUCT_LIMIT = 500;
 
 /**
  * Whether adding `additionalCount` products to a catalog that already has

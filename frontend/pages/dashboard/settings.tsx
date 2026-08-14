@@ -13,7 +13,7 @@ import { UserIcon, LockIcon, CreditCardIcon, TrashIcon } from '@/components/icon
 
 function subscriptionLabel(user: AuthUser | null): string {
   if (!user) return '—';
-  if (user.subscriptionType !== 'paid') return 'Free plan — 1 catalog';
+  if (user.subscriptionType !== 'paid') return 'Free plan — 20 catalogs';
   if (!user.subscriptionExpiresAt) return 'Paid plan — unlimited catalogs';
   const daysRemaining = Math.ceil(
     (new Date(user.subscriptionExpiresAt).getTime() - Date.now()) / (24 * 60 * 60 * 1000)

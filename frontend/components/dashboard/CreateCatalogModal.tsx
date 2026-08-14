@@ -23,6 +23,11 @@ interface Props {
 
 type Step = 'choose' | 'manual';
 
+// "Import File" hands off to the full guided wizard
+// (frontend/pages/dashboard/catalogs/create.tsx) — catalog details, Excel +
+// image ZIP upload, preview, plan, done, all in one flow. "Create Manually"
+// stays right here: just a name + description, then the vendor lands on
+// the new (empty) catalog's own page to add products one at a time.
 export default function CreateCatalogModal({ isOpen, onClose, onCreated }: Props) {
   const router = useRouter();
   const [step, setStep] = useState<Step>('choose');
@@ -72,14 +77,14 @@ export default function CreateCatalogModal({ isOpen, onClose, onCreated }: Props
       {step === 'choose' && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <button
-            onClick={() => router.push('/dashboard/catalogs/import')}
+            onClick={() => router.push('/dashboard/catalogs/create')}
             className="flex flex-col items-center gap-3 rounded-xl border border-gray-200 p-6 text-center hover:border-primary-300 hover:bg-primary-50"
           >
             <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary-100 text-primary-700">
               <UploadIcon className="h-5 w-5" />
             </div>
-            <span className="text-sm font-semibold text-gray-900">Upload File</span>
-            <span className="text-xs text-gray-500">Import from Excel</span>
+            <span className="text-sm font-semibold text-gray-900">Import File</span>
+            <span className="text-xs text-gray-500">Guided step-by-step Excel import</span>
           </button>
 
           <button
