@@ -3,6 +3,8 @@ import Link from 'next/link';
 import DashboardLayout from '@/components/DashboardLayout';
 import withAuth from '@/components/withAuth';
 import Alert from '@/components/Alert';
+import ProgressBar from '@/components/ProgressBar';
+import { useSimulatedProgress } from '@/hooks/useSimulatedProgress';
 import { DownloadIcon, UploadIcon } from '@/components/icons';
 import { apiFetch, ApiError, API_URL } from '@/utils/api';
 
@@ -21,6 +23,7 @@ function BulkImportProducts() {
   const [error, setError] = useState('');
   const [importing, setImporting] = useState(false);
   const [result, setResult] = useState<ImportResult | null>(null);
+  const importProgress = useSimulatedProgress(importing);
 
   function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
     setError('');
@@ -147,6 +150,20 @@ function BulkImportProducts() {
             <UploadIcon className="h-4 w-4" />
             {importing ? 'Importing…' : 'Import Products'}
           </button>
+
+          {importing && (
+            <div className="mt-4">
+              <ProgressBar percent={importProgress} />
+              <p className="mt-2 text-xs text-gray-500">
+                {importProgress < 40
+                  ? 'Reading your file…'
+                  : importProgress < 75
+                    ? 'Matching categories, specs, and images…'
+                    : 'Creating your products…'}{' '}
+                Larger files can take a moment — please don&apos;t close this page.
+              </p>
+            </div>
+          )}
         </div>
       </div>
 

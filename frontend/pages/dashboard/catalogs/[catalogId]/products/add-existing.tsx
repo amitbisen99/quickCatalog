@@ -4,6 +4,7 @@ import Link from 'next/link';
 import DashboardLayout from '@/components/DashboardLayout';
 import withAuth from '@/components/withAuth';
 import Alert from '@/components/Alert';
+import ProgressBar from '@/components/ProgressBar';
 import { apiFetch, ApiError } from '@/utils/api';
 import { currencySymbol } from '@/utils/currency';
 import { useAuth } from '@/context/AuthContext';
@@ -28,6 +29,7 @@ function AddExistingProduct() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [error, setError] = useState('');
   const [linking, setLinking] = useState(false);
+  const [linkProgress, setLinkProgress] = useState({ done: 0, total: 0 });
 
   useEffect(() => {
     if (!catalogId) return;
@@ -48,18 +50,38 @@ function AddExistingProduct() {
   }
 
   async function handleAddSelected() {
+    const ids = Array.from(selected);
     setLinking(true);
     setError('');
-    try {
-      await Promise.all(
-        Array.from(selected).map((productId) =>
-          apiFetch(`/catalogs/${catalogId}/products/${productId}/link`, { method: 'POST' })
-        )
+    setLinkProgress({ done: 0, total: ids.length });
+
+    // Tracked individually (not Promise.all's fail-fast) so the progress
+    // bar reflects real completions, and one failure among many doesn't
+    // hide that the rest actually succeeded server-side.
+    let done = 0;
+    let failed = 0;
+    await Promise.all(
+      ids.map(async (productId) => {
+        try {
+          await apiFetch(`/catalogs/${catalogId}/products/${productId}/link`, { method: 'POST' });
+        } catch {
+          failed += 1;
+        } finally {
+          done += 1;
+          setLinkProgress({ done, total: ids.length });
+        }
+      })
+    );
+
+    if (failed > 0) {
+      setError(
+        failed === ids.length
+          ? 'Could not add the selected products. Please try again.'
+          : `Added ${ids.length - failed} of ${ids.length} products — ${failed} could not be added. Please try again for the rest.`
       );
-      router.push(`/dashboard/catalogs/${catalogId}/products`);
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Could not add the selected products.');
       setLinking(false);
+    } else {
+      router.push(`/dashboard/catalogs/${catalogId}/products`);
     }
   }
 
@@ -137,20 +159,31 @@ function AddExistingProduct() {
       </div>
 
       {products && products.length > 0 && (
-        <div className="sticky bottom-4 mt-6 flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-lg">
-          <button
-            onClick={handleAddSelected}
-            disabled={selected.size === 0 || linking}
-            className="rounded-lg bg-primary-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-800 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {linking ? 'Adding…' : `Add Selected (${selected.size})`}
-          </button>
-          <Link
-            href={`/dashboard/catalogs/${catalogId}/products`}
-            className="text-sm font-medium text-gray-500 hover:text-gray-700"
-          >
-            Cancel
-          </Link>
+        <div className="sticky bottom-4 mt-6 rounded-xl border border-gray-200 bg-white p-4 shadow-lg">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleAddSelected}
+              disabled={selected.size === 0 || linking}
+              className="rounded-lg bg-primary-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-800 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {linking ? `Adding ${linkProgress.done} of ${linkProgress.total}…` : `Add Selected (${selected.size})`}
+            </button>
+            {linking ? (
+              <span className="text-sm font-medium text-gray-500">Please don&apos;t close this page.</span>
+            ) : (
+              <Link
+                href={`/dashboard/catalogs/${catalogId}/products`}
+                className="text-sm font-medium text-gray-500 hover:text-gray-700"
+              >
+                Cancel
+              </Link>
+            )}
+          </div>
+          {linking && (
+            <div className="mt-3">
+              <ProgressBar percent={linkProgress.total ? (linkProgress.done / linkProgress.total) * 100 : 0} />
+            </div>
+          )}
         </div>
       )}
     </DashboardLayout>

@@ -12,7 +12,10 @@ import {
   GridIcon,
   BoxIcon,
   DownloadIcon,
+  SpinnerIcon,
 } from '@/components/icons';
+import ProgressBar from '@/components/ProgressBar';
+import { useSimulatedProgress } from '@/hooks/useSimulatedProgress';
 import { apiFetch, ApiError, API_URL } from '@/utils/api';
 import { autoMapHeaders } from '@/utils/fuzzyMapHeaders';
 
@@ -206,6 +209,7 @@ function CreateCatalogWizard() {
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState('');
   const [createResult, setCreateResult] = useState<CreateResult | null>(null);
+  const creatingProgress = useSimulatedProgress(creating);
 
   function goTo(target: WizardStep) {
     setStep(target);
@@ -586,7 +590,7 @@ function CreateCatalogWizard() {
       )}
 
       {/* ---------------- Step 3: Preview & Validate ---------------- */}
-      {step === 3 && parseResult && (
+      {step === 3 && parseResult && !creating && (
         <WizardCard wide>
           <h1 className="text-xl font-bold text-gray-900">Review before you go live</h1>
           <p className="mt-1 text-sm text-gray-500">
@@ -708,7 +712,7 @@ function CreateCatalogWizard() {
       )}
 
       {/* ---------------- Step 4: Choose Plan ---------------- */}
-      {step === 4 && (
+      {step === 4 && !creating && (
         <WizardCard wide>
           <h1 className="text-xl font-bold text-gray-900">Choose your plan</h1>
           <p className="mt-1 text-sm text-gray-500">
@@ -798,6 +802,36 @@ function CreateCatalogWizard() {
             nextLabel={upgrading ? 'Upgrading…' : creating ? 'Creating…' : 'Create My Catalog'}
             nextDisabled={!selectedPlan || upgrading || creating}
           />
+        </WizardCard>
+      )}
+
+      {/* ---------------- Creating: shown in place of Step 3/4 while the
+          create-from-file request is in flight. There's no real
+          server-side progress signal (single request, no SSE/WebSocket),
+          so this is a simulated bar that eases toward ~92% and holds —
+          reassuring without ever claiming to be further along than it
+          actually is. ---------------- */}
+      {creating && (
+        <WizardCard>
+          <div className="py-4 text-center">
+            <SpinnerIcon className="mx-auto h-8 w-8 animate-spin text-primary-700" />
+            <h1 className="mt-4 text-xl font-bold text-gray-900">Creating your catalog…</h1>
+            <p className="mt-1 text-sm text-gray-500">
+              {creatingProgress < 35
+                ? 'Reading your file…'
+                : creatingProgress < 65
+                  ? 'Matching categories and images…'
+                  : creatingProgress < 90
+                    ? 'Creating your products…'
+                    : 'Almost done…'}
+            </p>
+            <div className="mx-auto mt-6 max-w-sm">
+              <ProgressBar percent={creatingProgress} />
+            </div>
+            <p className="mt-3 text-xs text-gray-400">
+              This can take a moment for larger files — please don&apos;t close this page.
+            </p>
+          </div>
         </WizardCard>
       )}
 
