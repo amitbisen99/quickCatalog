@@ -9,6 +9,18 @@
 export const API_URL =
   process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? '/api' : 'http://localhost:5000/api');
 
+// API_URL is deliberately relative ("/api") in production so browser
+// fetches stay same-origin — fine for the app's own requests, but a few
+// places (Open Graph tags, share links) need a fully-qualified URL a
+// server or crawler can hit directly with no "relative to what?"
+// ambiguity. Resolves against NEXT_PUBLIC_APP_URL when API_URL isn't
+// already absolute.
+export function absoluteApiUrl(path: string): string {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3010';
+  const base = API_URL.startsWith('http') ? API_URL : `${appUrl}${API_URL}`;
+  return `${base}${path}`;
+}
+
 export class ApiError extends Error {
   status: number;
   errors?: { field: string; message: string }[];

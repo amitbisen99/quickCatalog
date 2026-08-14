@@ -7,6 +7,7 @@ import Alert from '@/components/Alert';
 import { CopyIcon, DownloadIcon, PencilIcon, TrashIcon } from '@/components/icons';
 import { apiFetch, ApiError, API_URL } from '@/utils/api';
 import { getCatalogTemplate } from '@/components/catalog-templates/registry';
+import { useAuth } from '@/context/AuthContext';
 
 interface Catalog {
   id: string;
@@ -23,6 +24,7 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3010';
 
 function CatalogDetail() {
   const router = useRouter();
+  const { user } = useAuth();
   const catalogId = typeof router.query.catalogId === 'string' ? router.query.catalogId : '';
 
   const [catalog, setCatalog] = useState<Catalog | null>(null);
@@ -55,7 +57,13 @@ function CatalogDetail() {
   }
 
   const url = `${APP_URL}/public/${catalog.slug}`;
-  const shareText = `Check out our catalog: ${catalog.name}`;
+  const businessName = user?.businessName || 'Our Business';
+  // Business-formal share copy — reads naturally as a WhatsApp/SMS/email
+  // message rather than an ad. Facebook's sharer doesn't take custom
+  // text (it reads the page's own Open Graph tags instead), so this is
+  // only used by the channels that actually accept a message body.
+  const shareText = `${businessName} — Product Catalog\nExplore our full range: ${catalog.name}`;
+  const shareMessage = `${shareText}\n${url}`;
 
   async function handleCopy() {
     await navigator.clipboard.writeText(url);
@@ -64,7 +72,7 @@ function CatalogDetail() {
   }
 
   async function handleCopyForInstagram() {
-    await navigator.clipboard.writeText(`${shareText} ${url}`);
+    await navigator.clipboard.writeText(shareMessage);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
@@ -216,7 +224,7 @@ function CatalogDetail() {
                 <p className="text-sm font-medium text-gray-700">Share</p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   <a
-                    href={`https://wa.me/?text=${encodeURIComponent(`${shareText} ${url}`)}`}
+                    href={`https://wa.me/?text=${encodeURIComponent(shareMessage)}`}
                     target="_blank"
                     rel="noreferrer"
                     className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
@@ -238,13 +246,13 @@ function CatalogDetail() {
                     {copied ? 'Copied for Instagram!' : 'Instagram (copy link)'}
                   </button>
                   <a
-                    href={`sms:?body=${encodeURIComponent(`${shareText} ${url}`)}`}
+                    href={`sms:?body=${encodeURIComponent(shareMessage)}`}
                     className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
                   >
                     SMS
                   </a>
                   <a
-                    href={`mailto:?subject=${encodeURIComponent(catalog.name)}&body=${encodeURIComponent(`${shareText} ${url}`)}`}
+                    href={`mailto:?subject=${encodeURIComponent(catalog.name)}&body=${encodeURIComponent(shareMessage)}`}
                     className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
                   >
                     Email

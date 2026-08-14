@@ -6,6 +6,7 @@ const User = require('../models/User');
 const asyncHandler = require('../utils/asyncHandler');
 const AppError = require('../utils/AppError');
 const notImplemented = require('../utils/notImplemented');
+const { parseDataUrl } = require('../utils/dataUrl');
 
 function toPublicProductResponse(product) {
   return {
@@ -99,6 +100,31 @@ exports.getCatalogProductBySlug = asyncHandler(async (req, res) => {
     categories: await findCategoriesForProducts([product]),
     product: toPublicProductResponse(product),
   });
+});
+
+// The vendor's banner/logo is stored as an inline base64 data URL (see
+// compressImageToDataUrl) — fine for an <img src> the browser renders
+// directly, but useless as an og:image value, since link-preview
+// crawlers (WhatsApp, Facebook, etc.) fetch that URL over plain HTTP and
+// don't resolve data: URIs. This decodes it back to real image bytes and
+// serves them as an actual resource so it can be linked from a <meta>
+// tag. Prefers the banner (wider, hero-shaped) over the logo.
+exports.getCatalogOgImage = asyncHandler(async (req, res) => {
+  const { catalogSlug } = req.params;
+  const catalog = await Catalog.findOne({ slug: catalogSlug.toLowerCase() });
+  if (!catalog) {
+    throw new AppError('Catalog not found', 404);
+  }
+
+  const vendor = await User.findById(catalog.vendorId).select('banner logo');
+  const parsed = parseDataUrl(vendor?.banner) || parseDataUrl(vendor?.logo);
+  if (!parsed) {
+    throw new AppError('No share image available', 404);
+  }
+
+  res.setHeader('Cache-Control', 'public, max-age=3600');
+  res.setHeader('Content-Type', parsed.mimeType);
+  res.send(parsed.buffer);
 });
 
 // Enquiry submission lives at POST /api/catalogs/:catalogId/enquiries
