@@ -5,7 +5,8 @@ import DashboardLayout from '@/components/DashboardLayout';
 import withAuth from '@/components/withAuth';
 import Alert from '@/components/Alert';
 import CreateCatalogModal from '@/components/dashboard/CreateCatalogModal';
-import { CopyIcon, DownloadIcon, EyeIcon, PencilIcon, TrashIcon } from '@/components/icons';
+import ShareCatalogModal from '@/components/dashboard/ShareCatalogModal';
+import { CopyIcon, DownloadIcon, EyeIcon, PencilIcon, ShareIcon, TrashIcon } from '@/components/icons';
 import { apiFetch, ApiError, API_URL } from '@/utils/api';
 
 interface Catalog {
@@ -30,6 +31,7 @@ function Catalogs() {
   const [error, setError] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [copiedSlug, setCopiedSlug] = useState('');
+  const [sharingCatalog, setSharingCatalog] = useState<Catalog | null>(null);
 
   function loadCatalogs() {
     apiFetch<{ catalogs: Catalog[] }>('/catalogs')
@@ -156,6 +158,13 @@ function Catalogs() {
                         >
                           <EyeIcon className="h-5 w-5" />
                         </a>
+                        <button
+                          onClick={() => setSharingCatalog(catalog)}
+                          className="text-gray-400 hover:text-primary-700"
+                          title="Share"
+                        >
+                          <ShareIcon className="h-5 w-5" />
+                        </button>
                         <Link
                           href={`/dashboard/catalogs/${catalog.id}`}
                           className="text-gray-400 hover:text-primary-700"
@@ -189,6 +198,7 @@ function Catalogs() {
       </div>
 
       <CreateCatalogModal isOpen={modalOpen} onClose={() => setModalOpen(false)} onCreated={handleCreated} />
+      <ShareCatalogModal catalog={sharingCatalog} onClose={() => setSharingCatalog(null)} />
     </DashboardLayout>
   );
 }

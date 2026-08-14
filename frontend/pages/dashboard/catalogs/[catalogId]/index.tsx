@@ -4,9 +4,11 @@ import Link from 'next/link';
 import DashboardLayout from '@/components/DashboardLayout';
 import withAuth from '@/components/withAuth';
 import Alert from '@/components/Alert';
-import { CopyIcon, DownloadIcon, PencilIcon, TrashIcon } from '@/components/icons';
+import ShareOptions from '@/components/dashboard/ShareOptions';
+import { CopyIcon, DownloadIcon, PencilIcon, ShareIcon, TrashIcon } from '@/components/icons';
 import { apiFetch, ApiError, API_URL } from '@/utils/api';
 import { getCatalogTemplate } from '@/components/catalog-templates/registry';
+import { downloadQrWithLabel } from '@/utils/downloadQrWithLabel';
 import { useAuth } from '@/context/AuthContext';
 
 interface Catalog {
@@ -71,18 +73,12 @@ function CatalogDetail() {
     setTimeout(() => setCopied(false), 2000);
   }
 
-  async function handleCopyForInstagram() {
-    await navigator.clipboard.writeText(shareMessage);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }
-
   function handleDownloadQr() {
     if (!catalog?.qrCode) return;
-    const a = document.createElement('a');
-    a.href = catalog.qrCode;
-    a.download = `${catalog.slug}-qr.png`;
-    a.click();
+    // The on-page QR stays exactly as generated — this only affects the
+    // downloaded file, which gets the business name + a short
+    // call-to-action composed onto it so it's ready to print/share as-is.
+    downloadQrWithLabel(catalog.qrCode, businessName, `${catalog.slug}-qr.png`);
   }
 
   async function handleSave(e: FormEvent) {
@@ -200,63 +196,37 @@ function CatalogDetail() {
                 </div>
               </div>
 
-              <div className="mt-6 flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
-                <span className="flex-1 truncate text-sm text-gray-600">{url}</span>
-                <button
-                  onClick={handleCopy}
-                  className="inline-flex items-center gap-1.5 rounded-md bg-white px-2.5 py-1 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50"
-                >
-                  <CopyIcon className="h-3.5 w-3.5" />
-                  {copied ? 'Copied!' : 'Copy'}
-                </button>
-              </div>
+              {/* Highlighted — sharing is the whole point of a public
+                  catalog, so this shouldn't read as just another
+                  secondary section on the page. */}
+              <div className="mt-6 rounded-2xl border-2 border-primary-200 bg-primary-50 p-4 sm:p-5">
+                <div className="flex items-center gap-2">
+                  <ShareIcon className="h-5 w-5 text-primary-700" />
+                  <p className="text-base font-semibold text-gray-900">Share your catalog</p>
+                </div>
+                <p className="mt-1 text-sm text-gray-600">Get this in front of customers — share the link below.</p>
 
-              <a
-                href={url}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-3 inline-block text-sm font-medium text-primary-700 hover:text-primary-800"
-              >
-                View public page →
-              </a>
-
-              <div className="mt-6">
-                <p className="text-sm font-medium text-gray-700">Share</p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  <a
-                    href={`https://wa.me/?text=${encodeURIComponent(shareMessage)}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                  >
-                    WhatsApp
-                  </a>
-                  <a
-                    href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                  >
-                    Facebook
-                  </a>
+                <div className="mt-4 flex items-center gap-2 rounded-lg border border-primary-200 bg-white px-3 py-2">
+                  <span className="flex-1 truncate text-sm text-gray-600">{url}</span>
                   <button
-                    onClick={handleCopyForInstagram}
-                    className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                    onClick={handleCopy}
+                    className="inline-flex items-center gap-1.5 rounded-md bg-gray-50 px-2.5 py-1 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-100"
                   >
-                    {copied ? 'Copied for Instagram!' : 'Instagram (copy link)'}
+                    <CopyIcon className="h-3.5 w-3.5" />
+                    {copied ? 'Copied!' : 'Copy'}
                   </button>
-                  <a
-                    href={`sms:?body=${encodeURIComponent(shareMessage)}`}
-                    className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                  >
-                    SMS
-                  </a>
-                  <a
-                    href={`mailto:?subject=${encodeURIComponent(catalog.name)}&body=${encodeURIComponent(shareMessage)}`}
-                    className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                  >
-                    Email
-                  </a>
+                </div>
+                <a
+                  href={url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-2 inline-block text-sm font-medium text-primary-700 hover:text-primary-800"
+                >
+                  View public page →
+                </a>
+
+                <div className="mt-5">
+                  <ShareOptions url={url} message={shareMessage} subject={catalog.name} />
                 </div>
               </div>
             </>
