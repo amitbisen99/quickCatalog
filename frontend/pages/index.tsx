@@ -1,4 +1,5 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
 
@@ -33,9 +34,24 @@ function CheckItem({ children, muted }: { children: React.ReactNode; muted?: boo
 }
 
 export default function Home() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<FeatureTabId>('builder');
   const [ctaEmail, setCtaEmail] = useState('');
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+  // manifest.json's start_url points the installed PWA at /login, but an
+  // *already*-installed home screen icon doesn't reliably re-read the
+  // manifest just because it changed — iOS in particular can keep opening
+  // the old start_url until the icon is removed and re-added. This is the
+  // safety net: if we're somehow running standalone and still landed here,
+  // bounce to the real vendor app immediately instead of showing the
+  // marketing site.
+  useEffect(() => {
+    const iosStandalone = (window.navigator as unknown as { standalone?: boolean }).standalone === true;
+    if (window.matchMedia('(display-mode: standalone)').matches || iosStandalone) {
+      router.replace('/login');
+    }
+  }, [router]);
 
   function handleCtaSubmit(e: FormEvent) {
     e.preventDefault();
