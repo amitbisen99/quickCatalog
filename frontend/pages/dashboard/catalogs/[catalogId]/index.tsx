@@ -5,7 +5,7 @@ import DashboardLayout from '@/components/DashboardLayout';
 import withAuth from '@/components/withAuth';
 import Alert from '@/components/Alert';
 import ShareOptions from '@/components/dashboard/ShareOptions';
-import { CopyIcon, DownloadIcon, PencilIcon, ShareIcon, TrashIcon } from '@/components/icons';
+import { ChartBarIcon, CopyIcon, DownloadIcon, PencilIcon, ShareIcon, TrashIcon } from '@/components/icons';
 import { apiFetch, ApiError, API_URL } from '@/utils/api';
 import { getCatalogTemplate } from '@/components/catalog-templates/registry';
 import { downloadQrWithLabel } from '@/utils/downloadQrWithLabel';
@@ -184,6 +184,13 @@ function CatalogDetail() {
                       <DownloadIcon className="h-4 w-4" />
                       Download PDF
                     </a>
+                    <Link
+                      href={`/dashboard/catalogs/${catalogId}/analytics`}
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                    >
+                      <ChartBarIcon className="h-4 w-4" />
+                      Analytics
+                    </Link>
                   </div>
                 </div>
                 <div className="flex gap-3">

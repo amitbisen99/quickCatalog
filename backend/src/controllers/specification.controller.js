@@ -4,6 +4,9 @@ const Product = require('../models/Product');
 const asyncHandler = require('../utils/asyncHandler');
 const AppError = require('../utils/AppError');
 
+const DEFAULT_LIMIT = 10;
+const MAX_LIMIT = 100;
+
 async function toSpecificationResponse(spec) {
   const productCount = await Product.countDocuments({
     vendorId: spec.vendorId,
@@ -18,8 +21,31 @@ async function toSpecificationResponse(spec) {
 }
 
 exports.getSpecifications = asyncHandler(async (req, res) => {
-  const specifications = await Specification.find({ vendorId: req.user.id }).sort({ name: 1 });
-  res.json({ success: true, specifications: await Promise.all(specifications.map(toSpecificationResponse)) });
+  // Same opt-in-via-`page` pagination as category.controller.js's
+  // getCategories — the product form's specification picker calls this
+  // with no query params and needs the complete list, so that has to
+  // keep working unpaginated.
+  if (req.query.page === undefined) {
+    const specifications = await Specification.find({ vendorId: req.user.id }).sort({ name: 1 });
+    return res.json({ success: true, specifications: await Promise.all(specifications.map(toSpecificationResponse)) });
+  }
+
+  const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+  const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || DEFAULT_LIMIT, 1), MAX_LIMIT);
+
+  const [specifications, total] = await Promise.all([
+    Specification.find({ vendorId: req.user.id })
+      .sort({ name: 1 })
+      .skip((page - 1) * limit)
+      .limit(limit),
+    Specification.countDocuments({ vendorId: req.user.id }),
+  ]);
+
+  res.json({
+    success: true,
+    specifications: await Promise.all(specifications.map(toSpecificationResponse)),
+    pagination: { page, limit, total, totalPages: Math.max(Math.ceil(total / limit), 1) },
+  });
 });
 
 exports.createSpecification = asyncHandler(async (req, res) => {

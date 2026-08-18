@@ -12,6 +12,7 @@ import WhatsAppFloatButton from './WhatsAppFloatButton';
 import { ArrowLeftIcon, ArrowRightIcon } from '@/components/icons';
 import { currencySymbol } from '@/utils/currency';
 import { playfairDisplay } from '@/utils/fonts';
+import { useTrackVisit } from '@/utils/analytics';
 
 // One product "spread" per page — full-bleed photo on one side, an
 // editorial-style description panel on the other. Same header, search,
@@ -38,6 +39,13 @@ export default function EditorialSpotlightTemplate({ catalog, vendor, categories
   const totalPages = Math.max(Math.ceil(filteredProducts.length / PAGE_SIZE), 1);
   const product = filteredProducts[(page - 1) * PAGE_SIZE];
   const inCart = product ? cart.isInCart(product.id) : false;
+
+  // This template shows one product at a time without ever navigating
+  // to the standalone product page (unlike Modern Grid, where opening a
+  // product means a real page load) — so a product view here has to be
+  // tracked on spread change instead, or product-level analytics would
+  // be nearly empty for every catalog using this template.
+  useTrackVisit(catalog.slug, product?.id);
 
   function goToPage(next: number) {
     setPage(next);

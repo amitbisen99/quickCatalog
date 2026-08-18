@@ -2,6 +2,7 @@ import type { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import { absoluteApiUrl } from '@/utils/api';
 import { getCatalogTemplate } from '@/components/catalog-templates/registry';
+import { useTrackVisit } from '@/utils/analytics';
 import type { CatalogPageData } from '@/types/publicCatalog';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3010';
@@ -32,6 +33,12 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({ params }) 
 };
 
 export default function PublicCatalog({ data, error }: Props) {
+  // Client-side only (useTrackVisit's effect never runs during SSR) —
+  // this page is server-rendered for crawlers/link previews, but a
+  // visit should count once per real browser load, not once per server
+  // render (which would also fire for bots/crawlers hitting SSR directly).
+  useTrackVisit(data?.catalog.slug);
+
   if (!data) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">

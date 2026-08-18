@@ -8,6 +8,5 @@ const router = express.Router();
 router.get('/catalog/:catalogSlug', publicController.getCatalogBySlug);
 router.get('/catalog/:catalogSlug/og-image', publicController.getCatalogOgImage);
 router.get('/catalog/:catalogSlug/products/:productId', publicController.getCatalogProductBySlug);
-router.get('/catalog/:catalogSlug/analytics', publicController.trackCatalogVisit);
 
 module.exports = router;

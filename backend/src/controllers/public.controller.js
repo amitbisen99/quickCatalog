@@ -5,7 +5,6 @@ const Category = require('../models/Category');
 const User = require('../models/User');
 const asyncHandler = require('../utils/asyncHandler');
 const AppError = require('../utils/AppError');
-const notImplemented = require('../utils/notImplemented');
 const { parseDataUrl } = require('../utils/dataUrl');
 
 function toPublicProductResponse(product) {
@@ -131,5 +130,7 @@ exports.getCatalogOgImage = asyncHandler(async (req, res) => {
 // (catalog.routes.js → enquiry.controller.js) since it needs the
 // catalog's real id, not just its slug.
 
-// Visit analytics is a separate feature (Prompt 17).
-exports.trackCatalogVisit = notImplemented('GET /api/public/catalog/:catalogSlug/analytics');
+// Visit tracking + the vendor-facing analytics read live under
+// /api/analytics (analytics.routes.js → analytics.controller.js) — this
+// used to have a second, unused stub here too; removed to avoid two
+// competing "analytics" surfaces.

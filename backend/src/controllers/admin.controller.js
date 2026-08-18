@@ -6,10 +6,13 @@ const Product = require('../models/Product');
 const Category = require('../models/Category');
 const Specification = require('../models/Specification');
 const Enquiry = require('../models/Enquiry');
+const SupportTicket = require('../models/SupportTicket');
 const toSafeUser = require('../utils/toSafeUser');
+const toSupportTicketResponse = require('../utils/toSupportTicketResponse');
 const asyncHandler = require('../utils/asyncHandler');
 const AppError = require('../utils/AppError');
 const notImplemented = require('../utils/notImplemented');
+const { sendSupportTicketReplyEmail } = require('../services/email.service');
 
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 100;
@@ -150,7 +153,90 @@ exports.exportUsers = asyncHandler(async (req, res) => {
 });
 
 exports.getCatalogs = notImplemented('GET /api/admin/catalogs');
-exports.getSupportTickets = notImplemented('GET /api/admin/support-tickets');
-exports.updateTicketStatus = notImplemented('PUT /api/admin/support-tickets/:ticketId/status');
-exports.replyToTicket = notImplemented('POST /api/admin/support-tickets/:ticketId/reply');
+
+exports.getSupportTickets = asyncHandler(async (req, res) => {
+  const query = {};
+  if (['open', 'in_progress', 'closed'].includes(req.query.status)) {
+    query.status = req.query.status;
+  }
+  const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+  const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || DEFAULT_LIMIT, 1), MAX_LIMIT);
+
+  const [tickets, total] = await Promise.all([
+    SupportTicket.find(query)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit),
+    SupportTicket.countDocuments(query),
+  ]);
+
+  res.json({
+    success: true,
+    tickets: tickets.map(toSupportTicketResponse),
+    total,
+    page,
+    pages: Math.max(Math.ceil(total / limit), 1),
+  });
+});
+
+exports.getSupportTicketById = asyncHandler(async (req, res) => {
+  const { ticketId } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(ticketId)) {
+    throw new AppError('Support ticket not found', 404);
+  }
+  const ticket = await SupportTicket.findById(ticketId);
+  if (!ticket) {
+    throw new AppError('Support ticket not found', 404);
+  }
+  res.json({ success: true, ticket: toSupportTicketResponse(ticket) });
+});
+
+exports.updateTicketStatus = asyncHandler(async (req, res) => {
+  const { ticketId } = req.params;
+  const { status } = req.body;
+  if (!mongoose.Types.ObjectId.isValid(ticketId)) {
+    throw new AppError('Support ticket not found', 404);
+  }
+  const ticket = await SupportTicket.findById(ticketId);
+  if (!ticket) {
+    throw new AppError('Support ticket not found', 404);
+  }
+
+  ticket.status = status;
+  await ticket.save();
+
+  res.json({ success: true, message: 'Status updated', ticket: toSupportTicketResponse(ticket) });
+});
+
+exports.replyToTicket = asyncHandler(async (req, res) => {
+  const { ticketId } = req.params;
+  const { message } = req.body;
+  if (!mongoose.Types.ObjectId.isValid(ticketId)) {
+    throw new AppError('Support ticket not found', 404);
+  }
+  const ticket = await SupportTicket.findById(ticketId);
+  if (!ticket) {
+    throw new AppError('Support ticket not found', 404);
+  }
+
+  ticket.adminReply = message;
+  ticket.repliedAt = new Date();
+  // A reply means someone's actively handling it — only auto-advance out
+  // of "open", never overwrite an admin's own "closed" via a follow-up reply.
+  if (ticket.status === 'open') {
+    ticket.status = 'in_progress';
+  }
+  await ticket.save();
+
+  // Best-effort — the vendor has no in-app place to see this reply
+  // (no "my tickets" view for this feature), so the email IS the reply
+  // as far as they're concerned; still shouldn't fail the admin's action
+  // if it doesn't send.
+  sendSupportTicketReplyEmail(ticket.vendorEmail, ticket).catch((err) =>
+    console.error('Support ticket reply email failed:', err.message)
+  );
+
+  res.json({ success: true, message: 'Reply sent', ticket: toSupportTicketResponse(ticket) });
+});
+
 exports.getDashboardStats = notImplemented('GET /api/admin/dashboard/stats');

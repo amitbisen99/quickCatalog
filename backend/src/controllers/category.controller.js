@@ -4,6 +4,9 @@ const Product = require('../models/Product');
 const asyncHandler = require('../utils/asyncHandler');
 const AppError = require('../utils/AppError');
 
+const DEFAULT_LIMIT = 10;
+const MAX_LIMIT = 100;
+
 async function toCategoryResponse(category) {
   const productCount = await Product.countDocuments({ categoryId: category._id });
   return {
@@ -16,8 +19,31 @@ async function toCategoryResponse(category) {
 }
 
 exports.getCategories = asyncHandler(async (req, res) => {
-  const categories = await Category.find({ vendorId: req.user.id }).sort({ name: 1 });
-  res.json({ success: true, categories: await Promise.all(categories.map(toCategoryResponse)) });
+  // Pagination is opt-in via `page` — the product form's category
+  // dropdown, the products-page filter pills, and other consumers all
+  // need the complete list and call this with no query params at all,
+  // so leaving `page` unset must keep returning everything unpaginated.
+  if (req.query.page === undefined) {
+    const categories = await Category.find({ vendorId: req.user.id }).sort({ name: 1 });
+    return res.json({ success: true, categories: await Promise.all(categories.map(toCategoryResponse)) });
+  }
+
+  const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+  const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || DEFAULT_LIMIT, 1), MAX_LIMIT);
+
+  const [categories, total] = await Promise.all([
+    Category.find({ vendorId: req.user.id })
+      .sort({ name: 1 })
+      .skip((page - 1) * limit)
+      .limit(limit),
+    Category.countDocuments({ vendorId: req.user.id }),
+  ]);
+
+  res.json({
+    success: true,
+    categories: await Promise.all(categories.map(toCategoryResponse)),
+    pagination: { page, limit, total, totalPages: Math.max(Math.ceil(total / limit), 1) },
+  });
 });
 
 exports.createCategory = asyncHandler(async (req, res) => {

@@ -86,4 +86,41 @@ function sendEnquiryNotificationEmail(vendorEmail, enquiry) {
   });
 }
 
-module.exports = { sendEmail, sendOtpEmail, sendPasswordResetEmail, sendEnquiryNotificationEmail };
+function sendSupportTicketNotificationEmail(adminEmail, ticket) {
+  const contactLine = ticket.contactMethod === 'email' ? `Email: ${ticket.contactValue}` : `Mobile: ${ticket.contactValue}`;
+
+  return sendEmail({
+    to: adminEmail,
+    subject: `New support request from ${ticket.companyName}`,
+    htmlContent: `
+      <p>A new support request has come in from <strong>${ticket.companyName}</strong> (${ticket.vendorEmail}).</p>
+      <p><strong>Contact person:</strong> ${ticket.contactPersonName}<br/>
+      <strong>Preferred contact:</strong> ${contactLine}</p>
+      <p><strong>Reason for contact:</strong></p>
+      <p>${ticket.reason}</p>
+      <p>Log in to the QuickCatalog admin panel to respond.</p>
+    `,
+  });
+}
+
+function sendSupportTicketReplyEmail(vendorEmail, ticket) {
+  return sendEmail({
+    to: vendorEmail,
+    subject: 'Reply to your QuickCatalog support request',
+    htmlContent: `
+      <p>Our support team replied to your request:</p>
+      <p style="color:#666;">"${ticket.reason}"</p>
+      <p><strong>Reply:</strong></p>
+      <p>${ticket.adminReply}</p>
+    `,
+  });
+}
+
+module.exports = {
+  sendEmail,
+  sendOtpEmail,
+  sendPasswordResetEmail,
+  sendEnquiryNotificationEmail,
+  sendSupportTicketNotificationEmail,
+  sendSupportTicketReplyEmail,
+};

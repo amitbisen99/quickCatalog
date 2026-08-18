@@ -3,16 +3,16 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useAdminAuth } from '@/context/AdminAuthContext';
-import { HomeIcon, UserIcon, LogoutIcon, MenuIcon, XIcon, ChevronDownIcon } from '@/components/icons';
+import { HomeIcon, UserIcon, HelpIcon, LogoutIcon, MenuIcon, XIcon, ChevronDownIcon } from '@/components/icons';
 
 // Mirrors DashboardLayout.tsx (vendor panel) but for the admin panel —
 // separate nav list, separate session (useAdminAuth), no "Settings" link
-// since there's no admin settings page yet. More sections (support
-// tickets, subscriptions, payments) will slot into NAV_ITEMS as later
-// passes build them out.
+// since there's no admin settings page yet. More sections (subscriptions,
+// payments) will slot into NAV_ITEMS as later passes build them out.
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/admin/dashboard', icon: HomeIcon },
   { label: 'Vendors', href: '/admin/vendors', icon: UserIcon },
+  { label: 'Support Tickets', href: '/admin/support-tickets', icon: HelpIcon },
 ];
 
 interface Props {

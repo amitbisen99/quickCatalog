@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { apiFetch, ApiError } from '@/utils/api';
 import { getCatalogTemplate } from '@/components/catalog-templates/registry';
+import { useTrackVisit } from '@/utils/analytics';
 import type { CatalogProductPageData } from '@/types/publicCatalog';
 
 export default function PublicCatalogProduct() {
@@ -19,6 +20,8 @@ export default function PublicCatalogProduct() {
       .then(setData)
       .catch((err) => setError(err instanceof ApiError ? err.message : 'Could not load this product.'));
   }, [slug, productId]);
+
+  useTrackVisit(data?.catalog.slug, data?.product.id);
 
   if (error) {
     return (

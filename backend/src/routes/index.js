@@ -8,6 +8,7 @@ const categoryRoutes = require('./category.routes');
 const specificationRoutes = require('./specification.routes');
 const enquiryRoutes = require('./enquiry.routes');
 const analyticsRoutes = require('./analytics.routes');
+const supportRoutes = require('./support.routes');
 const uploadRoutes = require('./upload.routes');
 const publicRoutes = require('./public.routes');
 const adminAuthRoutes = require('./adminAuth.routes');
@@ -23,6 +24,7 @@ router.use('/categories', categoryRoutes);
 router.use('/specifications', specificationRoutes);
 router.use('/enquiries', enquiryRoutes);
 router.use('/analytics', analyticsRoutes);
+router.use('/support-tickets', supportRoutes);
 router.use('/upload', uploadRoutes);
 router.use('/public', publicRoutes);
 // Must be mounted before '/admin' below — admin.routes.js gates every

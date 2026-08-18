@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import withAuth from '@/components/withAuth';
 import Alert from '@/components/Alert';
@@ -11,8 +11,19 @@ interface Specification {
   productCount: number;
 }
 
+interface Pagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+const PAGE_SIZE = 10;
+
 function SpecificationsPage() {
   const [specifications, setSpecifications] = useState<Specification[] | null>(null);
+  const [pagination, setPagination] = useState<Pagination | null>(null);
+  const [page, setPage] = useState(1);
   const [error, setError] = useState('');
 
   const [name, setName] = useState('');
@@ -22,13 +33,16 @@ function SpecificationsPage() {
   const [editName, setEditName] = useState('');
   const [saving, setSaving] = useState(false);
 
-  function loadSpecifications() {
-    apiFetch<{ specifications: Specification[] }>('/specifications')
-      .then((res) => setSpecifications(res.specifications))
+  const loadSpecifications = useCallback(() => {
+    apiFetch<{ specifications: Specification[]; pagination: Pagination }>(`/specifications?page=${page}&limit=${PAGE_SIZE}`)
+      .then((res) => {
+        setSpecifications(res.specifications);
+        setPagination(res.pagination);
+      })
       .catch((err) => setError(err instanceof ApiError ? err.message : 'Could not load specifications.'));
-  }
+  }, [page]);
 
-  useEffect(loadSpecifications, []);
+  useEffect(loadSpecifications, [loadSpecifications]);
 
   async function handleAdd(e: FormEvent) {
     e.preventDefault();
@@ -36,12 +50,16 @@ function SpecificationsPage() {
     setAdding(true);
     setError('');
     try {
-      const res = await apiFetch<{ specification: Specification }>('/specifications', {
+      await apiFetch<{ specification: Specification }>('/specifications', {
         method: 'POST',
         body: { name: name.trim() },
       });
-      setSpecifications((prev) => [...(prev || []), res.specification].sort((a, b) => a.name.localeCompare(b.name)));
       setName('');
+      // A new specification can sort onto any page (list is name-ordered)
+      // — jump to page 1 rather than guess where it landed. If already
+      // on page 1, setPage(1) is a no-op, so reload directly then.
+      if (page === 1) loadSpecifications();
+      else setPage(1);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Could not create specification.');
     } finally {
@@ -59,12 +77,12 @@ function SpecificationsPage() {
     setSaving(true);
     setError('');
     try {
-      const res = await apiFetch<{ specification: Specification }>(`/specifications/${id}`, {
+      await apiFetch<{ specification: Specification }>(`/specifications/${id}`, {
         method: 'PUT',
         body: { name: editName.trim() },
       });
-      setSpecifications((prev) => prev?.map((s) => (s.id === id ? res.specification : s)) || null);
       setEditingId('');
+      loadSpecifications();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Could not update specification.');
     } finally {
@@ -76,7 +94,11 @@ function SpecificationsPage() {
     if (!window.confirm(`Delete "${specName}"?`)) return;
     try {
       await apiFetch(`/specifications/${id}`, { method: 'DELETE' });
-      setSpecifications((prev) => prev?.filter((s) => s.id !== id) || null);
+      // Deleting the last item on a page past the first would otherwise
+      // land on an empty page — step back a page instead of reloading in
+      // place when that happens.
+      if (specifications?.length === 1 && page > 1) setPage((p) => p - 1);
+      else loadSpecifications();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Could not delete specification.');
     }
@@ -188,6 +210,28 @@ function SpecificationsPage() {
           </div>
         )}
       </div>
+
+      {pagination && pagination.totalPages > 1 && (
+        <div className="mt-4 flex items-center justify-center gap-3 text-sm">
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page <= 1}
+            className="rounded-lg border border-gray-300 px-3 py-1.5 font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <span className="text-gray-500">
+            Page {pagination.page} of {pagination.totalPages} · {pagination.total} specification{pagination.total === 1 ? '' : 's'}
+          </span>
+          <button
+            onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
+            disabled={page >= pagination.totalPages}
+            className="rounded-lg border border-gray-300 px-3 py-1.5 font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+      )}
     </DashboardLayout>
   );
 }

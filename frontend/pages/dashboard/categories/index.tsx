@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import withAuth from '@/components/withAuth';
 import Alert from '@/components/Alert';
@@ -11,8 +11,19 @@ interface Category {
   productCount: number;
 }
 
+interface Pagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+const PAGE_SIZE = 10;
+
 function CategoriesPage() {
   const [categories, setCategories] = useState<Category[] | null>(null);
+  const [pagination, setPagination] = useState<Pagination | null>(null);
+  const [page, setPage] = useState(1);
   const [error, setError] = useState('');
 
   const [name, setName] = useState('');
@@ -22,13 +33,16 @@ function CategoriesPage() {
   const [editName, setEditName] = useState('');
   const [saving, setSaving] = useState(false);
 
-  function loadCategories() {
-    apiFetch<{ categories: Category[] }>('/categories')
-      .then((res) => setCategories(res.categories))
+  const loadCategories = useCallback(() => {
+    apiFetch<{ categories: Category[]; pagination: Pagination }>(`/categories?page=${page}&limit=${PAGE_SIZE}`)
+      .then((res) => {
+        setCategories(res.categories);
+        setPagination(res.pagination);
+      })
       .catch((err) => setError(err instanceof ApiError ? err.message : 'Could not load categories.'));
-  }
+  }, [page]);
 
-  useEffect(loadCategories, []);
+  useEffect(loadCategories, [loadCategories]);
 
   async function handleAdd(e: FormEvent) {
     e.preventDefault();
@@ -36,12 +50,16 @@ function CategoriesPage() {
     setAdding(true);
     setError('');
     try {
-      const res = await apiFetch<{ category: Category }>('/categories', {
+      await apiFetch<{ category: Category }>('/categories', {
         method: 'POST',
         body: { name: name.trim() },
       });
-      setCategories((prev) => [...(prev || []), res.category].sort((a, b) => a.name.localeCompare(b.name)));
       setName('');
+      // A new category can sort onto any page (list is name-ordered) —
+      // jump to page 1 rather than guess where it landed. If already on
+      // page 1, setPage(1) is a no-op, so reload directly in that case.
+      if (page === 1) loadCategories();
+      else setPage(1);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Could not create category.');
     } finally {
@@ -59,12 +77,12 @@ function CategoriesPage() {
     setSaving(true);
     setError('');
     try {
-      const res = await apiFetch<{ category: Category }>(`/categories/${id}`, {
+      await apiFetch<{ category: Category }>(`/categories/${id}`, {
         method: 'PUT',
         body: { name: editName.trim() },
       });
-      setCategories((prev) => prev?.map((c) => (c.id === id ? res.category : c)) || null);
       setEditingId('');
+      loadCategories();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Could not update category.');
     } finally {
@@ -76,7 +94,11 @@ function CategoriesPage() {
     if (!window.confirm(`Delete "${categoryName}"?`)) return;
     try {
       await apiFetch(`/categories/${id}`, { method: 'DELETE' });
-      setCategories((prev) => prev?.filter((c) => c.id !== id) || null);
+      // Deleting the last item on a page past the first would otherwise
+      // land on an empty page — step back a page instead of reloading in
+      // place when that happens.
+      if (categories?.length === 1 && page > 1) setPage((p) => p - 1);
+      else loadCategories();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Could not delete category.');
     }
@@ -185,6 +207,28 @@ function CategoriesPage() {
           </div>
         )}
       </div>
+
+      {pagination && pagination.totalPages > 1 && (
+        <div className="mt-4 flex items-center justify-center gap-3 text-sm">
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page <= 1}
+            className="rounded-lg border border-gray-300 px-3 py-1.5 font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <span className="text-gray-500">
+            Page {pagination.page} of {pagination.totalPages} · {pagination.total} categor{pagination.total === 1 ? 'y' : 'ies'}
+          </span>
+          <button
+            onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
+            disabled={page >= pagination.totalPages}
+            className="rounded-lg border border-gray-300 px-3 py-1.5 font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+      )}
     </DashboardLayout>
   );
 }
