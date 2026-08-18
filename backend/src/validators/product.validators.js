@@ -2,6 +2,7 @@ const { body } = require('express-validator');
 
 exports.productValidators = [
   body('name').trim().notEmpty().withMessage('Product name is required'),
+  body('sku').optional({ checkFalsy: true }).trim().isLength({ max: 100 }).withMessage('SKU must be 100 characters or fewer'),
   body('description').optional().trim(),
   body('price')
     .notEmpty()

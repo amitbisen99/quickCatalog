@@ -18,6 +18,7 @@ interface Category {
 interface Product {
   id: string;
   name: string;
+  sku?: string;
   description?: string;
   price: number;
   taxPercent?: number;
@@ -67,7 +68,10 @@ function ViewProduct() {
         <div className="mt-4 grid grid-cols-1 gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <div className="flex items-start justify-between gap-4">
-              <h1 className="text-2xl font-bold text-gray-900">{product.name}</h1>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">{product.name}</h1>
+                {product.sku && <p className="mt-1 text-sm text-gray-500">SKU: {product.sku}</p>}
+              </div>
               <Link
                 href={`/dashboard/products/${product.id}/edit`}
                 className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
@@ -121,6 +125,10 @@ function ViewProduct() {
 
           <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
             <dl className="space-y-3 text-sm">
+              <div className="flex justify-between">
+                <dt className="text-gray-500">SKU</dt>
+                <dd className="font-medium text-gray-900">{product.sku || '—'}</dd>
+              </div>
               <div className="flex justify-between">
                 <dt className="text-gray-500">Price</dt>
                 <dd className="font-medium text-gray-900">

@@ -33,6 +33,7 @@ interface ImageSlot {
 export interface ProductData {
   id: string;
   name: string;
+  sku?: string;
   description?: string;
   price: number;
   taxPercent?: number;
@@ -63,6 +64,7 @@ export default function ProductForm({ catalogId, mode, productId, initial }: Pro
   const symbol = currencySymbol(user?.currency);
 
   const [name, setName] = useState(initial?.name || '');
+  const [sku, setSku] = useState(initial?.sku || '');
   const [description, setDescription] = useState(initial?.description || '');
   const [price, setPrice] = useState(initial ? String(initial.price) : '');
   const [taxPercent, setTaxPercent] = useState(initial?.taxPercent !== undefined ? String(initial.taxPercent) : '');
@@ -183,6 +185,7 @@ export default function ProductForm({ catalogId, mode, productId, initial }: Pro
   function buildFormData(): FormData {
     const formData = new FormData();
     formData.append('name', name);
+    if (sku.trim()) formData.append('sku', sku.trim());
     formData.append('description', description);
     formData.append('price', price);
     if (taxPercent) formData.append('taxPercent', taxPercent);
@@ -268,6 +271,17 @@ export default function ProductForm({ catalogId, mode, productId, initial }: Pro
             onChange={(e) => setName(e.target.value)}
             className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-600"
           />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">SKU</label>
+          <input
+            value={sku}
+            onChange={(e) => setSku(e.target.value)}
+            placeholder="e.g. TSHIRT-RED-L"
+            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-600"
+          />
+          <p className="mt-1 text-xs text-gray-400">Optional. Must be unique across your products if you use one.</p>
         </div>
 
         <div>

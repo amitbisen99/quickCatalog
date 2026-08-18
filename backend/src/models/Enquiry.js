@@ -7,6 +7,7 @@ const enquiryItemSchema = new mongoose.Schema(
     // later being edited, unlinked, or deleted, and is never trusted
     // from the client (re-derived server-side from the live product).
     name: { type: String, required: true },
+    sku: { type: String },
     price: { type: Number, required: true },
     unit: { type: String },
     taxPercent: { type: Number },

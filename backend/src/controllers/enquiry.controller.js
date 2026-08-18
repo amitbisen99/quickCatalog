@@ -18,6 +18,7 @@ function toEnquiryResponse(enquiry) {
     items: enquiry.items.map((item) => ({
       productId: item.productId,
       name: item.name,
+      sku: item.sku,
       price: item.price,
       unit: item.unit,
       taxPercent: item.taxPercent,
@@ -56,6 +57,7 @@ exports.createEnquiryForCatalog = asyncHandler(async (req, res) => {
       return {
         productId: product._id,
         name: product.name,
+        sku: product.sku,
         price: product.price,
         unit: product.unit,
         taxPercent: product.taxPercent,

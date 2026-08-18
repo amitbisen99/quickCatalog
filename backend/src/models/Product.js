@@ -22,6 +22,14 @@ const productSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    // Optional — a vendor may not use SKUs at all. Uniqueness (when one is
+    // given) is enforced app-side, scoped per vendor, the same
+    // check-before-write pattern category/specification names already use
+    // rather than a schema-level unique index.
+    sku: {
+      type: String,
+      trim: true,
+    },
     description: {
       type: String,
       trim: true,

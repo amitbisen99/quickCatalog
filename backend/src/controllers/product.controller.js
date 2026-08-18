@@ -69,6 +69,7 @@ function toProductResponse(product) {
     vendorId: product.vendorId,
     catalogIds: product.catalogIds,
     name: product.name,
+    sku: product.sku,
     description: product.description,
     price: product.price,
     taxPercent: product.taxPercent,
@@ -99,9 +100,27 @@ function buildSearchFilter(req) {
   }
   if (req.query.search) {
     const escaped = String(req.query.search).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    filter.name = new RegExp(escaped, 'i');
+    const regex = new RegExp(escaped, 'i');
+    // Matches either field — a vendor searching "ABC123" is as likely to
+    // be typing a SKU as a product name.
+    filter.$or = [{ name: regex }, { sku: regex }];
   }
   return filter;
+}
+
+// SKU is optional, but when one is given it should actually identify a
+// single product — same check-before-write, case-insensitive uniqueness
+// check category/specification names already use, scoped per vendor
+// rather than a schema-level unique index.
+async function assertSkuAvailable(vendorId, sku, excludeProductId) {
+  if (!sku || !sku.trim()) return;
+  const escaped = sku.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const query = { vendorId, sku: new RegExp(`^${escaped}$`, 'i') };
+  if (excludeProductId) query._id = { $ne: excludeProductId };
+  const existing = await Product.findOne(query);
+  if (existing) {
+    throw new AppError('A product with this SKU already exists', 409);
+  }
 }
 
 // ── Catalog-scoped: the association between a catalog and its products ──
@@ -133,7 +152,8 @@ exports.createProduct = asyncHandler(async (req, res) => {
   const { catalogId } = req.params;
   await requireOwnedCatalog(catalogId, req.user.id, 1);
 
-  const { name, description, price, unit, minimumOrderQuantity, categoryId, video, taxPercent } = req.body;
+  const { name, sku, description, price, unit, minimumOrderQuantity, categoryId, video, taxPercent } = req.body;
+  await assertSkuAvailable(req.user.id, sku);
   const images = (await Promise.all((req.files || []).map((f) => compressImageToDataUrl(f.buffer)))).slice(0, 3);
   const specifications = parseSpecifications(req);
 
@@ -141,6 +161,7 @@ exports.createProduct = asyncHandler(async (req, res) => {
     vendorId: req.user.id,
     catalogIds: [catalogId],
     name,
+    sku: sku || undefined,
     description,
     price,
     taxPercent: taxPercent || undefined,
@@ -204,7 +225,8 @@ exports.unlinkProduct = asyncHandler(async (req, res) => {
 // vendor's library and can be linked to any catalog later via
 // linkExistingProduct.
 exports.createStandaloneProduct = asyncHandler(async (req, res) => {
-  const { name, description, price, unit, minimumOrderQuantity, categoryId, video, taxPercent } = req.body;
+  const { name, sku, description, price, unit, minimumOrderQuantity, categoryId, video, taxPercent } = req.body;
+  await assertSkuAvailable(req.user.id, sku);
   const images = (await Promise.all((req.files || []).map((f) => compressImageToDataUrl(f.buffer)))).slice(0, 3);
   const specifications = parseSpecifications(req);
 
@@ -212,6 +234,7 @@ exports.createStandaloneProduct = asyncHandler(async (req, res) => {
     vendorId: req.user.id,
     catalogIds: [],
     name,
+    sku: sku || undefined,
     description,
     price,
     taxPercent: taxPercent || undefined,
@@ -276,7 +299,13 @@ exports.updateProduct = asyncHandler(async (req, res) => {
     throw new AppError('Product not found', 404);
   }
 
-  const { name, description, price, unit, minimumOrderQuantity, categoryId, video, taxPercent } = req.body;
+  const { name, sku, description, price, unit, minimumOrderQuantity, categoryId, video, taxPercent } = req.body;
+  // Skip the lookup entirely when the SKU isn't actually changing — the
+  // common "edit other fields" path shouldn't pay for a uniqueness query
+  // against itself.
+  if (sku && sku !== product.sku) {
+    await assertSkuAvailable(req.user.id, sku, productId);
+  }
 
   let existingImages = [];
   if (req.body.existingImages) {
@@ -290,6 +319,7 @@ exports.updateProduct = asyncHandler(async (req, res) => {
   const specifications = parseSpecifications(req);
 
   product.name = name;
+  product.sku = sku || undefined;
   product.description = description;
   product.price = price;
   product.taxPercent = taxPercent || undefined;

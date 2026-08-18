@@ -11,6 +11,7 @@ import { useAuth } from '@/context/AuthContext';
 interface EnquiryItem {
   productId?: string;
   name: string;
+  sku?: string;
   price: number;
   taxPercent?: number;
   unit?: string;
@@ -120,7 +121,10 @@ function EnquiryDetail() {
                 {enquiry.items.map((item, i) => (
                   <li key={i} className="flex items-center justify-between px-4 py-3 text-sm">
                     <div>
-                      <p className="font-medium text-gray-900">{item.name}</p>
+                      <p className="font-medium text-gray-900">
+                        {item.name}
+                        {item.sku && <span className="ml-1.5 text-xs font-normal text-gray-400">(SKU: {item.sku})</span>}
+                      </p>
                       <p className="text-xs text-gray-500">
                         {symbol}{item.price} × {item.quantity} {item.unit || 'pcs'}
                         {item.taxPercent ? ` (+${item.taxPercent}% tax)` : ''}

@@ -16,6 +16,7 @@ interface Category {
 interface Product {
   id: string;
   name: string;
+  sku?: string;
   price: number;
   taxPercent?: number;
   unit?: string;
@@ -110,7 +111,7 @@ function ProductsLibrary() {
             setPage(1);
             setSearch(e.target.value);
           }}
-          placeholder="Search by product name…"
+          placeholder="Search by product name or SKU…"
           className="w-64 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-600"
         />
         <select
@@ -150,6 +151,7 @@ function ProductsLibrary() {
               <thead className="border-b border-gray-200 bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
                 <tr>
                   <th className="px-4 py-3 font-medium">Product Name</th>
+                  <th className="px-4 py-3 font-medium">SKU</th>
                   <th className="px-4 py-3 font-medium">Category</th>
                   <th className="px-4 py-3 font-medium">Price</th>
                   <th className="px-4 py-3 font-medium">Unit</th>
@@ -169,6 +171,7 @@ function ProductsLibrary() {
                         {product.name}
                       </Link>
                     </td>
+                    <td className="px-4 py-3 text-gray-600">{product.sku || '—'}</td>
                     <td className="px-4 py-3 text-gray-600">{categoryName(product.categoryId)}</td>
                     <td className="px-4 py-3 text-gray-600">
                       {symbol}{product.price}
