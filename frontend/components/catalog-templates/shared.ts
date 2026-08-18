@@ -19,3 +19,40 @@ export function truncateWords(text: string, maxWords: number): string {
   if (words.length <= maxWords) return text.trim();
   return `${words.slice(0, maxWords).join(' ')}…`;
 }
+
+const HTML_ENTITIES: Record<string, string> = {
+  amp: '&',
+  lt: '<',
+  gt: '>',
+  quot: '"',
+  apos: "'",
+  '#39': "'",
+  nbsp: ' ',
+};
+
+/**
+ * Strips HTML tags for a plain-text preview (e.g. a rich-text product
+ * description shown as a plain line-clamped snippet). Pure string
+ * manipulation — deliberately NOT DOMPurify, which needs a real DOM/
+ * `window` and throws when it runs during Next's server-side rendering.
+ * Templates rendered from `getServerSideProps` (the public catalog page)
+ * execute on the Node server with no DOM, so calling DOMPurify there
+ * crashes the request with a 500. Safe here because the result is only
+ * ever inserted as a React text node (auto-escaped), never via
+ * `dangerouslySetInnerHTML` — it needs to strip tags, not sanitize HTML
+ * for re-embedding.
+ */
+export function stripHtml(html: string): string {
+  return html
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&(#\d+|#x[0-9a-fA-F]+|[a-zA-Z]+);/g, (match, entity: string) => {
+      if (entity[0] === '#') {
+        const isHex = entity[1] === 'x' || entity[1] === 'X';
+        const code = parseInt(isHex ? entity.slice(2) : entity.slice(1), isHex ? 16 : 10);
+        return Number.isNaN(code) ? match : String.fromCodePoint(code);
+      }
+      return HTML_ENTITIES[entity] ?? match;
+    })
+    .replace(/\s+/g, ' ')
+    .trim();
+}

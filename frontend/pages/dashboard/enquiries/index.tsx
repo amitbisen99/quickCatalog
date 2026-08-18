@@ -1,20 +1,9 @@
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import DashboardLayout from '@/components/DashboardLayout';
 import withAuth from '@/components/withAuth';
 import Alert from '@/components/Alert';
-import Modal from '@/components/Modal';
 import { apiFetch, ApiError } from '@/utils/api';
-import { currencySymbol } from '@/utils/currency';
-import { useAuth } from '@/context/AuthContext';
-
-interface EnquiryItem {
-  productId?: string;
-  name: string;
-  price: number;
-  taxPercent?: number;
-  unit?: string;
-  quantity: number;
-}
 
 interface Enquiry {
   id: string;
@@ -23,7 +12,7 @@ interface Enquiry {
   customerName: string;
   customerMobile: string;
   customerEmail?: string;
-  items: EnquiryItem[];
+  items: { productId?: string; name: string; price: number; taxPercent?: number; unit?: string; quantity: number }[];
   status: 'new' | 'contacted' | 'closed';
   createdAt: string;
 }
@@ -35,12 +24,8 @@ const STATUS_STYLES: Record<Enquiry['status'], string> = {
 };
 
 function EnquiriesPage() {
-  const { user } = useAuth();
-  const symbol = currencySymbol(user?.currency);
   const [enquiries, setEnquiries] = useState<Enquiry[] | null>(null);
   const [error, setError] = useState('');
-  const [selected, setSelected] = useState<Enquiry | null>(null);
-  const [updating, setUpdating] = useState(false);
 
   function loadEnquiries() {
     apiFetch<{ enquiries: Enquiry[] }>('/enquiries')
@@ -49,24 +34,6 @@ function EnquiriesPage() {
   }
 
   useEffect(loadEnquiries, []);
-
-  async function handleStatusChange(id: string, status: Enquiry['status']) {
-    setUpdating(true);
-    try {
-      const res = await apiFetch<{ enquiry: Enquiry }>(`/enquiries/${id}/status`, {
-        method: 'PUT',
-        body: { status },
-      });
-      setEnquiries((prev) => prev?.map((e) => (e.id === id ? res.enquiry : e)) || null);
-      setSelected(res.enquiry);
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Could not update status.');
-    } finally {
-      setUpdating(false);
-    }
-  }
-
-  const itemsTotal = (items: EnquiryItem[]) => items.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
   return (
     <DashboardLayout title="Enquiries">
@@ -122,9 +89,12 @@ function EnquiriesPage() {
                       {new Date(enquiry.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-4 py-3">
-                      <button onClick={() => setSelected(enquiry)} className="text-xs font-semibold text-primary-700 hover:text-primary-800">
+                      <Link
+                        href={`/dashboard/enquiries/${enquiry.id}`}
+                        className="text-xs font-semibold text-primary-700 hover:text-primary-800"
+                      >
                         View
-                      </button>
+                      </Link>
                     </td>
                   </tr>
                 ))}
@@ -133,65 +103,6 @@ function EnquiriesPage() {
           </div>
         )}
       </div>
-
-      <Modal isOpen={!!selected} onClose={() => setSelected(null)} title="Enquiry Details">
-        {selected && (
-          <div className="space-y-4">
-            <div>
-              <p className="text-sm font-semibold text-gray-900">{selected.customerName}</p>
-              <p className="text-sm text-gray-600">{selected.customerMobile}</p>
-              {selected.customerEmail && <p className="text-sm text-gray-600">{selected.customerEmail}</p>}
-              <p className="mt-1 text-xs text-gray-400">
-                {selected.catalogName} · {new Date(selected.createdAt).toLocaleString()}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Products</p>
-              <ul className="mt-2 divide-y divide-gray-100 rounded-lg border border-gray-200">
-                {selected.items.map((item, i) => (
-                  <li key={i} className="flex items-center justify-between px-3 py-2 text-sm">
-                    <div>
-                      <p className="font-medium text-gray-900">{item.name}</p>
-                      <p className="text-xs text-gray-500">
-                        {symbol}{item.price} × {item.quantity} {item.unit || 'pcs'}
-                        {item.taxPercent ? ` (+${item.taxPercent}% tax)` : ''}
-                      </p>
-                    </div>
-                    <p className="font-medium text-gray-900">{symbol}{item.price * item.quantity}</p>
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-2 text-right text-sm font-semibold text-gray-900">
-                Total: {symbol}{itemsTotal(selected.items)}
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500">Status</label>
-              <select
-                value={selected.status}
-                onChange={(e) => handleStatusChange(selected.id, e.target.value as Enquiry['status'])}
-                disabled={updating}
-                className="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-600"
-              >
-                <option value="new">New</option>
-                <option value="contacted">Contacted</option>
-                <option value="closed">Closed</option>
-              </select>
-            </div>
-
-            <a
-              href={`https://wa.me/${selected.customerMobile.replace(/\D/g, '')}`}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex w-full items-center justify-center rounded-lg bg-primary-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-primary-800"
-            >
-              Contact on WhatsApp
-            </a>
-          </div>
-        )}
-      </Modal>
     </DashboardLayout>
   );
 }

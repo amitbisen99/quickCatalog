@@ -1,8 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import DOMPurify from 'dompurify';
 import type { CatalogTemplateProps } from '@/types/publicCatalog';
-import { whatsappLink } from './shared';
+import { stripHtml, whatsappLink } from './shared';
 import { useEnquiryCart } from './useEnquiryCart';
 import EnquiryCartWidget from './EnquiryCartWidget';
 import CatalogHero from './CatalogHero';
@@ -19,10 +18,6 @@ import { playfairDisplay } from '@/utils/fonts';
 // category filter, pagination, and enquiry workflow as Modern Grid; only
 // how products themselves are presented differs.
 const PAGE_SIZE = 1;
-
-function plainTextOf(html: string): string {
-  return DOMPurify.sanitize(html, { ALLOWED_TAGS: [] }).trim();
-}
 
 export default function EditorialSpotlightTemplate({ catalog, vendor, categories, products }: CatalogTemplateProps) {
   const symbol = currencySymbol(vendor.currency);
@@ -138,7 +133,7 @@ export default function EditorialSpotlightTemplate({ catalog, vendor, categories
 
               {product.description && (
                 <p className="mt-5 line-clamp-4 text-sm leading-relaxed text-[#C9D3C6] sm:text-base">
-                  {plainTextOf(product.description)}
+                  {stripHtml(product.description)}
                 </p>
               )}
 

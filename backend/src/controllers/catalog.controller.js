@@ -88,7 +88,11 @@ async function createCatalogRecord(user, name, description, template) {
 
 exports.getCatalogs = asyncHandler(async (req, res) => {
   const catalogs = await Catalog.find({ vendorId: req.user.id }).sort({ createdAt: -1 });
-  res.json({ success: true, catalogs: await Promise.all(catalogs.map(toCatalogResponse)) });
+  // NOT `catalogs.map(toCatalogResponse)` — Array.map passes (element,
+  // index, array) to its callback, so the index would land in
+  // toCatalogResponse's `knownCount` param and show as the products count
+  // (0, 1, 2, ...) instead of each catalog's real product count.
+  res.json({ success: true, catalogs: await Promise.all(catalogs.map((catalog) => toCatalogResponse(catalog))) });
 });
 
 exports.createCatalog = asyncHandler(async (req, res) => {
