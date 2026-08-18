@@ -384,6 +384,7 @@ exports.bulkImportSample = asyncHandler(async (req, res) => {
   const examples = [
     [
       'Cotton T-Shirt',
+      'TSHIRT-RED-L',
       'Premium cotton round-neck t-shirt',
       499,
       'pcs',
@@ -397,6 +398,7 @@ exports.bulkImportSample = asyncHandler(async (req, res) => {
     ],
     [
       'Ceramic Mug',
+      'MUG-350ML',
       'Matte-finish 350ml mug',
       149,
       'pcs',
@@ -522,6 +524,7 @@ exports.bulkImportProducts = asyncHandler(async (req, res) => {
       vendorId: req.user.id,
       catalogIds: [],
       name: row.name,
+      sku: row.sku,
       description: row.description,
       price: row.price,
       taxPercent: row.taxPercent,

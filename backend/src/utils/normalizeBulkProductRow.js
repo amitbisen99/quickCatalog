@@ -5,6 +5,7 @@ const { parsePrice, parseImageUrls, parseSpecifications } = require('./normalize
 // wizard), so there's no column-mapping step for the vendor to do.
 const HEADERS = {
   name: 'Product Name',
+  sku: 'SKU',
   description: 'Description',
   price: 'Price',
   unit: 'Unit',
@@ -56,6 +57,7 @@ function normalizeBulkProductRow(record) {
   return {
     data: {
       name,
+      sku: get('sku') || undefined,
       description: get('description'),
       price,
       unit: get('unit') || 'pcs',

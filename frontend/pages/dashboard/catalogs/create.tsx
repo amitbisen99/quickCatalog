@@ -30,22 +30,21 @@ import { autoMapHeaders } from '@/utils/fuzzyMapHeaders';
 // already logged in and already inside the panel.
 
 // Mirrors backend/src/utils/planLimits.js — the server is the real
-// enforcer, these only drive display copy and when the Plan step shows.
-const FREE_PRODUCT_LIMIT = 500;
-const FREE_CATALOG_LIMIT: number = 20;
+// enforcer, this only drives display copy on the Preview step.
+const FREE_PRODUCT_LIMIT = 10;
 
-type WizardStep = 1 | 2 | 3 | 4 | 5;
+type WizardStep = 1 | 2 | 3 | 4;
 
 const STEPS: { id: WizardStep; label: string }[] = [
   { id: 1, label: 'Catalog' },
   { id: 2, label: 'Upload' },
   { id: 3, label: 'Preview' },
-  { id: 4, label: 'Plan' },
-  { id: 5, label: 'Done' },
+  { id: 4, label: 'Done' },
 ];
 
 const MAPPABLE_FIELD_LABELS: Record<string, string> = {
   productName: 'Product Name',
+  sku: 'SKU',
   price: 'Price',
   description: 'Description',
   category: 'Category',
@@ -202,10 +201,8 @@ function CreateCatalogWizard() {
   const [parseResult, setParseResult] = useState<ParseResult | null>(null);
   const [fieldMappings, setFieldMappings] = useState<Record<string, string>>({});
 
-  const [selectedPlan, setSelectedPlan] = useState<'free' | 'paid' | null>(null);
   const [previewTab, setPreviewTab] = useState<'table' | 'visual'>('table');
 
-  const [upgrading, setUpgrading] = useState(false);
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState('');
   const [createResult, setCreateResult] = useState<CreateResult | null>(null);
@@ -220,7 +217,11 @@ function CreateCatalogWizard() {
   const step2Valid = excelFile !== null;
 
   const totalRows = parseResult?.totalRows ?? 0;
-  const requiresPlanSelection = totalRows > FREE_PRODUCT_LIMIT;
+  // The catalog is always created on Free — there's no plan choice in
+  // this wizard. When the file has more products than Free allows, the
+  // server silently truncates to the first FREE_PRODUCT_LIMIT and this
+  // just informs the vendor that's what's about to happen.
+  const willBeCapped = totalRows > FREE_PRODUCT_LIMIT;
 
   function handleExcelChange(e: ChangeEvent<HTMLInputElement>) {
     setExcelFile(e.target.files?.[0] ?? null);
@@ -279,7 +280,7 @@ function CreateCatalogWizard() {
 
       const res = await apiFetch<CreateResult>('/catalogs/create-from-file', { method: 'POST', formData });
       setCreateResult(res);
-      goTo(5);
+      goTo(4);
     } catch (err) {
       setCreateError(err instanceof ApiError ? err.message : 'Could not create your catalog. Please try again.');
     } finally {
@@ -288,29 +289,7 @@ function CreateCatalogWizard() {
   }
 
   function handlePreviewContinue() {
-    if (requiresPlanSelection) {
-      goTo(4);
-    } else {
-      setSelectedPlan('free');
-      void createCatalog();
-    }
-  }
-
-  async function handlePlanContinue() {
-    if (!selectedPlan) return;
-    setCreateError('');
-    if (selectedPlan === 'paid') {
-      setUpgrading(true);
-      try {
-        await apiFetch('/users/upgrade-plan', { method: 'PUT' });
-      } catch (err) {
-        setCreateError(err instanceof ApiError ? err.message : 'Could not upgrade your plan. Please try again.');
-        setUpgrading(false);
-        return;
-      }
-      setUpgrading(false);
-    }
-    await createCatalog();
+    void createCatalog();
   }
 
   return (
@@ -686,15 +665,18 @@ function CreateCatalogWizard() {
             </div>
           )}
 
-          {!requiresPlanSelection && (
-            <div className="mt-5 flex items-start gap-3 rounded-lg border border-gray-200 bg-white p-4 text-xs text-gray-600">
+          <div className="mt-5 flex items-start gap-3 rounded-lg border border-gray-200 bg-white p-4 text-xs text-gray-600">
+            {willBeCapped ? (
+              <ExclamationTriangleIcon className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+            ) : (
               <CheckCircleIcon className="mt-0.5 h-4 w-4 shrink-0 text-green-600" />
-              <span>
-                {parseResult.totalRows} products fits comfortably on the Free plan, so there&apos;s nothing to
-                choose — we&apos;ll create your catalog on Free automatically. You can upgrade anytime later.
-              </span>
-            </div>
-          )}
+            )}
+            <span>
+              {willBeCapped
+                ? `The free plan is limited to ${FREE_PRODUCT_LIMIT} products in a catalog, so we'll create your catalog with the first ${FREE_PRODUCT_LIMIT} products automatically. You can upgrade anytime later.`
+                : `All ${parseResult.totalRows} products will be added to your catalog — we'll create it on the Free plan automatically. You can upgrade anytime later.`}
+            </span>
+          </div>
 
           {createError && (
             <div className="mt-5">
@@ -705,102 +687,8 @@ function CreateCatalogWizard() {
           <FooterNav
             onBack={() => goTo(2)}
             onNext={handlePreviewContinue}
-            nextLabel={creating ? 'Creating…' : requiresPlanSelection ? 'Looks good, continue' : 'Create My Catalog'}
+            nextLabel={creating ? 'Creating…' : 'Create My Catalog'}
             nextDisabled={creating}
-          />
-        </WizardCard>
-      )}
-
-      {/* ---------------- Step 4: Choose Plan ---------------- */}
-      {step === 4 && !creating && (
-        <WizardCard wide>
-          <h1 className="text-xl font-bold text-gray-900">Choose your plan</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            You&apos;re importing <strong className="text-gray-900">{totalRows} products</strong>. Pick the plan
-            that fits.
-          </p>
-
-          <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
-            <button
-              type="button"
-              onClick={() => setSelectedPlan('free')}
-              className={`relative rounded-lg border-2 p-5 text-left transition-all ${
-                selectedPlan === 'free' ? 'border-primary-700 bg-primary-50' : 'border-gray-200 bg-white hover:border-primary-300'
-              }`}
-            >
-              {selectedPlan === 'free' && (
-                <span className="absolute -top-3 right-4 rounded-full bg-primary-700 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
-                  Selected
-                </span>
-              )}
-              <p className="text-xs font-bold uppercase tracking-wide text-gray-500">Free</p>
-              <p className="mt-1 text-2xl font-bold text-gray-900">
-                ₹0<span className="text-sm font-medium text-gray-500"> / forever</span>
-              </p>
-              <ul className="mt-4 space-y-2 text-sm text-gray-700">
-                <li className="flex items-center gap-2">
-                  <CheckCircleIcon className="h-4 w-4 text-green-600" /> Up to {FREE_PRODUCT_LIMIT} products
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircleIcon className="h-4 w-4 text-green-600" /> {FREE_CATALOG_LIMIT} catalog
-                  {FREE_CATALOG_LIMIT === 1 ? '' : 's'}
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircleIcon className="h-4 w-4 text-green-600" /> Shareable public link
-                </li>
-                <li className="flex items-center gap-2 text-gray-400">
-                  Only first {FREE_PRODUCT_LIMIT} of your {totalRows} products import
-                </li>
-              </ul>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setSelectedPlan('paid')}
-              className={`relative rounded-lg border-2 p-5 text-left transition-all ${
-                selectedPlan === 'paid' ? 'border-primary-700 bg-primary-50' : 'border-gray-200 bg-white hover:border-primary-300'
-              }`}
-            >
-              <span className="absolute -top-3 left-4 rounded-full bg-secondary-500 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
-                Recommended
-              </span>
-              {selectedPlan === 'paid' && (
-                <span className="absolute -top-3 right-4 rounded-full bg-primary-700 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
-                  Selected
-                </span>
-              )}
-              <p className="text-xs font-bold uppercase tracking-wide text-gray-500">Pro</p>
-              <p className="mt-1 text-2xl font-bold text-gray-900">
-                ₹999<span className="text-sm font-medium text-gray-500"> / month</span>
-              </p>
-              <ul className="mt-4 space-y-2 text-sm text-gray-700">
-                <li className="flex items-center gap-2">
-                  <CheckCircleIcon className="h-4 w-4 text-green-600" /> Unlimited products
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircleIcon className="h-4 w-4 text-green-600" /> Unlimited catalogs
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircleIcon className="h-4 w-4 text-green-600" /> Custom branding &amp; templates
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircleIcon className="h-4 w-4 text-green-600" /> All {totalRows} products import
-                </li>
-              </ul>
-            </button>
-          </div>
-
-          {createError && (
-            <div className="mt-5">
-              <Alert variant="error">{createError}</Alert>
-            </div>
-          )}
-
-          <FooterNav
-            onBack={() => goTo(3)}
-            onNext={handlePlanContinue}
-            nextLabel={upgrading ? 'Upgrading…' : creating ? 'Creating…' : 'Create My Catalog'}
-            nextDisabled={!selectedPlan || upgrading || creating}
           />
         </WizardCard>
       )}
@@ -835,8 +723,8 @@ function CreateCatalogWizard() {
         </WizardCard>
       )}
 
-      {/* ---------------- Step 5: Success ---------------- */}
-      {step === 5 && createResult && (
+      {/* ---------------- Step 4: Success ---------------- */}
+      {step === 4 && createResult && (
         <WizardCard>
           <div className="text-center">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-green-50 text-green-600">

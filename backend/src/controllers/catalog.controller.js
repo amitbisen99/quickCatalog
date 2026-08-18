@@ -277,6 +277,7 @@ exports.createFromFile = asyncHandler(async (req, res) => {
       vendorId: user._id,
       catalogIds: [catalog._id],
       name: row.name,
+      sku: row.sku,
       description: row.description,
       price: row.price,
       unit: row.unit,
@@ -308,10 +309,10 @@ exports.createFromFile = asyncHandler(async (req, res) => {
 // Tax %, which belong to the separate product bulk-import flow and would
 // otherwise go silently unused here).
 exports.getCreateFromFileSample = asyncHandler(async (req, res) => {
-  const headers = ['Product Name', 'Price', 'Description', 'Category', 'Unit', 'Specifications', 'Image URL', 'Image Filename', 'Video URL'];
+  const headers = ['Product Name', 'SKU', 'Price', 'Description', 'Category', 'Unit', 'Specifications', 'Image URL', 'Image Filename', 'Video URL'];
   const examples = [
-    ['Cotton T-Shirt', 499, 'Premium cotton round-neck t-shirt', 'Apparel', 'pcs', 'Color: Red; Size: Large', 'https://example.com/image1.jpg', '', ''],
-    ['Ceramic Mug', 149, 'Matte-finish 350ml mug', 'Home & Kitchen', 'pcs', 'Material: Ceramic', '', 'mug1.jpg', ''],
+    ['Cotton T-Shirt', 'TSHIRT-RED-L', 499, 'Premium cotton round-neck t-shirt', 'Apparel', 'pcs', 'Color: Red; Size: Large', 'https://example.com/image1.jpg', '', ''],
+    ['Ceramic Mug', 'MUG-350ML', 149, 'Matte-finish 350ml mug', 'Home & Kitchen', 'pcs', 'Material: Ceramic', '', 'mug1.jpg', ''],
   ];
 
   const workbook = XLSX.utils.book_new();

@@ -484,7 +484,18 @@ export default function ProductForm({ catalogId, mode, productId, initial }: Pro
             {slots.length < 3 && (
               <button
                 type="button"
-                onClick={() => setUploadSheetOpen(true)}
+                onClick={() => {
+                  // Desktop has no camera worth offering — skip straight to
+                  // the OS file picker. The bottom sheet (Camera/Gallery
+                  // choice) is only useful on mobile/tablet. Checked at
+                  // click time (not via a resize-listener state) so it's
+                  // always current and gives no SSR/hydration trouble.
+                  if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
+                    galleryInputRef.current?.click();
+                  } else {
+                    setUploadSheetOpen(true);
+                  }
+                }}
                 className="flex h-24 w-24 shrink-0 flex-col items-center justify-center gap-1 rounded-lg border-2 border-primary-300 bg-primary-50 text-xs font-semibold text-primary-700 hover:border-primary-400 hover:bg-primary-100"
               >
                 <UploadIcon className="h-5 w-5" />

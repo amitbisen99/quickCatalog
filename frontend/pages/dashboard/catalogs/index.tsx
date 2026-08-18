@@ -7,8 +7,9 @@ import Alert from '@/components/Alert';
 import CreateCatalogModal from '@/components/dashboard/CreateCatalogModal';
 import ShareCatalogModal from '@/components/dashboard/ShareCatalogModal';
 import UpgradePlanModal from '@/components/dashboard/UpgradePlanModal';
-import { CopyIcon, DownloadIcon, EyeIcon, PencilIcon, ShareIcon, TrashIcon } from '@/components/icons';
-import { apiFetch, ApiError, API_URL } from '@/utils/api';
+import { CopyIcon, DownloadIcon, EyeIcon, PencilIcon, ShareIcon, SpinnerIcon, TrashIcon } from '@/components/icons';
+import { apiFetch, ApiError } from '@/utils/api';
+import { downloadFile } from '@/utils/downloadFile';
 
 interface Catalog {
   id: string;
@@ -34,6 +35,7 @@ function Catalogs() {
   const [copiedSlug, setCopiedSlug] = useState('');
   const [sharingCatalog, setSharingCatalog] = useState<Catalog | null>(null);
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
+  const [downloadingId, setDownloadingId] = useState('');
 
   function loadCatalogs() {
     apiFetch<{ catalogs: Catalog[] }>('/catalogs')
@@ -61,6 +63,17 @@ function Catalogs() {
       setCatalogs((prev) => prev?.filter((c) => c.id !== id) || null);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Could not delete catalog.');
+    }
+  }
+
+  async function handleDownloadPdf(id: string, name: string) {
+    setDownloadingId(id);
+    try {
+      await downloadFile(`/catalogs/${id}/pdf`, `${name}.pdf`);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Could not download the PDF. Please try again.');
+    } finally {
+      setDownloadingId('');
     }
   }
 
@@ -174,14 +187,18 @@ function Catalogs() {
                         >
                           <PencilIcon className="h-5 w-5" />
                         </Link>
-                        <a
-                          href={`${API_URL}/catalogs/${catalog.id}/pdf`}
-                          download
-                          className="text-gray-400 hover:text-primary-700"
+                        <button
+                          onClick={() => handleDownloadPdf(catalog.id, catalog.name)}
+                          disabled={downloadingId === catalog.id}
+                          className="text-gray-400 hover:text-primary-700 disabled:opacity-50"
                           title="Download PDF"
                         >
-                          <DownloadIcon className="h-5 w-5" />
-                        </a>
+                          {downloadingId === catalog.id ? (
+                            <SpinnerIcon className="h-5 w-5 animate-spin" />
+                          ) : (
+                            <DownloadIcon className="h-5 w-5" />
+                          )}
+                        </button>
                         <button
                           onClick={() => handleDelete(catalog.id, catalog.name)}
                           className="text-gray-400 hover:text-red-600"

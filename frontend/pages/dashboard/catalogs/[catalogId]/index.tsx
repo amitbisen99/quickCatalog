@@ -5,8 +5,9 @@ import DashboardLayout from '@/components/DashboardLayout';
 import withAuth from '@/components/withAuth';
 import Alert from '@/components/Alert';
 import ShareOptions from '@/components/dashboard/ShareOptions';
-import { ChartBarIcon, CopyIcon, DownloadIcon, PencilIcon, ShareIcon, TrashIcon } from '@/components/icons';
-import { apiFetch, ApiError, API_URL } from '@/utils/api';
+import { ChartBarIcon, CopyIcon, DownloadIcon, PencilIcon, ShareIcon, SpinnerIcon, TrashIcon } from '@/components/icons';
+import { apiFetch, ApiError } from '@/utils/api';
+import { downloadFile } from '@/utils/downloadFile';
 import { getCatalogTemplate } from '@/components/catalog-templates/registry';
 import { downloadQrWithLabel } from '@/utils/downloadQrWithLabel';
 import { useAuth } from '@/context/AuthContext';
@@ -38,6 +39,7 @@ function CatalogDetail() {
   const [description, setDescription] = useState('');
   const [saveError, setSaveError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
 
   useEffect(() => {
     if (!catalogId) return;
@@ -79,6 +81,18 @@ function CatalogDetail() {
     // downloaded file, which gets the business name + a short
     // call-to-action composed onto it so it's ready to print/share as-is.
     downloadQrWithLabel(catalog.qrCode, businessName, `${catalog.slug}-qr.png`);
+  }
+
+  async function handleDownloadPdf() {
+    if (!catalog) return;
+    setDownloadingPdf(true);
+    try {
+      await downloadFile(`/catalogs/${catalogId}/pdf`, `${catalog.name}.pdf`);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Could not download the PDF. Please try again.');
+    } finally {
+      setDownloadingPdf(false);
+    }
   }
 
   async function handleSave(e: FormEvent) {
@@ -176,14 +190,18 @@ function CatalogDetail() {
                     >
                       Manage Products
                     </Link>
-                    <a
-                      href={`${API_URL}/catalogs/${catalogId}/pdf`}
-                      download
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                    <button
+                      onClick={handleDownloadPdf}
+                      disabled={downloadingPdf}
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
                     >
-                      <DownloadIcon className="h-4 w-4" />
-                      Download PDF
-                    </a>
+                      {downloadingPdf ? (
+                        <SpinnerIcon className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <DownloadIcon className="h-4 w-4" />
+                      )}
+                      {downloadingPdf ? 'Downloading…' : 'Download PDF'}
+                    </button>
                     <Link
                       href={`/dashboard/catalogs/${catalogId}/analytics`}
                       className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"

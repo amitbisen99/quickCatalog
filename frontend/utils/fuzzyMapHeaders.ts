@@ -2,6 +2,7 @@
 // defaults; the vendor can always override any dropdown.
 const FIELD_SYNONYMS: Record<string, string[]> = {
   productName: ['product name', 'name', 'title', 'item', 'item name', 'product'],
+  sku: ['sku', 'sku code', 'product sku', 'product code', 'item code', 'item sku'],
   description: ['description', 'details', 'desc', 'about'],
   price: ['price', 'cost', 'rate', 'mrp', 'amount', 'unit price'],
   category: ['category', 'cat', 'type', 'group'],

@@ -68,6 +68,7 @@ function normalizeProductRow(record, fieldMappings) {
   return {
     data: {
       name,
+      sku: get('sku') || undefined,
       description: get('description'),
       price,
       unit: get('unit') || 'pcs',
