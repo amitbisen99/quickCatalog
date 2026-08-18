@@ -6,6 +6,7 @@ import withAuth from '@/components/withAuth';
 import Alert from '@/components/Alert';
 import CreateCatalogModal from '@/components/dashboard/CreateCatalogModal';
 import ShareCatalogModal from '@/components/dashboard/ShareCatalogModal';
+import UpgradePlanModal from '@/components/dashboard/UpgradePlanModal';
 import { CopyIcon, DownloadIcon, EyeIcon, PencilIcon, ShareIcon, TrashIcon } from '@/components/icons';
 import { apiFetch, ApiError, API_URL } from '@/utils/api';
 
@@ -32,6 +33,7 @@ function Catalogs() {
   const [modalOpen, setModalOpen] = useState(false);
   const [copiedSlug, setCopiedSlug] = useState('');
   const [sharingCatalog, setSharingCatalog] = useState<Catalog | null>(null);
+  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
 
   function loadCatalogs() {
     apiFetch<{ catalogs: Catalog[] }>('/catalogs')
@@ -197,8 +199,14 @@ function Catalogs() {
         )}
       </div>
 
-      <CreateCatalogModal isOpen={modalOpen} onClose={() => setModalOpen(false)} onCreated={handleCreated} />
+      <CreateCatalogModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onCreated={handleCreated}
+        onPlanLimitHit={() => setUpgradeModalOpen(true)}
+      />
       <ShareCatalogModal catalog={sharingCatalog} onClose={() => setSharingCatalog(null)} />
+      <UpgradePlanModal isOpen={upgradeModalOpen} onClose={() => setUpgradeModalOpen(false)} reason="catalog" />
     </DashboardLayout>
   );
 }

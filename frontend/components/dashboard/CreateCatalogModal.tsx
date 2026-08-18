@@ -4,6 +4,7 @@ import Modal from '@/components/Modal';
 import Alert from '@/components/Alert';
 import { UploadIcon, PencilIcon } from '@/components/icons';
 import { apiFetch, ApiError } from '@/utils/api';
+import { isPlanLimitError } from '@/utils/planLimit';
 
 interface CatalogSummary {
   id: string;
@@ -19,6 +20,9 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   onCreated: (catalog: CatalogSummary) => void;
+  // Free-tier catalog cap hit — the parent closes this modal and opens
+  // the shared upgrade prompt instead of just showing the raw error here.
+  onPlanLimitHit?: () => void;
 }
 
 type Step = 'choose' | 'manual';
@@ -28,7 +32,7 @@ type Step = 'choose' | 'manual';
 // image ZIP upload, preview, plan, done, all in one flow. "Create Manually"
 // stays right here: just a name + description, then the vendor lands on
 // the new (empty) catalog's own page to add products one at a time.
-export default function CreateCatalogModal({ isOpen, onClose, onCreated }: Props) {
+export default function CreateCatalogModal({ isOpen, onClose, onCreated, onPlanLimitHit }: Props) {
   const router = useRouter();
   const [step, setStep] = useState<Step>('choose');
   const [name, setName] = useState('');
@@ -66,6 +70,11 @@ export default function CreateCatalogModal({ isOpen, onClose, onCreated }: Props
       onCreated(result.catalog);
       reset();
     } catch (err) {
+      if (isPlanLimitError(err) && onPlanLimitHit) {
+        handleClose();
+        onPlanLimitHit();
+        return;
+      }
       setError(err instanceof ApiError ? err.message : 'Something went wrong. Please try again.');
     } finally {
       setLoading(false);

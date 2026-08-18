@@ -5,8 +5,10 @@ import DashboardLayout from '@/components/DashboardLayout';
 import withAuth from '@/components/withAuth';
 import Alert from '@/components/Alert';
 import ProgressBar from '@/components/ProgressBar';
+import UpgradePlanModal from '@/components/dashboard/UpgradePlanModal';
 import { apiFetch, ApiError } from '@/utils/api';
 import { currencySymbol } from '@/utils/currency';
+import { isPlanLimitError } from '@/utils/planLimit';
 import { useAuth } from '@/context/AuthContext';
 
 interface Product {
@@ -30,6 +32,7 @@ function AddExistingProduct() {
   const [error, setError] = useState('');
   const [linking, setLinking] = useState(false);
   const [linkProgress, setLinkProgress] = useState({ done: 0, total: 0 });
+  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
 
   useEffect(() => {
     if (!catalogId) return;
@@ -64,12 +67,14 @@ function AddExistingProduct() {
     // hide that the rest actually succeeded server-side.
     let done = 0;
     let failed = 0;
+    let hitPlanLimit = false;
     await Promise.all(
       ids.map(async (productId) => {
         try {
           await apiFetch(`/catalogs/${catalogId}/products/${productId}/link`, { method: 'POST' });
-        } catch {
+        } catch (err) {
           failed += 1;
+          if (isPlanLimitError(err)) hitPlanLimit = true;
         } finally {
           done += 1;
           setLinkProgress({ done, total: ids.length });
@@ -77,7 +82,13 @@ function AddExistingProduct() {
       })
     );
 
-    if (failed > 0) {
+    if (hitPlanLimit) {
+      // Once the free-tier cap is hit, every remaining link attempt fails
+      // the same way — the upgrade prompt is more useful here than the
+      // generic partial-failure message below.
+      setUpgradeModalOpen(true);
+      setLinking(false);
+    } else if (failed > 0) {
       setError(
         failed === ids.length
           ? 'Could not add the selected products. Please try again.'
@@ -190,6 +201,8 @@ function AddExistingProduct() {
           )}
         </div>
       )}
+
+      <UpgradePlanModal isOpen={upgradeModalOpen} onClose={() => setUpgradeModalOpen(false)} reason="product" />
     </DashboardLayout>
   );
 }

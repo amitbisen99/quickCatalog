@@ -46,21 +46,37 @@ async function requireOwnedCatalog(catalogId, vendorId, additionalCount = 0) {
   const [catalog, user, existingCount] = await Promise.all([
     Catalog.findOne({ _id: catalogId, vendorId }),
     needsCapCheck ? User.findById(vendorId).select('subscriptionType') : null,
-    needsCapCheck ? Product.countDocuments({ catalogIds: catalogId }) : null,
+    // Vendor-wide, not per-catalog — a free vendor only ever has one
+    // catalog anyway, and this count also gets reused by
+    // createStandaloneProduct so library-only products count toward the
+    // same cap instead of being a free loophole around it.
+    needsCapCheck ? Product.countDocuments({ vendorId }) : null,
   ]);
 
   if (!catalog) {
     throw new AppError('Catalog not found', 404);
   }
 
-  if (needsCapCheck && exceedsFreeProductLimit(user, existingCount, additionalCount)) {
-    throw new AppError(
-      `Free plan is limited to ${FREE_PRODUCT_LIMIT} products per catalog. Upgrade to add more.`,
-      403
-    );
-  }
+  if (needsCapCheck) assertWithinProductLimit(user, existingCount, additionalCount);
 
   return catalog;
+}
+
+function assertWithinProductLimit(user, existingCount, additionalCount) {
+  if (exceedsFreeProductLimit(user, existingCount, additionalCount)) {
+    throw new AppError(`Free plan is limited to ${FREE_PRODUCT_LIMIT} products. Upgrade to add more.`, 403);
+  }
+}
+
+// The "how much room does this vendor have left" query pair, shared by
+// every place that needs to check/enforce the product cap outside of
+// requireOwnedCatalog (which already fetches these two alongside its own
+// catalog lookup, so it stays a plain Promise.all there).
+function getVendorProductCapacity(vendorId) {
+  return Promise.all([
+    User.findById(vendorId).select('subscriptionType'),
+    Product.countDocuments({ vendorId }),
+  ]);
 }
 
 function toProductResponse(product) {
@@ -227,6 +243,14 @@ exports.unlinkProduct = asyncHandler(async (req, res) => {
 exports.createStandaloneProduct = asyncHandler(async (req, res) => {
   const { name, sku, description, price, unit, minimumOrderQuantity, categoryId, video, taxPercent } = req.body;
   await assertSkuAvailable(req.user.id, sku);
+
+  // Not tied to a catalog, so requireOwnedCatalog's cap check never runs
+  // for this path — enforce the same vendor-wide free-tier product limit
+  // here directly, or a free vendor could bypass it entirely by adding
+  // products to their library instead of a catalog.
+  const [user, existingCount] = await getVendorProductCapacity(req.user.id);
+  assertWithinProductLimit(user, existingCount, 1);
+
   const images = (await Promise.all((req.files || []).map((f) => compressImageToDataUrl(f.buffer)))).slice(0, 3);
   const specifications = parseSpecifications(req);
 
@@ -426,6 +450,13 @@ exports.bulkImportProducts = asyncHandler(async (req, res) => {
   const zipFile = req.files?.imagesZip?.[0];
   const zipEntries = zipFile ? readImagesZip(zipFile.buffer) : null;
 
+  const [user, existingCount] = await getVendorProductCapacity(req.user.id);
+  // Free tier: cap this import at whatever's left of the vendor's overall
+  // product limit, not the full FREE_PRODUCT_LIMIT again — importing
+  // shouldn't reset the ceiling for a vendor who already has products.
+  const remainingSlots =
+    user.subscriptionType === 'paid' ? Infinity : Math.max(FREE_PRODUCT_LIMIT - existingCount, 0);
+
   const pending = [];
   const errors = [];
   const warnings = [];
@@ -437,6 +468,8 @@ exports.bulkImportProducts = asyncHandler(async (req, res) => {
   // both miss the cache and create a duplicate, so this part stays
   // sequential. It's cheap either way; image compression below (resolved
   // in its own concurrent pass) is what actually made large imports slow.
+  // Rows beyond remainingSlots get truncated below regardless, so skip
+  // both of those for them — no point paying for work that's thrown away.
   for (let i = 0; i < records.length; i += 1) {
     const rowNumber = i + 2; // +1 for header row, +1 for 1-indexing
     const { data, error } = normalizeBulkProductRow(records[i]);
@@ -445,21 +478,25 @@ exports.bulkImportProducts = asyncHandler(async (req, res) => {
       continue;
     }
 
+    const willBeInserted = pending.length < remainingSlots;
+
     let categoryId;
-    if (data.categoryName) {
+    if (data.categoryName && willBeInserted) {
       // eslint-disable-next-line no-await-in-loop
       categoryId = await findOrCreateCategory(req.user.id, data.categoryName, categoryCache);
     }
 
     // Keeps the vendor's Specification master list in sync — the value
     // itself is stored on the product keyed by name, not by this id.
-    const specNames = Object.keys(data.specifications);
-    for (let s = 0; s < specNames.length; s += 1) {
-      // eslint-disable-next-line no-await-in-loop
-      await findOrCreateSpecification(req.user.id, specNames[s], specCache);
+    if (willBeInserted) {
+      const specNames = Object.keys(data.specifications);
+      for (let s = 0; s < specNames.length; s += 1) {
+        // eslint-disable-next-line no-await-in-loop
+        await findOrCreateSpecification(req.user.id, specNames[s], specCache);
+      }
     }
 
-    pending.push({ rowNumber, data, categoryId });
+    pending.push({ rowNumber, data, categoryId, willBeInserted });
   }
 
   if (pending.length === 0) {
@@ -469,11 +506,19 @@ exports.bulkImportProducts = asyncHandler(async (req, res) => {
   const validRows = await mapWithConcurrency(pending, IMAGE_RESOLVE_CONCURRENCY, async (row) => ({
     ...row.data,
     categoryId: row.categoryId,
-    images: await resolveRowImages(row.data, zipEntries, row.rowNumber, warnings),
+    images: row.willBeInserted
+      ? await resolveRowImages(row.data, zipEntries, row.rowNumber, warnings)
+      : row.data.images,
   }));
 
+  // Free tier: cap the import rather than reject it outright — the vendor
+  // still gets whatever fits under the limit, and can upgrade to bring
+  // the rest in. slice(0, Infinity) is a no-op for paid.
+  const rowsToInsert = validRows.slice(0, remainingSlots);
+  const isCapped = user.subscriptionType !== 'paid' && validRows.length > remainingSlots;
+
   const createdProducts = await Product.insertMany(
-    validRows.map((row) => ({
+    rowsToInsert.map((row) => ({
       vendorId: req.user.id,
       catalogIds: [],
       name: row.name,
@@ -489,11 +534,16 @@ exports.bulkImportProducts = asyncHandler(async (req, res) => {
     }))
   );
 
+  const planLimit = isCapped
+    ? { limit: FREE_PRODUCT_LIMIT, totalValidRows: validRows.length, imported: createdProducts.length }
+    : null;
+
   res.status(201).json({
     success: true,
     message: `${createdProducts.length} product${createdProducts.length === 1 ? '' : 's'} imported successfully`,
     productsCreated: createdProducts.length,
     errors,
     warnings,
+    planLimit,
   });
 });

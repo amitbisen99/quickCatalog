@@ -5,10 +5,12 @@ import dynamic from 'next/dynamic';
 import DOMPurify from 'dompurify';
 import 'react-quill/dist/quill.snow.css';
 import Alert from '@/components/Alert';
+import UpgradePlanModal from '@/components/dashboard/UpgradePlanModal';
 import { TrashIcon, CameraIcon, GalleryIcon, UploadIcon } from '@/components/icons';
 import { apiFetch, ApiError } from '@/utils/api';
 import { UNITS } from '@/utils/constants';
 import { currencySymbol } from '@/utils/currency';
+import { isPlanLimitError } from '@/utils/planLimit';
 import { useAuth } from '@/context/AuthContext';
 
 const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
@@ -89,6 +91,7 @@ export default function ProductForm({ catalogId, mode, productId, initial }: Pro
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
 
   // "Upload" opens a bottom sheet rather than a plain file picker so a
   // phone can choose Camera vs Gallery explicitly — a bare <input capture>
@@ -228,7 +231,11 @@ export default function ProductForm({ catalogId, mode, productId, initial }: Pro
       }
       router.push(listPath);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Something went wrong. Please try again.');
+      if (isPlanLimitError(err)) {
+        setUpgradeModalOpen(true);
+      } else {
+        setError(err instanceof ApiError ? err.message : 'Something went wrong. Please try again.');
+      }
     } finally {
       setSaving(false);
     }
@@ -614,6 +621,8 @@ export default function ProductForm({ catalogId, mode, productId, initial }: Pro
           </div>
         </div>
       </div>
+
+      <UpgradePlanModal isOpen={upgradeModalOpen} onClose={() => setUpgradeModalOpen(false)} reason="product" />
     </div>
   );
 }

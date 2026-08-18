@@ -4,6 +4,8 @@ import DashboardLayout from '@/components/DashboardLayout';
 import withAuth from '@/components/withAuth';
 import Alert from '@/components/Alert';
 import PasswordStrengthMeter from '@/components/PasswordStrengthMeter';
+import UpgradePlanModal from '@/components/dashboard/UpgradePlanModal';
+import { FREE_CATALOG_LIMIT, FREE_PRODUCT_LIMIT, isFreePlan } from '@/utils/planLimit';
 import { useAuth, AuthUser } from '@/context/AuthContext';
 import { apiFetch, ApiError } from '@/utils/api';
 import { isPasswordValid } from '@/utils/validators';
@@ -13,13 +15,13 @@ import { UserIcon, LockIcon, CreditCardIcon, TrashIcon } from '@/components/icon
 
 function subscriptionLabel(user: AuthUser | null): string {
   if (!user) return '—';
-  if (user.subscriptionType !== 'paid') return 'Free plan — 20 catalogs';
-  if (!user.subscriptionExpiresAt) return 'Paid plan — unlimited catalogs';
+  if (isFreePlan(user)) return `Free plan — ${FREE_CATALOG_LIMIT} catalog, ${FREE_PRODUCT_LIMIT} products`;
+  if (!user.subscriptionExpiresAt) return 'Paid plan — unlimited catalogs & products';
   const daysRemaining = Math.ceil(
     (new Date(user.subscriptionExpiresAt).getTime() - Date.now()) / (24 * 60 * 60 * 1000)
   );
   return daysRemaining > 0
-    ? `Paid plan — unlimited catalogs (${daysRemaining} day${daysRemaining === 1 ? '' : 's'} left)`
+    ? `Paid plan — unlimited catalogs & products (${daysRemaining} day${daysRemaining === 1 ? '' : 's'} left)`
     : 'Paid plan expired';
 }
 
@@ -52,6 +54,9 @@ function Settings() {
   // Danger zone
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [deleteError, setDeleteError] = useState('');
+
+  // Subscription
+  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
 
   useEffect(() => {
     apiFetch<{ user: AuthUser }>('/users/profile').then((res) => {
@@ -389,14 +394,15 @@ function Settings() {
           <h2 className="text-xl font-semibold text-gray-900">Subscription</h2>
         </div>
         <p className="mt-3 text-sm text-gray-600">{subscriptionLabel(user)}</p>
-        <button
-          type="button"
-          disabled
-          title="Coming soon"
-          className="mt-4 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-400 cursor-not-allowed"
-        >
-          Upgrade (coming soon)
-        </button>
+        {isFreePlan(user) && (
+          <button
+            type="button"
+            onClick={() => setUpgradeModalOpen(true)}
+            className="mt-4 rounded-lg bg-primary-700 px-4 py-2 text-sm font-medium text-white hover:bg-primary-800"
+          >
+            Upgrade to Paid
+          </button>
+        )}
       </section>
 
       {/* Danger zone */}
@@ -440,6 +446,8 @@ function Settings() {
           </button>
         )}
       </section>
+
+      <UpgradePlanModal isOpen={upgradeModalOpen} onClose={() => setUpgradeModalOpen(false)} reason="generic" />
     </DashboardLayout>
   );
 }
