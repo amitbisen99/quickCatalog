@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import AdminLayout from '@/components/AdminLayout';
@@ -16,8 +16,6 @@ interface Ticket {
   contactMethod: 'email' | 'mobile';
   contactValue: string;
   status: TicketStatus;
-  adminReply?: string;
-  repliedAt?: string;
   createdAt: string;
 }
 
@@ -28,11 +26,6 @@ function TicketDetail() {
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [error, setError] = useState('');
   const [updatingStatus, setUpdatingStatus] = useState(false);
-
-  const [replyMessage, setReplyMessage] = useState('');
-  const [replying, setReplying] = useState(false);
-  const [replyError, setReplyError] = useState('');
-  const [replySuccess, setReplySuccess] = useState('');
 
   useEffect(() => {
     if (!ticketId) return;
@@ -53,26 +46,6 @@ function TicketDetail() {
       setError(err instanceof ApiError ? err.message : 'Could not update status.');
     } finally {
       setUpdatingStatus(false);
-    }
-  }
-
-  async function handleReply(e: FormEvent) {
-    e.preventDefault();
-    setReplyError('');
-    setReplySuccess('');
-    setReplying(true);
-    try {
-      const res = await apiFetch<{ ticket: Ticket; message: string }>(`/admin/support-tickets/${ticketId}/reply`, {
-        method: 'POST',
-        body: { message: replyMessage },
-      });
-      setTicket(res.ticket);
-      setReplySuccess(res.message);
-      setReplyMessage('');
-    } catch (err) {
-      setReplyError(err instanceof ApiError ? err.message : 'Could not send reply.');
-    } finally {
-      setReplying(false);
     }
   }
 
@@ -114,47 +87,6 @@ function TicketDetail() {
               <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Reason for contact</p>
               <p className="mt-2 whitespace-pre-wrap text-sm text-gray-900">{ticket.reason}</p>
             </div>
-          </div>
-
-          <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-            <p className="text-sm font-medium text-gray-700">Reply</p>
-            {ticket.adminReply && (
-              <div className="mt-3 rounded-lg bg-gray-50 p-3 text-sm text-gray-700">
-                <p className="whitespace-pre-wrap">{ticket.adminReply}</p>
-                {ticket.repliedAt && (
-                  <p className="mt-2 text-xs text-gray-400">Sent {new Date(ticket.repliedAt).toLocaleString()}</p>
-                )}
-              </div>
-            )}
-
-            {replyError && (
-              <div className="mt-3">
-                <Alert variant="error">{replyError}</Alert>
-              </div>
-            )}
-            {replySuccess && (
-              <div className="mt-3">
-                <Alert variant="success">{replySuccess}</Alert>
-              </div>
-            )}
-
-            <form onSubmit={handleReply} className="mt-3 space-y-3">
-              <textarea
-                value={replyMessage}
-                onChange={(e) => setReplyMessage(e.target.value)}
-                required
-                rows={4}
-                placeholder={ticket.adminReply ? 'Send a follow-up reply…' : 'Write a reply to this vendor…'}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-600"
-              />
-              <button
-                type="submit"
-                disabled={replying}
-                className="rounded-lg bg-primary-700 px-4 py-2 text-sm font-medium text-white hover:bg-primary-800 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {replying ? 'Sending…' : ticket.adminReply ? 'Send Follow-up' : 'Send Reply'}
-              </button>
-            </form>
           </div>
         </div>
 
