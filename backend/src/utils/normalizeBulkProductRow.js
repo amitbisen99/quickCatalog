@@ -1,4 +1,10 @@
-const { parsePrice, parseImageUrls, parseSpecifications } = require('./normalizeProductRow');
+const {
+  parsePrice,
+  parseImageUrls,
+  parseSpecifications,
+  parseMinimumOrderQuantity,
+  parseTaxPercent,
+} = require('./normalizeProductRow');
 
 // Column headers must match products.controller.js's bulkImportSample
 // template exactly — this is a fixed format (unlike the catalog-from-file
@@ -34,24 +40,14 @@ function normalizeBulkProductRow(record) {
     return { error: 'Price is missing or not a valid number' };
   }
 
-  let minimumOrderQuantity;
-  const moqRaw = get('minimumOrderQuantity');
-  if (moqRaw) {
-    const parsed = parseInt(moqRaw, 10);
-    if (!Number.isFinite(parsed) || parsed < 1) {
-      return { error: 'Minimum Order Quantity must be a whole number of at least 1' };
-    }
-    minimumOrderQuantity = parsed;
+  const moq = parseMinimumOrderQuantity(get('minimumOrderQuantity'));
+  if (moq.error) {
+    return { error: moq.error };
   }
 
-  let taxPercent;
-  const taxRaw = get('taxPercent');
-  if (taxRaw) {
-    const parsed = parseFloat(taxRaw);
-    if (!Number.isFinite(parsed) || parsed < 0 || parsed > 100) {
-      return { error: 'Tax % must be a number between 0 and 100' };
-    }
-    taxPercent = parsed;
+  const tax = parseTaxPercent(get('taxPercent'));
+  if (tax.error) {
+    return { error: tax.error };
   }
 
   return {
@@ -61,8 +57,8 @@ function normalizeBulkProductRow(record) {
       description: get('description'),
       price,
       unit: get('unit') || 'pcs',
-      minimumOrderQuantity,
-      taxPercent,
+      minimumOrderQuantity: moq.value,
+      taxPercent: tax.value,
       // Image URL takes priority; Image Filename (matched against an
       // uploaded ZIP) is only used as a fallback when no URL is given —
       // resolved by the controller, which is the only place that has

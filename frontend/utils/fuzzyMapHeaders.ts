@@ -5,9 +5,14 @@ const FIELD_SYNONYMS: Record<string, string[]> = {
   sku: ['sku', 'sku code', 'product sku', 'product code', 'item code', 'item sku'],
   description: ['description', 'details', 'desc', 'about'],
   price: ['price', 'cost', 'rate', 'mrp', 'amount', 'unit price'],
-  category: ['category', 'cat', 'type', 'group'],
   unit: ['unit', 'uom', 'measure', 'unit of measure'],
+  minimumOrderQuantity: ['minimum order quantity', 'moq', 'min order qty', 'min qty', 'minimum quantity'],
+  category: ['category', 'cat', 'type', 'group'],
   specifications: ['specifications', 'specification', 'specs', 'spec'],
+  // Raw synonyms are pre-normalized (lowercase, no punctuation) since
+  // normalize() strips symbols like "%" from headers before comparing —
+  // "Tax %" normalizes to "tax", so the synonym is just "tax".
+  taxPercent: ['tax percent', 'tax', 'gst', 'gst percent', 'vat', 'vat percent'],
   // Checked before imageUrl below — its own substring pass ("image" is one
   // of its synonyms) would otherwise swallow an "Image Filename" column
   // first, since object key order is the field-processing order here.

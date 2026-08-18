@@ -281,6 +281,8 @@ exports.createFromFile = asyncHandler(async (req, res) => {
       description: row.description,
       price: row.price,
       unit: row.unit,
+      minimumOrderQuantity: row.minimumOrderQuantity,
+      taxPercent: row.taxPercent,
       images: row.images,
       video: row.video || undefined,
       categoryId: row.categoryId,
@@ -304,15 +306,52 @@ exports.createFromFile = asyncHandler(async (req, res) => {
 });
 
 // Sample template for the create-catalog wizard's Upload step — mirrors
-// products.controller.js's bulkImportSample, but only the columns this
-// wizard's own field-mapping actually reads (no Minimum Order Quantity /
-// Tax %, which belong to the separate product bulk-import flow and would
-// otherwise go silently unused here).
+// products.controller.js's bulkImportSample column-for-column, so every
+// field the Add Product form supports has a matching column here too.
 exports.getCreateFromFileSample = asyncHandler(async (req, res) => {
-  const headers = ['Product Name', 'SKU', 'Price', 'Description', 'Category', 'Unit', 'Specifications', 'Image URL', 'Image Filename', 'Video URL'];
+  const headers = [
+    'Product Name',
+    'SKU',
+    'Description',
+    'Price',
+    'Unit',
+    'Minimum Order Quantity',
+    'Category',
+    'Specifications',
+    'Tax %',
+    'Image URL',
+    'Image Filename',
+    'Video URL',
+  ];
   const examples = [
-    ['Cotton T-Shirt', 'TSHIRT-RED-L', 499, 'Premium cotton round-neck t-shirt', 'Apparel', 'pcs', 'Color: Red; Size: Large', 'https://example.com/image1.jpg', '', ''],
-    ['Ceramic Mug', 'MUG-350ML', 149, 'Matte-finish 350ml mug', 'Home & Kitchen', 'pcs', 'Material: Ceramic', '', 'mug1.jpg', ''],
+    [
+      'Cotton T-Shirt',
+      'TSHIRT-RED-L',
+      'Premium cotton round-neck t-shirt',
+      499,
+      'pcs',
+      10,
+      'Apparel',
+      'Color: Red; Size: Large',
+      5,
+      'https://example.com/image1.jpg',
+      '',
+      '',
+    ],
+    [
+      'Ceramic Mug',
+      'MUG-350ML',
+      'Matte-finish 350ml mug',
+      149,
+      'pcs',
+      25,
+      'Home & Kitchen',
+      'Material: Ceramic',
+      '',
+      '',
+      'mug1.jpg',
+      '',
+    ],
   ];
 
   const workbook = XLSX.utils.book_new();

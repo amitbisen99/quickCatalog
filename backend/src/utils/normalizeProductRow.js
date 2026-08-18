@@ -14,6 +14,26 @@ function parsePrice(raw) {
   return Number.isFinite(value) && value >= 0 ? value : null;
 }
 
+/** Parses a whole-number Minimum Order Quantity of at least 1. */
+function parseMinimumOrderQuantity(raw) {
+  if (!raw) return {};
+  const parsed = parseInt(raw, 10);
+  if (!Number.isFinite(parsed) || parsed < 1) {
+    return { error: 'Minimum Order Quantity must be a whole number of at least 1' };
+  }
+  return { value: parsed };
+}
+
+/** Parses a tax percentage between 0 and 100. */
+function parseTaxPercent(raw) {
+  if (!raw) return {};
+  const parsed = parseFloat(raw);
+  if (!Number.isFinite(parsed) || parsed < 0 || parsed > 100) {
+    return { error: 'Tax % must be a number between 0 and 100' };
+  }
+  return { value: parsed };
+}
+
 /** Splits on comma/semicolon/pipe/newline, trims, drops blanks, caps at 3. */
 function parseImageUrls(raw) {
   if (!raw) return [];
@@ -65,6 +85,16 @@ function normalizeProductRow(record, fieldMappings) {
     return { error: 'Price is missing or not a valid number' };
   }
 
+  const moq = parseMinimumOrderQuantity(get('minimumOrderQuantity'));
+  if (moq.error) {
+    return { error: moq.error };
+  }
+
+  const tax = parseTaxPercent(get('taxPercent'));
+  if (tax.error) {
+    return { error: tax.error };
+  }
+
   return {
     data: {
       name,
@@ -72,6 +102,8 @@ function normalizeProductRow(record, fieldMappings) {
       description: get('description'),
       price,
       unit: get('unit') || 'pcs',
+      minimumOrderQuantity: moq.value,
+      taxPercent: tax.value,
       // Image URL takes priority; Image Filename (matched against an
       // uploaded ZIP) is only used as a fallback when no URL is given —
       // resolved by the controller, which is the only place that has the
@@ -85,4 +117,11 @@ function normalizeProductRow(record, fieldMappings) {
   };
 }
 
-module.exports = { normalizeProductRow, parsePrice, parseImageUrls, parseSpecifications };
+module.exports = {
+  normalizeProductRow,
+  parsePrice,
+  parseImageUrls,
+  parseSpecifications,
+  parseMinimumOrderQuantity,
+  parseTaxPercent,
+};
