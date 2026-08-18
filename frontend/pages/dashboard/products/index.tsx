@@ -25,13 +25,22 @@ interface Product {
   catalogIds: string[];
 }
 
+interface Pagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
 function ProductsLibrary() {
   const { user } = useAuth();
   const symbol = currencySymbol(user?.currency);
   const [products, setProducts] = useState<Product[] | null>(null);
+  const [pagination, setPagination] = useState<Pagination | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoryFilter, setCategoryFilter] = useState('');
   const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -39,14 +48,17 @@ function ProductsLibrary() {
   }, []);
 
   const loadProducts = useCallback(() => {
-    const params = new URLSearchParams();
+    const params = new URLSearchParams({ page: String(page) });
     if (categoryFilter) params.set('categoryId', categoryFilter);
     if (search) params.set('search', search);
 
-    apiFetch<{ products: Product[] }>(`/products?${params}`)
-      .then((res) => setProducts(res.products))
+    apiFetch<{ products: Product[]; pagination: Pagination }>(`/products?${params}`)
+      .then((res) => {
+        setProducts(res.products);
+        setPagination(res.pagination);
+      })
       .catch((err) => setError(err instanceof ApiError ? err.message : 'Could not load products.'));
-  }, [categoryFilter, search]);
+  }, [categoryFilter, search, page]);
 
   useEffect(loadProducts, [loadProducts]);
 
@@ -56,6 +68,7 @@ function ProductsLibrary() {
     try {
       await apiFetch(`/products/${id}`, { method: 'DELETE' });
       setProducts((prev) => prev?.filter((p) => p.id !== id) || null);
+      setPagination((prev) => (prev ? { ...prev, total: Math.max(prev.total - 1, 0) } : prev));
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Could not delete product.');
     }
@@ -68,7 +81,11 @@ function ProductsLibrary() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Products</h1>
-          <p className="mt-1 text-sm text-gray-500">Your product library, shared across every catalog.</p>
+          <p className="mt-1 text-sm text-gray-500">
+            {pagination
+              ? `${pagination.total} product${pagination.total === 1 ? '' : 's'} in your library, shared across every catalog.`
+              : 'Your product library, shared across every catalog.'}
+          </p>
         </div>
         <div className="flex gap-3">
           <Link
@@ -89,13 +106,19 @@ function ProductsLibrary() {
       <div className="mt-4 flex flex-wrap gap-3">
         <input
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => {
+            setPage(1);
+            setSearch(e.target.value);
+          }}
           placeholder="Search by product name…"
           className="w-64 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-600"
         />
         <select
           value={categoryFilter}
-          onChange={(e) => setCategoryFilter(e.target.value)}
+          onChange={(e) => {
+            setPage(1);
+            setCategoryFilter(e.target.value);
+          }}
           className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-600"
         >
           <option value="">All categories</option>
@@ -186,6 +209,28 @@ function ProductsLibrary() {
           </div>
         )}
       </div>
+
+      {pagination && pagination.totalPages > 1 && (
+        <div className="mt-4 flex items-center justify-center gap-3 text-sm">
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page <= 1}
+            className="rounded-lg border border-gray-300 px-3 py-1.5 font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <span className="text-gray-500">
+            Page {pagination.page} of {pagination.totalPages}
+          </span>
+          <button
+            onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
+            disabled={page >= pagination.totalPages}
+            className="rounded-lg border border-gray-300 px-3 py-1.5 font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+      )}
     </DashboardLayout>
   );
 }

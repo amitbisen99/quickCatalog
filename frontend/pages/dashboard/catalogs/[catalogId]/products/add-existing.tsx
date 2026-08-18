@@ -33,7 +33,11 @@ function AddExistingProduct() {
 
   useEffect(() => {
     if (!catalogId) return;
-    const params = new URLSearchParams({ excludeCatalogId: catalogId });
+    // listVendorProducts now defaults to a 20-per-page slice for the main
+    // Products library's pagination — this picker isn't paginated, so it
+    // asks for its previous effective limit explicitly instead of
+    // silently shrinking to 20 results.
+    const params = new URLSearchParams({ excludeCatalogId: catalogId, limit: '50' });
     if (search) params.set('search', search);
     apiFetch<{ products: Product[] }>(`/products?${params}`)
       .then((res) => setProducts(res.products))

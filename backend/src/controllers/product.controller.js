@@ -232,8 +232,22 @@ exports.listVendorProducts = asyncHandler(async (req, res) => {
     filter.catalogIds = { $ne: req.query.excludeCatalogId };
   }
 
-  const products = await Product.find(filter).sort({ createdAt: -1 }).limit(50);
-  res.json({ success: true, products: products.map(toProductResponse) });
+  const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+  const limit = Math.max(parseInt(req.query.limit, 10) || PAGE_SIZE, 1);
+
+  const [products, total] = await Promise.all([
+    Product.find(filter)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit),
+    Product.countDocuments(filter),
+  ]);
+
+  res.json({
+    success: true,
+    products: products.map(toProductResponse),
+    pagination: { page, limit, total, totalPages: Math.max(Math.ceil(total / limit), 1) },
+  });
 });
 
 exports.getProduct = asyncHandler(async (req, res) => {
