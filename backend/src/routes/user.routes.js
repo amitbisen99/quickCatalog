@@ -12,7 +12,7 @@ router.use(authenticate, authorize('vendor'));
 router.get('/profile', userController.getProfile);
 router.put('/profile', profileImagesUpload, updateProfileValidators, validate, userController.updateProfile);
 router.put('/change-password', changePasswordValidators, validate, userController.changePassword);
-router.put('/upgrade-plan', userController.upgradePlan);
+// Real upgrade flow lives under /api/payments/razorpay/... (payment.routes.js)
 router.delete('/account', userController.deleteAccount);
 
 module.exports = router;

@@ -11,3 +11,8 @@ exports.updateTicketStatusValidators = [
 ];
 
 exports.replyToTicketValidators = [body('message').trim().notEmpty().withMessage('Reply message is required')];
+
+exports.updatePlanPricingValidators = [
+  body('indiaPriceInr').isFloat({ min: 0 }).withMessage('Enter a valid India price'),
+  body('internationalPriceUsd').isFloat({ min: 0 }).withMessage('Enter a valid international price'),
+];

@@ -13,6 +13,7 @@ const asyncHandler = require('../utils/asyncHandler');
 const AppError = require('../utils/AppError');
 const notImplemented = require('../utils/notImplemented');
 const { sendSupportTicketReplyEmail } = require('../services/email.service');
+const { getPlanPricing } = require('../utils/planPricing');
 
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 100;
@@ -240,3 +241,21 @@ exports.replyToTicket = asyncHandler(async (req, res) => {
 });
 
 exports.getDashboardStats = notImplemented('GET /api/admin/dashboard/stats');
+
+function toPlanPricingResponse(pricing) {
+  return { indiaPriceInr: pricing.indiaPriceInr, internationalPriceUsd: pricing.internationalPriceUsd };
+}
+
+exports.getPlanPricing = asyncHandler(async (req, res) => {
+  const pricing = await getPlanPricing();
+  res.json({ success: true, pricing: toPlanPricingResponse(pricing) });
+});
+
+exports.updatePlanPricing = asyncHandler(async (req, res) => {
+  const { indiaPriceInr, internationalPriceUsd } = req.body;
+  const pricing = await getPlanPricing();
+  pricing.indiaPriceInr = indiaPriceInr;
+  pricing.internationalPriceUsd = internationalPriceUsd;
+  await pricing.save();
+  res.json({ success: true, message: 'Plan pricing updated', pricing: toPlanPricingResponse(pricing) });
+});
