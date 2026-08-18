@@ -11,6 +11,7 @@ const { parseWorkbook } = require('../utils/excelParser');
 const { normalizeProductRow } = require('../utils/normalizeProductRow');
 const readImagesZip = require('../utils/readImagesZip');
 const resolveRowImages = require('../utils/resolveRowImages');
+const mapWithConcurrency = require('../utils/mapWithConcurrency');
 const asyncHandler = require('../utils/asyncHandler');
 const AppError = require('../utils/AppError');
 const notImplemented = require('../utils/notImplemented');
@@ -18,6 +19,12 @@ const { CATALOG_TEMPLATE_IDS, DEFAULT_CATALOG_TEMPLATE } = require('../utils/cat
 const { FREE_CATALOG_LIMIT, FREE_PRODUCT_LIMIT, exceedsFreeProductLimit } = require('../utils/planLimits');
 const findOrCreateCategory = require('../utils/findOrCreateCategory');
 const findOrCreateSpecification = require('../utils/findOrCreateSpecification');
+
+// See product.controller.js's identical constant — per-row image
+// compression is the slow part of an import; this bounds how many rows
+// compress concurrently instead of doing all of them at once or one at
+// a time.
+const IMAGE_RESOLVE_CONCURRENCY = 5;
 const generateCatalogPdf = require('../utils/generateCatalogPdf');
 
 // knownCount lets a caller that just inserted the products (and so already
@@ -191,17 +198,26 @@ exports.createFromFile = asyncHandler(async (req, res) => {
   const zipFile = req.files?.imagesZip?.[0];
   const zipEntries = zipFile ? readImagesZip(zipFile.buffer) : null;
 
-  const validRows = [];
+  const pending = [];
   const errors = [];
   const warnings = [];
   const categoryCache = new Map();
   const specCache = new Map();
 
   // Free tier: rows beyond this position get truncated below regardless,
-  // so skip their category lookups and image resolution — no point paying
-  // for DB writes / sharp compression on rows that get thrown away.
+  // so skip their category lookups (and, in the image-resolution pass
+  // below, their sharp compression) — no point paying for either on rows
+  // that get thrown away.
   const effectiveLimit = user.subscriptionType === 'paid' ? Infinity : FREE_PRODUCT_LIMIT;
 
+  // Category/spec lookups share a name->id cache and check-then-create,
+  // so they — and the truncation position itself, which depends on how
+  // many valid rows came before each one — have to stay sequential.
+  // Image compression is resolved afterward in its own concurrent pass:
+  // it's independent per row and was the actual bottleneck on larger
+  // imports (one row's images fully compressing before the next row even
+  // started could add up to more wall-clock time than a request has
+  // before a proxy/platform timeout kicks in).
   for (let i = 0; i < records.length; i += 1) {
     const rowNumber = i + 2; // +1 for header row, +1 for 1-indexing
     const { data, error } = normalizeProductRow(records[i], fieldMappings);
@@ -210,7 +226,7 @@ exports.createFromFile = asyncHandler(async (req, res) => {
       continue;
     }
 
-    const willBeInserted = validRows.length < effectiveLimit;
+    const willBeInserted = pending.length < effectiveLimit;
 
     let categoryId;
     if (data.categoryName && willBeInserted) {
@@ -228,15 +244,20 @@ exports.createFromFile = asyncHandler(async (req, res) => {
       }
     }
 
-    // eslint-disable-next-line no-await-in-loop
-    const images = willBeInserted ? await resolveRowImages(data, zipEntries, rowNumber, warnings) : data.images;
-
-    validRows.push({ ...data, categoryId, images });
+    pending.push({ rowNumber, data, categoryId, willBeInserted });
   }
 
-  if (validRows.length === 0) {
+  if (pending.length === 0) {
     throw new AppError('No valid product rows found — check the column mapping and try again', 400);
   }
+
+  const validRows = await mapWithConcurrency(pending, IMAGE_RESOLVE_CONCURRENCY, async (row) => ({
+    ...row.data,
+    categoryId: row.categoryId,
+    images: row.willBeInserted
+      ? await resolveRowImages(row.data, zipEntries, row.rowNumber, warnings)
+      : row.data.images,
+  }));
 
   // Free tier: cap products per catalog rather than reject the whole
   // import — the vendor still gets a usable catalog, just capped, and can

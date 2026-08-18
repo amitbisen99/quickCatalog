@@ -12,9 +12,18 @@ const findOrCreateCategory = require('../utils/findOrCreateCategory');
 const findOrCreateSpecification = require('../utils/findOrCreateSpecification');
 const readImagesZip = require('../utils/readImagesZip');
 const resolveRowImages = require('../utils/resolveRowImages');
+const mapWithConcurrency = require('../utils/mapWithConcurrency');
 const asyncHandler = require('../utils/asyncHandler');
 const AppError = require('../utils/AppError');
 const { FREE_PRODUCT_LIMIT, exceedsFreeProductLimit } = require('../utils/planLimits');
+
+// Per-row image compression (sharp resize+recompress) is the slow part
+// of a bulk import — processing rows one at a time in a single request
+// scales linearly and can run long enough to hit a proxy/platform
+// timeout on larger files. This bounds how many rows compress their
+// images at once: enough to meaningfully cut wall-clock time without
+// spiking memory/CPU by decoding dozens of images simultaneously.
+const IMAGE_RESOLVE_CONCURRENCY = 5;
 
 const PAGE_SIZE = 20;
 
@@ -369,12 +378,17 @@ exports.bulkImportProducts = asyncHandler(async (req, res) => {
   const zipFile = req.files?.imagesZip?.[0];
   const zipEntries = zipFile ? readImagesZip(zipFile.buffer) : null;
 
-  const validRows = [];
+  const pending = [];
   const errors = [];
   const warnings = [];
   const categoryCache = new Map();
   const specCache = new Map();
 
+  // Category/spec lookups share a name->id cache and check-then-create —
+  // running two rows with the same brand-new name concurrently could
+  // both miss the cache and create a duplicate, so this part stays
+  // sequential. It's cheap either way; image compression below (resolved
+  // in its own concurrent pass) is what actually made large imports slow.
   for (let i = 0; i < records.length; i += 1) {
     const rowNumber = i + 2; // +1 for header row, +1 for 1-indexing
     const { data, error } = normalizeBulkProductRow(records[i]);
@@ -397,15 +411,18 @@ exports.bulkImportProducts = asyncHandler(async (req, res) => {
       await findOrCreateSpecification(req.user.id, specNames[s], specCache);
     }
 
-    // eslint-disable-next-line no-await-in-loop
-    const images = await resolveRowImages(data, zipEntries, rowNumber, warnings);
-
-    validRows.push({ ...data, categoryId, images });
+    pending.push({ rowNumber, data, categoryId });
   }
 
-  if (validRows.length === 0) {
+  if (pending.length === 0) {
     throw new AppError('No valid product rows found — check the template and try again', 400);
   }
+
+  const validRows = await mapWithConcurrency(pending, IMAGE_RESOLVE_CONCURRENCY, async (row) => ({
+    ...row.data,
+    categoryId: row.categoryId,
+    images: await resolveRowImages(row.data, zipEntries, row.rowNumber, warnings),
+  }));
 
   const createdProducts = await Product.insertMany(
     validRows.map((row) => ({
