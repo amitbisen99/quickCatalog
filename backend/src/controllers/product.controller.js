@@ -22,8 +22,12 @@ const { FREE_PRODUCT_LIMIT, exceedsFreeProductLimit } = require('../utils/planLi
 // scales linearly and can run long enough to hit a proxy/platform
 // timeout on larger files. This bounds how many rows compress their
 // images at once: enough to meaningfully cut wall-clock time without
-// spiking memory/CPU by decoding dozens of images simultaneously.
-const IMAGE_RESOLVE_CONCURRENCY = 5;
+// decoding too many full-resolution images into memory simultaneously
+// (each decoded bitmap is far bigger than its compressed source file —
+// this is the main lever against OOM crashes on a memory-constrained
+// production instance, now that readImagesZip no longer decompresses
+// the whole ZIP up front either).
+const IMAGE_RESOLVE_CONCURRENCY = 3;
 
 const PAGE_SIZE = 20;
 

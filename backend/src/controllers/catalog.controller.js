@@ -22,9 +22,10 @@ const findOrCreateSpecification = require('../utils/findOrCreateSpecification');
 
 // See product.controller.js's identical constant — per-row image
 // compression is the slow part of an import; this bounds how many rows
-// compress concurrently instead of doing all of them at once or one at
-// a time.
-const IMAGE_RESOLVE_CONCURRENCY = 5;
+// compress concurrently instead of doing all of them at once (risking an
+// OOM crash decoding too many full-resolution images simultaneously) or
+// one at a time (risking a proxy/platform timeout on larger files).
+const IMAGE_RESOLVE_CONCURRENCY = 3;
 const generateCatalogPdf = require('../utils/generateCatalogPdf');
 
 // knownCount lets a caller that just inserted the products (and so already

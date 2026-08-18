@@ -21,17 +21,21 @@ async function resolveRowImages(data, zipEntries, rowNumber, warnings) {
     return data.images;
   }
 
-  const resolvedBuffers = [];
+  const resolvedEntries = [];
   data.imageFilenames.forEach((filename) => {
-    const buffer = zipEntries.get(filename.toLowerCase());
-    if (buffer) {
-      resolvedBuffers.push(buffer);
+    const entry = zipEntries.get(filename.toLowerCase());
+    if (entry) {
+      resolvedEntries.push(entry);
     } else {
       warnings.push({ rowNumber, warning: `Image file "${filename}" not found in the uploaded ZIP` });
     }
   });
 
-  return Promise.all(resolvedBuffers.map((buffer) => compressImageToDataUrl(buffer)));
+  // entry.getData() decompresses that one file right here, immediately
+  // before compressing it down to its final small size — not upfront for
+  // the whole ZIP (see readImagesZip), so memory only ever holds the
+  // handful of images actually in flight for this row.
+  return Promise.all(resolvedEntries.map((entry) => compressImageToDataUrl(entry.getData())));
 }
 
 module.exports = resolveRowImages;
