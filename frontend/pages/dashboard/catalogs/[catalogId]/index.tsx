@@ -5,6 +5,7 @@ import DashboardLayout from '@/components/DashboardLayout';
 import withAuth from '@/components/withAuth';
 import Alert from '@/components/Alert';
 import ShareOptions from '@/components/dashboard/ShareOptions';
+import CatalogEmbedSection from '@/components/dashboard/CatalogEmbedSection';
 import { ChartBarIcon, CopyIcon, DownloadIcon, PencilIcon, ShareIcon, SpinnerIcon, TrashIcon } from '@/components/icons';
 import { apiFetch, ApiError } from '@/utils/api';
 import { downloadFile } from '@/utils/downloadFile';
@@ -288,6 +289,8 @@ function CatalogDetail() {
           Change template
         </Link>
       </div>
+
+      <CatalogEmbedSection catalog={catalog} />
     </DashboardLayout>
   );
 }

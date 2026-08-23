@@ -22,6 +22,19 @@ const nextConfig = {
       },
     ],
   },
+  async headers() {
+    return [
+      {
+        // Public catalog pages need to stay embeddable in an iframe from
+        // any site a vendor drops the embed widget's "modal" mode snippet
+        // on — set explicitly rather than relying on the absence of a
+        // restrictive header, so a future unrelated security-hardening
+        // pass doesn't silently break every vendor's embedded widget.
+        source: '/public/:path*',
+        headers: [{ key: 'Content-Security-Policy', value: 'frame-ancestors *' }],
+      },
+    ];
+  },
 };
 
 module.exports = withPWA(nextConfig);
