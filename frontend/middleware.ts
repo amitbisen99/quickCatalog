@@ -58,36 +58,46 @@ async function resolvePrimarySlugForHost(hostname: string): Promise<string | nul
 }
 
 export async function middleware(request: NextRequest) {
-  const hostname = request.headers.get('host')?.split(':')[0] || '';
-  const { pathname } = request.nextUrl;
+  // Whatever happens inside here, normal traffic must never go down over
+  // it — a bug or an unexpected runtime quirk in this white-label routing
+  // logic should degrade to "acts like this middleware doesn't exist",
+  // never to a 500 on every single page.
+  try {
+    const hostname = request.headers.get('host')?.split(':')[0] || '';
+    const { pathname } = request.nextUrl;
 
-  // Own domain, localhost (dev), or no host at all — nothing to do.
-  if (!hostname || hostname === OWN_HOSTNAME || hostname === 'localhost' || hostname === '127.0.0.1') {
+    // Own domain, localhost (dev), or no host at all — nothing to do.
+    if (!hostname || hostname === OWN_HOSTNAME || hostname === 'localhost' || hostname === '127.0.0.1') {
+      return NextResponse.next();
+    }
+
+    // Public catalog pages (and their static assets, already excluded by
+    // the matcher below) already work correctly on any hostname — the
+    // [slug] route resolves purely from the URL path. Nothing to do here.
+    if (pathname.startsWith('/public/')) {
+      return NextResponse.next();
+    }
+
+    const slug = await resolvePrimarySlugForHost(hostname);
+    if (!slug) {
+      // Unrecognized domain, or a recognized one with no catalogs yet —
+      // let it fall through to whatever Next would normally serve.
+      return NextResponse.next();
+    }
+
+    // Root path (the vendor's domain with no /public/... in the URL) and
+    // any other internal route (/login, /dashboard, /admin, /signup, ...
+    // which shouldn't be reachable under a vendor's own branding) both
+    // land on the same place: their primary catalog. Redirect straight
+    // there in one hop rather than bouncing through `/` first.
+    const url = request.nextUrl.clone();
+    url.pathname = `/public/${slug}`;
+    return NextResponse.redirect(url);
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('middleware error, falling through to normal routing:', err);
     return NextResponse.next();
   }
-
-  // Public catalog pages (and their static assets, already excluded by
-  // the matcher below) already work correctly on any hostname — the
-  // [slug] route resolves purely from the URL path. Nothing to do here.
-  if (pathname.startsWith('/public/')) {
-    return NextResponse.next();
-  }
-
-  const slug = await resolvePrimarySlugForHost(hostname);
-  if (!slug) {
-    // Unrecognized domain, or a recognized one with no catalogs yet — let
-    // it fall through to whatever Next would normally serve.
-    return NextResponse.next();
-  }
-
-  // Root path (the vendor's domain with no /public/... in the URL) and
-  // any other internal route (/login, /dashboard, /admin, /signup, ...
-  // which shouldn't be reachable under a vendor's own branding) both land
-  // on the same place: their primary catalog. Redirect straight there in
-  // one hop rather than bouncing through `/` first.
-  const url = request.nextUrl.clone();
-  url.pathname = `/public/${slug}`;
-  return NextResponse.redirect(url);
 }
 
 export const config = {
