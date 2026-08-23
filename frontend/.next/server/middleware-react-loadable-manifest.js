@@ -1,0 +1,1 @@
+self.__REACT_LOADABLE_MANIFEST='{"components\\\\dashboard\\\\ProductForm.tsx -> react-quill":{"id":1167,"files":["static/chunks/eabe11fc.636c2af3957e2ef8.js","static/chunks/156.c68fa5d97f4efdff.js"]}}';
