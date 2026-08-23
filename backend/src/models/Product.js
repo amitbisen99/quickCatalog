@@ -15,7 +15,6 @@ const productSchema = new mongoose.Schema(
       type: [mongoose.Schema.Types.ObjectId],
       ref: 'Catalog',
       default: [],
-      index: true,
     },
     name: {
       type: String,
@@ -78,5 +77,19 @@ const productSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Every catalog-scoped product listing (public catalog page, PDF
+// download, dashboard product list, add-existing-product picker) filters
+// on catalogIds and sorts by createdAt — without an index covering both,
+// Mongo falls back to an in-memory sort of the FULL matching document set
+// (including every product's embedded base64 image data) before applying
+// any skip/limit, which blows its 32MB in-memory sort limit for a
+// large/image-heavy catalog (confirmed in production: "Sort exceeded
+// memory limit... did not opt in to external sorting" on a 200-product
+// catalog). This compound index lets Mongo satisfy both the filter and
+// the sort straight from the index, so it never needs to. Also replaces
+// the old standalone index on catalogIds — its leading field covers that
+// case too, so keeping both would just be redundant index maintenance.
+productSchema.index({ catalogIds: 1, createdAt: -1 });
 
 module.exports = mongoose.model('Product', productSchema);

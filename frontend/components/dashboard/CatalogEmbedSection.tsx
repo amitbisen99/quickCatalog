@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Modal from '@/components/Modal';
 import { CodeIcon, CopyIcon } from '@/components/icons';
 import { useAuth } from '@/context/AuthContext';
 import { getCatalogPublicUrl } from '@/utils/catalogUrl';
@@ -51,12 +52,13 @@ function buildWidgetSnippet(
 // active — no separate config needed here for that.
 export default function CatalogEmbedSection({ catalog }: Props) {
   const { user } = useAuth();
-  const [tab, setTab] = useState<'link' | 'widget'>('link');
+  const [tab, setTab] = useState<'link' | 'widget'>('widget');
   const [text, setText] = useState('Visit Catalog');
   const [color, setColor] = useState(DEFAULT_COLOR);
   const [position, setPosition] = useState('bottom-right');
   const [mode, setMode] = useState<'newtab' | 'modal'>('newtab');
   const [copied, setCopied] = useState(false);
+  const [instructionsOpen, setInstructionsOpen] = useState(false);
 
   const url = getCatalogPublicUrl(catalog.slug, user);
   const snippet =
@@ -211,8 +213,76 @@ export default function CatalogEmbedSection({ catalog }: Props) {
               : 'Paste this once, anywhere on your page. It shows as a floating button by default, or place a ' +
                 '<div id="your-id"> and add data-target="your-id" to the tag to show it inline instead.'}
           </p>
+          {tab === 'widget' && (
+            <button
+              type="button"
+              onClick={() => setInstructionsOpen(true)}
+              className="mt-2 text-xs font-medium text-primary-700 underline hover:text-primary-800"
+            >
+              How to add the Script snippet →
+            </button>
+          )}
         </div>
       </div>
+
+      <Modal isOpen={instructionsOpen} onClose={() => setInstructionsOpen(false)} title="How to add the Script snippet">
+        <div className="max-h-[70vh] space-y-5 overflow-y-auto pr-1 text-sm text-gray-700">
+          <div>
+            <p className="font-semibold text-gray-900">Where you paste it depends on where you want the button:</p>
+            <ul className="mt-1.5 list-disc space-y-1 pl-5 text-gray-600">
+              <li>
+                <strong>Every page</strong> (most common — a persistent floating button, like a chat bubble): add it
+                <strong> once</strong> into a shared template included on every page (see platform-specific steps
+                below).
+              </li>
+              <li>
+                <strong>Just one page</strong>: paste it directly into that page&apos;s HTML, right before{' '}
+                <code className="rounded bg-gray-100 px-1 py-0.5 text-xs">{'</body>'}</code>.
+              </li>
+              <li>
+                <strong>Inline, inside a section</strong> (using <code className="rounded bg-gray-100 px-1 py-0.5 text-xs">data-target</code>):
+                paste it only on the page that has the matching{' '}
+                <code className="rounded bg-gray-100 px-1 py-0.5 text-xs">{'<div id="...">'}</code>.
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <p className="font-semibold text-gray-900">WordPress</p>
+            <p className="mt-1 text-gray-600">
+              Appearance → Theme File Editor → <code className="rounded bg-gray-100 px-1 py-0.5 text-xs">footer.php</code>,
+              right before <code className="rounded bg-gray-100 px-1 py-0.5 text-xs">{'</body>'}</code>. Or, if you&apos;d
+              rather not edit theme files, use a plugin like &quot;Insert Headers and Footers&quot;.
+            </p>
+          </div>
+
+          <div>
+            <p className="font-semibold text-gray-900">Shopify</p>
+            <p className="mt-1 text-gray-600">
+              Online Store → Themes → Edit Code →{' '}
+              <code className="rounded bg-gray-100 px-1 py-0.5 text-xs">theme.liquid</code>, right before{' '}
+              <code className="rounded bg-gray-100 px-1 py-0.5 text-xs">{'</body>'}</code>.
+            </p>
+          </div>
+
+          <div>
+            <p className="font-semibold text-gray-900">Wix / Squarespace</p>
+            <p className="mt-1 text-gray-600">
+              Settings → Custom Code (Wix) or Code Injection (Squarespace) — add it to the &quot;footer&quot; or
+              &quot;every page&quot; section.
+            </p>
+          </div>
+
+          <div>
+            <p className="font-semibold text-gray-900">A custom-built HTML site</p>
+            <p className="mt-1 text-gray-600">
+              If your pages share a common footer include/template, add it there. If each page is standalone HTML
+              with no shared template, paste it into each page you want the button on — the script is harmless to
+              load more than once, but there&apos;s no way around adding it per page without a shared layout.
+            </p>
+          </div>
+        </div>
+      </Modal>
     </section>
   );
 }
