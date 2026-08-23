@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { apiFetch, ApiError, API_URL } from '@/utils/api';
 import { autoMapHeaders } from '@/utils/fuzzyMapHeaders';
 import { getCatalogPublicUrl } from '@/utils/catalogUrl';
+import { isFreePlan } from '@/utils/planLimit';
 
 // Standalone "create your catalog" funnel — deliberately separate from the
 // vendor dashboard (no DashboardLayout/AdminLayout, no sidebar nav). Entered
@@ -279,11 +280,14 @@ export default function CreateCatalogWizard() {
   const step2Valid = excelFile !== null;
 
   const totalRows = parseResult?.totalRows ?? 0;
-  // The catalog is always created on Free — there's no plan choice in
-  // this wizard. When the file has more products than Free allows, the
+  // Paid vendors have no product cap at all (see planLimits.js's
+  // exceedsFreeProductLimit, which the server actually enforces) — this
+  // was previously capping the message purely on row count, showing the
+  // "free plan" warning even to paid accounts. When the file has more
+  // products than Free allows *and* the vendor is actually on Free, the
   // server silently truncates to the first FREE_PRODUCT_LIMIT and this
   // just informs the vendor that's what's about to happen.
-  const willBeCapped = totalRows > FREE_PRODUCT_LIMIT;
+  const willBeCapped = isFreePlan(user) && totalRows > FREE_PRODUCT_LIMIT;
 
   function handleExcelChange(e: ChangeEvent<HTMLInputElement>) {
     setExcelFile(e.target.files?.[0] ?? null);
@@ -713,7 +717,9 @@ export default function CreateCatalogWizard() {
               <span>
                 {willBeCapped
                   ? `The free plan is limited to ${FREE_PRODUCT_LIMIT} products in a catalog, so we'll create your catalog with the first ${FREE_PRODUCT_LIMIT} products automatically. You can upgrade anytime later.`
-                  : `All ${parseResult.totalRows} products will be added to your catalog — we'll create it on the Free plan automatically. You can upgrade anytime later.`}
+                  : isFreePlan(user)
+                    ? `All ${parseResult.totalRows} products will be added to your catalog — we'll create it on the Free plan automatically. You can upgrade anytime later.`
+                    : `All ${parseResult.totalRows} products will be added to your catalog.`}
               </span>
             </div>
 
