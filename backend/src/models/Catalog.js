@@ -35,6 +35,38 @@ const catalogSchema = new mongoose.Schema(
       type: String,
       default: 'modern-grid',
     },
+    // White-label domains — kept as two independent pairs (not one shared
+    // domain/status) because a catalog can have both a branded subdomain
+    // AND a fully custom domain active at once, each going through its own
+    // separate manual hPanel setup with its own timeline. `sparse: true`
+    // lets many catalogs share `null` here without violating uniqueness.
+    subdomain: {
+      type: String,
+      unique: true,
+      sparse: true,
+      lowercase: true,
+      trim: true,
+    },
+    // 'pending' the moment a vendor requests it; flipped to 'active' once
+    // an admin has actually set it up in hPanel + DNS (see docs/ARCHITECTURE
+    // or the admin domain-requests screen) and it's confirmed resolving —
+    // there's no automated provisioning API on this host, so this is a
+    // manually-actioned queue, not a live status check.
+    subdomainStatus: {
+      type: String,
+      enum: ['pending', 'active', 'failed'],
+    },
+    customDomain: {
+      type: String,
+      unique: true,
+      sparse: true,
+      lowercase: true,
+      trim: true,
+    },
+    customDomainStatus: {
+      type: String,
+      enum: ['pending', 'active', 'failed'],
+    },
   },
   { timestamps: true }
 );

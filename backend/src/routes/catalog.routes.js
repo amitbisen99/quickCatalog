@@ -5,7 +5,12 @@ const productRoutes = require('./product.routes');
 const { authenticate, authorize } = require('../middleware/auth');
 const validate = require('../middleware/validate');
 const { bulkImportUpload } = require('../middleware/upload');
-const { createCatalogValidators, updateCatalogValidators } = require('../validators/catalog.validators');
+const {
+  createCatalogValidators,
+  updateCatalogValidators,
+  setSubdomainValidators,
+  setCustomDomainValidators,
+} = require('../validators/catalog.validators');
 const { createEnquiryValidators } = require('../validators/enquiry.validators');
 
 const router = express.Router();
@@ -38,6 +43,24 @@ router.put(
   catalogController.updateCatalog
 );
 router.delete('/:catalogId', authenticate, authorize('vendor'), catalogController.deleteCatalog);
+router.put(
+  '/:catalogId/subdomain',
+  authenticate,
+  authorize('vendor'),
+  setSubdomainValidators,
+  validate,
+  catalogController.setSubdomain
+);
+router.delete('/:catalogId/subdomain', authenticate, authorize('vendor'), catalogController.removeSubdomain);
+router.put(
+  '/:catalogId/custom-domain',
+  authenticate,
+  authorize('vendor'),
+  setCustomDomainValidators,
+  validate,
+  catalogController.setCustomDomain
+);
+router.delete('/:catalogId/custom-domain', authenticate, authorize('vendor'), catalogController.removeCustomDomain);
 router.get('/:catalogId/stats', authenticate, authorize('vendor'), catalogController.getCatalogStats);
 router.get('/:catalogId/pdf', authenticate, authorize('vendor'), catalogController.downloadCatalogPdf);
 

@@ -16,3 +16,8 @@ exports.updatePlanPricingValidators = [
   body('indiaPriceInr').isFloat({ min: 0 }).withMessage('Enter a valid India price'),
   body('internationalPriceUsd').isFloat({ min: 0 }).withMessage('Enter a valid international price'),
 ];
+
+exports.updateDomainRequestValidators = [
+  body('type').isIn(['subdomain', 'customDomain']).withMessage('Invalid domain type'),
+  body('status').isIn(['active', 'failed']).withMessage('Invalid status'),
+];

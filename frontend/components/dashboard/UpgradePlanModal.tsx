@@ -7,7 +7,7 @@ import { currencySymbol } from '@/utils/currency';
 import { openRazorpayCheckout, RazorpaySuccessResponse } from '@/utils/razorpay';
 import { useAuth } from '@/context/AuthContext';
 
-type Reason = 'catalog' | 'product' | 'generic';
+type Reason = 'catalog' | 'product' | 'domain' | 'generic';
 
 interface Props {
   isOpen: boolean;
@@ -39,6 +39,10 @@ const REASON_COPY: Record<Reason, { title: string; body: string }> = {
   product: {
     title: "You've reached the Free plan's product limit",
     body: `The Free plan includes ${FREE_PRODUCT_LIMIT} products. Upgrade to Paid for unlimited catalogs and products.`,
+  },
+  domain: {
+    title: 'Connect your own domain',
+    body: 'Custom domains are a Paid plan feature — point your own domain (like catalog.yourbrand.com) at your catalog instead of sharing our link.',
   },
   generic: {
     title: 'Upgrade to the Paid plan',

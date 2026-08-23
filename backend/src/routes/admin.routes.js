@@ -7,6 +7,7 @@ const {
   updateTicketStatusValidators,
   replyToTicketValidators,
   updatePlanPricingValidators,
+  updateDomainRequestValidators,
 } = require('../validators/admin.validators');
 
 const router = express.Router();
@@ -30,6 +31,13 @@ router.put(
   adminController.updateTicketStatus
 );
 router.post('/support-tickets/:ticketId/reply', replyToTicketValidators, validate, adminController.replyToTicket);
+router.get('/domain-requests', adminController.getDomainRequests);
+router.put(
+  '/domain-requests/:catalogId',
+  updateDomainRequestValidators,
+  validate,
+  adminController.updateDomainRequest
+);
 router.get('/dashboard/stats', adminController.getDashboardStats);
 router.get('/plan-pricing', adminController.getPlanPricing);
 router.put('/plan-pricing', updatePlanPricingValidators, validate, adminController.updatePlanPricing);

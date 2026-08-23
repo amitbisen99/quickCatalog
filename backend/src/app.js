@@ -6,14 +6,32 @@ const morgan = require('morgan');
 const routes = require('./routes');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 const { globalLimiter } = require('./middleware/rateLimiter');
+const { isOriginAllowed } = require('./utils/allowedOriginsCache');
 
 const app = express();
 
-const allowedOrigins = [process.env.CLIENT_URL, process.env.ADMIN_URL].filter(Boolean);
+const staticAllowedOrigins = [process.env.CLIENT_URL, process.env.ADMIN_URL].filter(Boolean);
 
 app.use(
   cors({
-    origin: allowedOrigins.length ? allowedOrigins : true,
+    // No Origin header at all (server-to-server calls, curl, Postman) is
+    // always allowed — cors() passes `undefined` for those, same as the
+    // old static-array config effectively did. Same for a totally
+    // unconfigured environment (neither CLIENT_URL nor ADMIN_URL set) —
+    // preserves the previous fallback-to-open-CORS behavior so a fresh
+    // clone with no .env doesn't mysteriously fail every request.
+    origin(origin, callback) {
+      if (
+        !origin ||
+        staticAllowedOrigins.length === 0 ||
+        staticAllowedOrigins.includes(origin) ||
+        isOriginAllowed(origin)
+      ) {
+        callback(null, true);
+      } else {
+        callback(null, false);
+      }
+    },
     credentials: true,
   })
 );

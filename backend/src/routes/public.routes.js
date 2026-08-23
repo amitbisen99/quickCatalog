@@ -5,6 +5,7 @@ const publicController = require('../controllers/public.controller');
 // site visitors browsing a vendor's catalog.
 const router = express.Router();
 
+router.get('/resolve-domain', publicController.resolveDomain);
 router.get('/catalog/:catalogSlug', publicController.getCatalogBySlug);
 router.get('/catalog/:catalogSlug/og-image', publicController.getCatalogOgImage);
 router.get('/catalog/:catalogSlug/products/:productId', publicController.getCatalogProductBySlug);

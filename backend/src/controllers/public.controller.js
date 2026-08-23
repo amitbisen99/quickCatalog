@@ -126,6 +126,37 @@ exports.getCatalogOgImage = asyncHandler(async (req, res) => {
   res.send(parsed.buffer);
 });
 
+// White-label routing — the frontend's middleware.ts calls this on every
+// request whose Host header isn't the app's own domain, to find out which
+// catalog (if any) that hostname belongs to. Only ever matches an *active*
+// domain — a 'pending' one isn't actually resolving via real DNS yet
+// (hasn't been set up in hPanel), so treating it as live here would be a
+// lie the middleware can't act on anyway.
+exports.resolveDomain = asyncHandler(async (req, res) => {
+  const host = String(req.query.host || '').toLowerCase().trim();
+  if (!host) {
+    throw new AppError('host is required', 400);
+  }
+
+  const baseDomain = process.env.APP_BASE_DOMAIN;
+  let catalog = null;
+
+  if (baseDomain && host.endsWith(`.${baseDomain}`)) {
+    const subdomain = host.slice(0, -(`.${baseDomain}`.length));
+    catalog = await Catalog.findOne({ subdomain, subdomainStatus: 'active' }, 'slug');
+  }
+
+  if (!catalog) {
+    catalog = await Catalog.findOne({ customDomain: host, customDomainStatus: 'active' }, 'slug');
+  }
+
+  if (!catalog) {
+    throw new AppError('No catalog found for this domain', 404);
+  }
+
+  res.json({ success: true, slug: catalog.slug });
+});
+
 // Enquiry submission lives at POST /api/catalogs/:catalogId/enquiries
 // (catalog.routes.js → enquiry.controller.js) since it needs the
 // catalog's real id, not just its slug.

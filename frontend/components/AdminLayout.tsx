@@ -8,6 +8,7 @@ import {
   UserIcon,
   HelpIcon,
   CreditCardIcon,
+  ShareIcon,
   LogoutIcon,
   MenuIcon,
   XIcon,
@@ -20,6 +21,7 @@ import {
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/admin/dashboard', icon: HomeIcon },
   { label: 'Vendors', href: '/admin/vendors', icon: UserIcon },
+  { label: 'Domain Requests', href: '/admin/domain-requests', icon: ShareIcon },
   { label: 'Support Tickets', href: '/admin/support-tickets', icon: HelpIcon },
   { label: 'Plan Pricing', href: '/admin/plan-pricing', icon: CreditCardIcon },
 ];

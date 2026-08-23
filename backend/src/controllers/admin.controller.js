@@ -259,3 +259,60 @@ exports.updatePlanPricing = asyncHandler(async (req, res) => {
   await pricing.save();
   res.json({ success: true, message: 'Plan pricing updated', pricing: toPlanPricingResponse(pricing) });
 });
+
+function toDomainRequestResponse(catalog) {
+  return {
+    catalogId: catalog._id,
+    catalogName: catalog.name,
+    vendorId: catalog.vendorId?._id,
+    vendorBusinessName: catalog.vendorId?.businessName,
+    vendorEmail: catalog.vendorId?.email,
+    subdomain: catalog.subdomainStatus === 'pending' ? catalog.subdomain : undefined,
+    customDomain: catalog.customDomainStatus === 'pending' ? catalog.customDomain : undefined,
+    createdAt: catalog.updatedAt,
+  };
+}
+
+// This host has no domain-provisioning API — every white-label
+// subdomain/custom-domain request has to be set up by hand in hPanel
+// (+ the vendor's own DNS, for custom domains). This is that manual
+// queue: what's waiting on you, and the button that flips a request to
+// 'active' once you've actually done the hPanel/DNS work and confirmed
+// it resolves.
+exports.getDomainRequests = asyncHandler(async (req, res) => {
+  const catalogs = await Catalog.find({
+    $or: [{ subdomainStatus: 'pending' }, { customDomainStatus: 'pending' }],
+  })
+    .populate('vendorId', 'businessName email')
+    .sort({ updatedAt: 1 });
+
+  res.json({ success: true, requests: catalogs.map(toDomainRequestResponse) });
+});
+
+exports.updateDomainRequest = asyncHandler(async (req, res) => {
+  const { catalogId } = req.params;
+  const { type, status } = req.body;
+  if (!mongoose.Types.ObjectId.isValid(catalogId)) {
+    throw new AppError('Catalog not found', 404);
+  }
+
+  const catalog = await Catalog.findById(catalogId);
+  if (!catalog) {
+    throw new AppError('Catalog not found', 404);
+  }
+
+  if (type === 'subdomain') {
+    if (!catalog.subdomain) {
+      throw new AppError('This catalog has no subdomain request', 400);
+    }
+    catalog.subdomainStatus = status;
+  } else {
+    if (!catalog.customDomain) {
+      throw new AppError('This catalog has no custom domain request', 400);
+    }
+    catalog.customDomainStatus = status;
+  }
+  await catalog.save();
+
+  res.json({ success: true, message: 'Domain request updated' });
+});
