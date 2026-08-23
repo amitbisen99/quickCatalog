@@ -19,7 +19,7 @@ const port = process.env.PORT || 3000;
 app
   .prepare()
   .then(() => {
-    createServer((req, res) => handle(req, res)).listen(port, (err) => {
+    createServer((req, res) => handle(req, res)).listen(port, '0.0.0.0', (err) => {
       if (err) throw err;
       console.log(`> QuickCatalog frontend ready on port ${port}`);
     });
