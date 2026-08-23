@@ -7,27 +7,26 @@ const { setAdminAuthCookies, clearAdminAuthCookies, generateAdminAccessToken, ad
 // Single super-admin credential from env (ADMIN_EMAIL/ADMIN_PASSWORD_HASH) —
 // no Admin model/collection, matching docs/ARCHITECTURE.md's decision that
 // this is one operator, not a team.
+//
+// ADMIN_PASSWORD_HASH is stored base64-encoded, not as the raw bcrypt
+// hash — confirmed via diagnostic logging that Hostinger's hPanel env-var
+// storage mangles '$' characters (escapes each one as '\$'), which
+// silently corrupts a raw bcrypt hash (it's delimited by exactly three
+// '$' characters) so it can never match again. Base64 output contains no
+// '$' or other shell-special characters, so it survives untouched
+// regardless of the host's env-var pipeline. See backend/.env.example for
+// the exact command to generate this value.
+function getAdminPasswordHash() {
+  if (!process.env.ADMIN_PASSWORD_HASH) return null;
+  return Buffer.from(process.env.ADMIN_PASSWORD_HASH, 'base64').toString('utf8');
+}
+
 exports.login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
+  const adminPasswordHash = getAdminPasswordHash();
   const emailMatches = process.env.ADMIN_EMAIL && email.toLowerCase() === process.env.ADMIN_EMAIL.toLowerCase();
-  const passwordMatches = process.env.ADMIN_PASSWORD_HASH && (await bcrypt.compare(password, process.env.ADMIN_PASSWORD_HASH));
-
-  // TEMP DIAGNOSTIC — tracking down a hPanel env-var mismatch. Logs only
-  // shapes/lengths/booleans, never the actual email, password, or hash
-  // values. Remove once the mismatch is found.
-  // eslint-disable-next-line no-console
-  console.log('[admin-login-debug]', {
-    envEmailSet: !!process.env.ADMIN_EMAIL,
-    envEmailLength: process.env.ADMIN_EMAIL ? process.env.ADMIN_EMAIL.length : null,
-    envHashSet: !!process.env.ADMIN_PASSWORD_HASH,
-    envHashLength: process.env.ADMIN_PASSWORD_HASH ? process.env.ADMIN_PASSWORD_HASH.length : null,
-    envHashPrefix: process.env.ADMIN_PASSWORD_HASH ? process.env.ADMIN_PASSWORD_HASH.slice(0, 4) : null,
-    submittedEmailLength: email ? email.length : null,
-    submittedPasswordLength: password ? password.length : null,
-    emailMatches,
-    passwordMatches,
-  });
+  const passwordMatches = adminPasswordHash && (await bcrypt.compare(password, adminPasswordHash));
 
   if (!emailMatches || !passwordMatches) {
     throw new AppError('Invalid email or password', 401);
