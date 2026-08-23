@@ -12,17 +12,30 @@ const OWN_HOSTNAME = (() => {
   }
 })();
 
+// White-label domains are vendor-scoped, not per-catalog — every catalog
+// a vendor owns is already reachable at `{their-domain}/public/{slug}`
+// with zero rewriting needed, since the public catalog route resolves
+// purely from the slug in the URL regardless of hostname. So this
+// middleware only has two jobs on a recognized vendor domain:
+//  1. Root path (no /public/... in the URL) → redirect to whichever
+//     catalog the vendor picked as their "primary" one.
+//  2. Internal routes (/login, /dashboard, /admin, /signup, ...) →
+//     redirect to the primary catalog too, rather than exposing our
+//     dashboard/admin/auth screens under their branding.
+// Both need to know the vendor's primary catalog slug, so both go through
+// the same resolvePrimarySlugForHost lookup.
+
 // Resolved-domain lookups are cached in-memory (this runs in the same
 // long-lived Node process as the rest of the app, not a per-request edge
 // isolate, since we're self-hosted rather than on Vercel's edge network —
 // so a plain module-level Map persists correctly across requests). Domain
 // activation is a manual, multi-hour process on the backend, so a short
 // TTL here costs nothing in staleness while saving a backend round-trip
-// on every single request from a white-label domain.
+// on every root-path hit from a white-label domain.
 const CACHE_TTL_MS = 60 * 1000;
 const resolvedDomainCache = new Map<string, { slug: string | null; expiresAt: number }>();
 
-async function resolveSlugForHost(hostname: string): Promise<string | null> {
+async function resolvePrimarySlugForHost(hostname: string): Promise<string | null> {
   const cached = resolvedDomainCache.get(hostname);
   if (cached && cached.expiresAt > Date.now()) {
     return cached.slug;
@@ -37,7 +50,7 @@ async function resolveSlugForHost(hostname: string): Promise<string | null> {
     }
   } catch {
     // Backend unreachable — fall through to null (renders as a normal
-    // 404 rather than taking the whole domain down over a transient error).
+    // page rather than taking the whole domain down over a transient error).
   }
 
   resolvedDomainCache.set(hostname, { slug, expiresAt: Date.now() + CACHE_TTL_MS });
@@ -46,30 +59,35 @@ async function resolveSlugForHost(hostname: string): Promise<string | null> {
 
 export async function middleware(request: NextRequest) {
   const hostname = request.headers.get('host')?.split(':')[0] || '';
+  const { pathname } = request.nextUrl;
 
   // Own domain, localhost (dev), or no host at all — nothing to do.
   if (!hostname || hostname === OWN_HOSTNAME || hostname === 'localhost' || hostname === '127.0.0.1') {
     return NextResponse.next();
   }
 
-  const slug = await resolveSlugForHost(hostname);
-  if (!slug) {
-    // Unrecognized domain — let it fall through to whatever Next would
-    // normally serve for this path (the marketing homepage at `/`, a real
-    // 404 for anything else) rather than pretending to be a valid catalog.
+  // Public catalog pages (and their static assets, already excluded by
+  // the matcher below) already work correctly on any hostname — the
+  // [slug] route resolves purely from the URL path. Nothing to do here.
+  if (pathname.startsWith('/public/')) {
     return NextResponse.next();
   }
 
-  // Preserve whatever path/query the visitor requested past the root —
-  // `/products/abc123` on the vendor's domain maps the same way
-  // `/public/{slug}/products/abc123` already does on the main domain. The
-  // root path itself needs special-casing so it becomes `/public/{slug}`
-  // rather than `/public/{slug}/` (a trailing slash Next's page router
-  // doesn't need to be asked to normalize).
-  const suffix = request.nextUrl.pathname === '/' ? '' : request.nextUrl.pathname;
+  const slug = await resolvePrimarySlugForHost(hostname);
+  if (!slug) {
+    // Unrecognized domain, or a recognized one with no catalogs yet — let
+    // it fall through to whatever Next would normally serve.
+    return NextResponse.next();
+  }
+
+  // Root path (the vendor's domain with no /public/... in the URL) and
+  // any other internal route (/login, /dashboard, /admin, /signup, ...
+  // which shouldn't be reachable under a vendor's own branding) both land
+  // on the same place: their primary catalog. Redirect straight there in
+  // one hop rather than bouncing through `/` first.
   const url = request.nextUrl.clone();
-  url.pathname = `/public/${slug}${suffix}`;
-  return NextResponse.rewrite(url);
+  url.pathname = `/public/${slug}`;
+  return NextResponse.redirect(url);
 }
 
 export const config = {

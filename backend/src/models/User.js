@@ -44,6 +44,50 @@ const userSchema = new mongoose.Schema(
     },
     subscriptionExpiresAt: { type: Date },
 
+    // White-label domains — scoped to the vendor, not any one catalog:
+    // every catalog they own becomes reachable at
+    // `{domain}/public/{slug}` once one of these is active, since the
+    // public catalog route already resolves purely by slug regardless of
+    // hostname. Kept as two independent pairs since both a subdomain and a
+    // full custom domain can be active at once, each on its own manual
+    // hPanel/DNS timeline. `sparse: true` lets many vendors share `null`
+    // here without violating uniqueness.
+    subdomain: {
+      type: String,
+      unique: true,
+      sparse: true,
+      lowercase: true,
+      trim: true,
+    },
+    // 'pending' the moment a vendor requests it; flipped to 'active' once
+    // an admin has actually set it up in hPanel + DNS (see the admin
+    // domain-requests screen) and it's confirmed resolving — there's no
+    // automated provisioning API on this host, so this is a
+    // manually-actioned queue, not a live status check.
+    subdomainStatus: {
+      type: String,
+      enum: ['pending', 'active', 'failed'],
+    },
+    customDomain: {
+      type: String,
+      unique: true,
+      sparse: true,
+      lowercase: true,
+      trim: true,
+    },
+    customDomainStatus: {
+      type: String,
+      enum: ['pending', 'active', 'failed'],
+    },
+    // Which catalog a vendor's white-label domain root (no /public/...
+    // path) redirects to. Optional — resolveDomain falls back to the
+    // vendor's oldest catalog when unset, so single-catalog vendors (the
+    // common free-plan case) never have to touch this.
+    primaryCatalogId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Catalog',
+    },
+
     otpHash: { type: String, select: false },
     otpExpiresAt: { type: Date, select: false },
 

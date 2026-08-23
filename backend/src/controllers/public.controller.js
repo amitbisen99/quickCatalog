@@ -126,12 +126,17 @@ exports.getCatalogOgImage = asyncHandler(async (req, res) => {
   res.send(parsed.buffer);
 });
 
-// White-label routing — the frontend's middleware.ts calls this on every
-// request whose Host header isn't the app's own domain, to find out which
-// catalog (if any) that hostname belongs to. Only ever matches an *active*
-// domain — a 'pending' one isn't actually resolving via real DNS yet
-// (hasn't been set up in hPanel), so treating it as live here would be a
-// lie the middleware can't act on anyway.
+// White-label routing — the frontend's middleware.ts calls this only for
+// a vendor domain's root path (no /public/... in the URL) and for
+// internal routes it needs to redirect away from, to find out which
+// catalog the domain's owner wants shown by default. Every other public
+// catalog URL (/public/{slug}, deep links and all) already resolves
+// purely from the slug in the path, regardless of hostname — no lookup
+// needed there at all.
+//
+// Only ever matches an *active* domain — a 'pending' one isn't actually
+// resolving via real DNS yet (hasn't been set up in hPanel), so treating
+// it as live here would be a lie the middleware can't act on anyway.
 exports.resolveDomain = asyncHandler(async (req, res) => {
   const host = String(req.query.host || '').toLowerCase().trim();
   if (!host) {
@@ -139,19 +144,34 @@ exports.resolveDomain = asyncHandler(async (req, res) => {
   }
 
   const baseDomain = process.env.APP_BASE_DOMAIN;
-  let catalog = null;
+  let vendor = null;
 
   if (baseDomain && host.endsWith(`.${baseDomain}`)) {
     const subdomain = host.slice(0, -(`.${baseDomain}`.length));
-    catalog = await Catalog.findOne({ subdomain, subdomainStatus: 'active' }, 'slug');
+    vendor = await User.findOne({ subdomain, subdomainStatus: 'active' }, 'primaryCatalogId');
+  }
+
+  if (!vendor) {
+    vendor = await User.findOne({ customDomain: host, customDomainStatus: 'active' }, 'primaryCatalogId');
+  }
+
+  if (!vendor) {
+    throw new AppError('No vendor found for this domain', 404);
+  }
+
+  // Falls back to the vendor's oldest catalog when no primary is chosen
+  // (or the chosen one no longer exists) — covers the common single-
+  // catalog free-plan vendor without requiring them to pick one.
+  let catalog = null;
+  if (vendor.primaryCatalogId) {
+    catalog = await Catalog.findOne({ _id: vendor.primaryCatalogId, vendorId: vendor._id }, 'slug');
+  }
+  if (!catalog) {
+    catalog = await Catalog.findOne({ vendorId: vendor._id }, 'slug').sort({ createdAt: 1 });
   }
 
   if (!catalog) {
-    catalog = await Catalog.findOne({ customDomain: host, customDomainStatus: 'active' }, 'slug');
-  }
-
-  if (!catalog) {
-    throw new AppError('No catalog found for this domain', 404);
+    throw new AppError('This vendor has no catalogs yet', 404);
   }
 
   res.json({ success: true, slug: catalog.slug });

@@ -33,7 +33,7 @@ router.put(
 router.post('/support-tickets/:ticketId/reply', replyToTicketValidators, validate, adminController.replyToTicket);
 router.get('/domain-requests', adminController.getDomainRequests);
 router.put(
-  '/domain-requests/:catalogId',
+  '/domain-requests/:vendorId',
   updateDomainRequestValidators,
   validate,
   adminController.updateDomainRequest

@@ -11,7 +11,36 @@ import { apiFetch, ApiError } from '@/utils/api';
 import { isPasswordValid } from '@/utils/validators';
 import { BUSINESS_TYPES, INDUSTRIES } from '@/utils/constants';
 import { CURRENCIES } from '@/utils/currency';
-import { UserIcon, LockIcon, CreditCardIcon, TrashIcon } from '@/components/icons';
+import {
+  UserIcon,
+  LockIcon,
+  CreditCardIcon,
+  TrashIcon,
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+  ShareIcon,
+} from '@/components/icons';
+
+type DomainStatus = 'pending' | 'active' | 'failed';
+
+interface CatalogSummary {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3010';
+// The bare domain the app is deployed on — used to build the preview of
+// what a requested subdomain will look like (`{value}.{APP_BASE_DOMAIN}`).
+// Falls back to parsing it out of APP_URL so this doesn't need its own
+// separate env var kept in sync with NEXT_PUBLIC_APP_URL.
+const APP_BASE_DOMAIN = (() => {
+  try {
+    return new URL(APP_URL).hostname;
+  } catch {
+    return 'instantcatalog.app';
+  }
+})();
 
 function subscriptionLabel(user: AuthUser | null): string {
   if (!user) return '—';
@@ -58,6 +87,23 @@ function Settings() {
   // Subscription
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
 
+  // White-label domain — vendor-scoped, not per-catalog: once active,
+  // every catalog this vendor owns is reachable at `{domain}/public/{slug}`.
+  const [subdomain, setSubdomain] = useState<string | undefined>();
+  const [subdomainStatus, setSubdomainStatus] = useState<DomainStatus | undefined>();
+  const [subdomainInput, setSubdomainInput] = useState('');
+  const [savingSubdomain, setSavingSubdomain] = useState(false);
+  const [subdomainError, setSubdomainError] = useState('');
+  const [customDomain, setCustomDomain] = useState<string | undefined>();
+  const [customDomainStatus, setCustomDomainStatus] = useState<DomainStatus | undefined>();
+  const [customDomainInput, setCustomDomainInput] = useState('');
+  const [savingCustomDomain, setSavingCustomDomain] = useState(false);
+  const [customDomainError, setCustomDomainError] = useState('');
+  const [primaryCatalogId, setPrimaryCatalogId] = useState('');
+  const [savingPrimaryCatalog, setSavingPrimaryCatalog] = useState(false);
+  const [catalogs, setCatalogs] = useState<CatalogSummary[]>([]);
+  const [domainUpgradeModalOpen, setDomainUpgradeModalOpen] = useState(false);
+
   useEffect(() => {
     apiFetch<{ user: AuthUser }>('/users/profile').then((res) => {
       setMobileNo(res.user.mobileNo || '');
@@ -67,7 +113,17 @@ function Settings() {
       setCurrency(res.user.currency || 'INR');
       setLogoPreview(res.user.logo || '');
       setBannerPreview(res.user.banner || '');
+      setSubdomain(res.user.subdomain);
+      setSubdomainStatus(res.user.subdomainStatus);
+      setCustomDomain(res.user.customDomain);
+      setCustomDomainStatus(res.user.customDomainStatus);
+      setPrimaryCatalogId(res.user.primaryCatalogId || '');
     });
+    apiFetch<{ catalogs: CatalogSummary[] }>('/catalogs')
+      .then((res) => setCatalogs(res.catalogs))
+      .catch(() => {
+        // Non-fatal — the primary-catalog picker just stays empty.
+      });
   }, []);
 
   function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -151,6 +207,82 @@ function Settings() {
       router.push('/login');
     } catch (err) {
       setDeleteError(err instanceof ApiError ? err.message : 'Something went wrong. Please try again.');
+    }
+  }
+
+  async function handleSetSubdomain(e: FormEvent) {
+    e.preventDefault();
+    setSubdomainError('');
+    setSavingSubdomain(true);
+    try {
+      const res = await apiFetch<{ user: AuthUser }>('/users/subdomain', {
+        method: 'PUT',
+        body: { subdomain: subdomainInput },
+      });
+      setSubdomain(res.user.subdomain);
+      setSubdomainStatus(res.user.subdomainStatus);
+      setSubdomainInput('');
+    } catch (err) {
+      setSubdomainError(err instanceof ApiError ? err.message : 'Could not request that subdomain. Please try again.');
+    } finally {
+      setSavingSubdomain(false);
+    }
+  }
+
+  async function handleRemoveSubdomain() {
+    if (!window.confirm('Remove your subdomain?')) return;
+    try {
+      const res = await apiFetch<{ user: AuthUser }>('/users/subdomain', { method: 'DELETE' });
+      setSubdomain(res.user.subdomain);
+      setSubdomainStatus(res.user.subdomainStatus);
+    } catch (err) {
+      setSubdomainError(err instanceof ApiError ? err.message : 'Could not remove the subdomain.');
+    }
+  }
+
+  async function handleSetCustomDomain(e: FormEvent) {
+    e.preventDefault();
+    if (isFreePlan(user)) {
+      setDomainUpgradeModalOpen(true);
+      return;
+    }
+    setCustomDomainError('');
+    setSavingCustomDomain(true);
+    try {
+      const res = await apiFetch<{ user: AuthUser }>('/users/custom-domain', {
+        method: 'PUT',
+        body: { customDomain: customDomainInput },
+      });
+      setCustomDomain(res.user.customDomain);
+      setCustomDomainStatus(res.user.customDomainStatus);
+      setCustomDomainInput('');
+    } catch (err) {
+      setCustomDomainError(err instanceof ApiError ? err.message : 'Could not connect that domain. Please try again.');
+    } finally {
+      setSavingCustomDomain(false);
+    }
+  }
+
+  async function handleRemoveCustomDomain() {
+    if (!window.confirm('Disconnect this domain?')) return;
+    try {
+      const res = await apiFetch<{ user: AuthUser }>('/users/custom-domain', { method: 'DELETE' });
+      setCustomDomain(res.user.customDomain);
+      setCustomDomainStatus(res.user.customDomainStatus);
+    } catch (err) {
+      setCustomDomainError(err instanceof ApiError ? err.message : 'Could not disconnect the domain.');
+    }
+  }
+
+  async function handlePrimaryCatalogChange(catalogId: string) {
+    setPrimaryCatalogId(catalogId);
+    setSavingPrimaryCatalog(true);
+    try {
+      await apiFetch('/users/primary-catalog', { method: 'PUT', body: { catalogId } });
+    } catch (err) {
+      setSubdomainError(err instanceof ApiError ? err.message : 'Could not update your primary catalog.');
+    } finally {
+      setSavingPrimaryCatalog(false);
     }
   }
 
@@ -404,6 +536,160 @@ function Settings() {
           </button>
         )}
       </section>
+
+      {/* White-label domain */}
+      <section className="mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-100 text-primary-700">
+            <ShareIcon className="h-5 w-5" />
+          </div>
+          <h2 className="text-xl font-semibold text-gray-900">White-label Domain</h2>
+        </div>
+        <p className="mt-1 text-sm text-gray-600">
+          Show every catalog you own under your own address instead of our shared link — once set up,{' '}
+          {catalogs[0] ? `${APP_URL.replace(/^https?:\/\//, '')}/public/${catalogs[0].slug}` : 'your catalog links'} become
+          reachable the same way from your domain too.
+        </p>
+
+        <div className="mt-5 border-t border-gray-100 pt-5">
+          <p className="text-sm font-medium text-gray-700">Branded subdomain</p>
+          {subdomain ? (
+            <div className="mt-2 flex items-start justify-between gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3">
+              <div>
+                <p className="text-sm font-medium text-gray-900">
+                  {subdomain}.{APP_BASE_DOMAIN}
+                </p>
+                {subdomainStatus === 'active' ? (
+                  <p className="mt-1 flex items-center gap-1 text-xs text-green-700">
+                    <CheckCircleIcon className="h-3.5 w-3.5" /> Live
+                  </p>
+                ) : subdomainStatus === 'failed' ? (
+                  <p className="mt-1 flex items-center gap-1 text-xs text-red-600">
+                    <ExclamationTriangleIcon className="h-3.5 w-3.5" /> Setup failed — contact support
+                  </p>
+                ) : (
+                  <p className="mt-1 flex items-center gap-1 text-xs text-amber-600">
+                    <ExclamationTriangleIcon className="h-3.5 w-3.5" /> Pending — we&apos;re setting this up
+                  </p>
+                )}
+              </div>
+              <button
+                onClick={handleRemoveSubdomain}
+                className="shrink-0 text-xs font-medium text-gray-400 hover:text-red-600"
+              >
+                Remove
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleSetSubdomain} className="mt-2">
+              <div className="flex items-center gap-2">
+                <div className="flex flex-1 items-center rounded-lg border border-gray-300 focus-within:border-primary-600 focus-within:ring-1 focus-within:ring-primary-600">
+                  <input
+                    value={subdomainInput}
+                    onChange={(e) => setSubdomainInput(e.target.value)}
+                    placeholder="yourbrand"
+                    className="w-full rounded-l-lg px-3 py-2 text-sm focus:outline-none"
+                  />
+                  <span className="shrink-0 pr-3 text-sm text-gray-400">.{APP_BASE_DOMAIN}</span>
+                </div>
+                <button
+                  type="submit"
+                  disabled={savingSubdomain || !subdomainInput.trim()}
+                  className="shrink-0 rounded-lg bg-primary-700 px-4 py-2 text-sm font-medium text-white hover:bg-primary-800 disabled:opacity-50"
+                >
+                  {savingSubdomain ? 'Requesting…' : 'Request'}
+                </button>
+              </div>
+              {subdomainError && <p className="mt-2 text-xs text-red-600">{subdomainError}</p>}
+            </form>
+          )}
+        </div>
+
+        <div className="mt-5 border-t border-gray-100 pt-5">
+          <p className="text-sm font-medium text-gray-700">Custom domain</p>
+          {isFreePlan(user) && !customDomain ? (
+            <button
+              onClick={() => setDomainUpgradeModalOpen(true)}
+              className="mt-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              Upgrade to connect your own domain
+            </button>
+          ) : customDomain ? (
+            <div className="mt-2 flex items-start justify-between gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3">
+              <div>
+                <p className="text-sm font-medium text-gray-900">{customDomain}</p>
+                {customDomainStatus === 'active' ? (
+                  <p className="mt-1 flex items-center gap-1 text-xs text-green-700">
+                    <CheckCircleIcon className="h-3.5 w-3.5" /> Live
+                  </p>
+                ) : customDomainStatus === 'failed' ? (
+                  <p className="mt-1 flex items-center gap-1 text-xs text-red-600">
+                    <ExclamationTriangleIcon className="h-3.5 w-3.5" /> Setup failed — contact support
+                  </p>
+                ) : (
+                  <p className="mt-1 flex items-center gap-1 text-xs text-amber-600">
+                    <ExclamationTriangleIcon className="h-3.5 w-3.5" /> Pending — we&apos;re setting this up
+                  </p>
+                )}
+              </div>
+              <button
+                onClick={handleRemoveCustomDomain}
+                className="shrink-0 text-xs font-medium text-gray-400 hover:text-red-600"
+              >
+                Remove
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleSetCustomDomain} className="mt-2">
+              <div className="flex items-center gap-2">
+                <input
+                  value={customDomainInput}
+                  onChange={(e) => setCustomDomainInput(e.target.value)}
+                  placeholder="catalog.yourbrand.com"
+                  className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-600"
+                />
+                <button
+                  type="submit"
+                  disabled={savingCustomDomain || !customDomainInput.trim()}
+                  className="shrink-0 rounded-lg bg-primary-700 px-4 py-2 text-sm font-medium text-white hover:bg-primary-800 disabled:opacity-50"
+                >
+                  {savingCustomDomain ? 'Connecting…' : 'Connect'}
+                </button>
+              </div>
+              <p className="mt-1 text-xs text-gray-400">
+                Point a CNAME (or A record for a root domain) at our hosting — we&apos;ll confirm once it&apos;s set up.
+              </p>
+              {customDomainError && <p className="mt-2 text-xs text-red-600">{customDomainError}</p>}
+            </form>
+          )}
+        </div>
+
+        {catalogs.length > 1 && (subdomain || customDomain) && (
+          <div className="mt-5 border-t border-gray-100 pt-5">
+            <label htmlFor="primaryCatalog" className="block text-sm font-medium text-gray-700">
+              Primary catalog
+            </label>
+            <p className="mt-1 text-xs text-gray-500">
+              Which catalog visitors see when they go straight to your domain with no specific link.
+            </p>
+            <select
+              id="primaryCatalog"
+              value={primaryCatalogId}
+              onChange={(e) => handlePrimaryCatalogChange(e.target.value)}
+              disabled={savingPrimaryCatalog}
+              className="mt-2 w-full max-w-sm rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-600 disabled:opacity-50"
+            >
+              {catalogs.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+      </section>
+
+      <UpgradePlanModal isOpen={domainUpgradeModalOpen} onClose={() => setDomainUpgradeModalOpen(false)} reason="domain" />
 
       {/* Danger zone */}
       <section className="mt-6 rounded-2xl border border-red-200 bg-white p-6 shadow-sm">

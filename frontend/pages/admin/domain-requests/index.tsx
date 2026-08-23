@@ -5,13 +5,11 @@ import Alert from '@/components/Alert';
 import { CheckCircleIcon, XIcon } from '@/components/icons';
 import { apiFetch, ApiError } from '@/utils/api';
 
-// One row per pending request — a catalog can have both a pending
+// One row per pending request — a vendor can have both a pending
 // subdomain AND a pending customDomain at once (see backend/src/models/
-// Catalog.js), so `type` distinguishes which field this specific request
-// is about even though both live on the same catalog document.
+// User.js), so `type` distinguishes which field this specific request is
+// about even though both live on the same vendor document.
 interface DomainRequest {
-  catalogId: string;
-  catalogName: string;
   vendorId: string;
   vendorBusinessName: string;
   vendorEmail: string;
@@ -33,12 +31,12 @@ function DomainRequests() {
 
   useEffect(loadRequests, [loadRequests]);
 
-  async function handleAction(catalogId: string, type: 'subdomain' | 'customDomain', status: 'active' | 'failed') {
-    const key = `${catalogId}:${type}`;
+  async function handleAction(vendorId: string, type: 'subdomain' | 'customDomain', status: 'active' | 'failed') {
+    const key = `${vendorId}:${type}`;
     setActioningKey(key);
     setError('');
     try {
-      await apiFetch(`/admin/domain-requests/${catalogId}`, { method: 'PUT', body: { type, status } });
+      await apiFetch(`/admin/domain-requests/${vendorId}`, { method: 'PUT', body: { type, status } });
       loadRequests();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Could not update this request.');
@@ -53,7 +51,8 @@ function DomainRequests() {
         <h1 className="text-3xl font-bold text-gray-900">Domain Requests</h1>
         <p className="mt-1 text-sm text-gray-500">
           This host has no domain-provisioning API — set each of these up in hPanel (subdomain, or Parked Domain +
-          the vendor&apos;s DNS for a custom domain), confirm it resolves, then mark it live below.
+          the vendor&apos;s DNS for a custom domain), confirm it resolves, then mark it live below. One domain
+          covers every catalog that vendor owns.
         </p>
       </div>
 
@@ -77,7 +76,6 @@ function DomainRequests() {
               <thead className="border-b border-gray-200 bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
                 <tr>
                   <th className="px-4 py-3 font-medium">Vendor</th>
-                  <th className="px-4 py-3 font-medium">Catalog</th>
                   <th className="px-4 py-3 font-medium">Requested</th>
                   <th className="px-4 py-3 font-medium">Type</th>
                   <th className="px-4 py-3 font-medium">Date</th>
@@ -91,7 +89,7 @@ function DomainRequests() {
                   if (req.customDomain) rows.push({ type: 'customDomain', value: req.customDomain, label: 'Custom domain' });
 
                   return rows.map((row) => {
-                    const key = `${req.catalogId}:${row.type}`;
+                    const key = `${req.vendorId}:${row.type}`;
                     const actioning = actioningKey === key;
                     return (
                       <tr key={key}>
@@ -99,7 +97,6 @@ function DomainRequests() {
                           <p className="font-medium text-gray-900">{req.vendorBusinessName}</p>
                           <p className="text-xs text-gray-500">{req.vendorEmail}</p>
                         </td>
-                        <td className="px-4 py-3 text-gray-600">{req.catalogName}</td>
                         <td className="px-4 py-3">
                           <p className="font-medium text-gray-900">{row.value}</p>
                           <p className="text-xs text-gray-500">{row.label}</p>
@@ -113,7 +110,7 @@ function DomainRequests() {
                         <td className="px-4 py-3">
                           <div className="flex gap-2">
                             <button
-                              onClick={() => handleAction(req.catalogId, row.type, 'active')}
+                              onClick={() => handleAction(req.vendorId, row.type, 'active')}
                               disabled={actioning}
                               title="Mark live"
                               className="inline-flex items-center gap-1 rounded-lg border border-green-300 px-2.5 py-1.5 text-xs font-medium text-green-700 hover:bg-green-50 disabled:opacity-50"
@@ -121,7 +118,7 @@ function DomainRequests() {
                               <CheckCircleIcon className="h-3.5 w-3.5" /> Mark live
                             </button>
                             <button
-                              onClick={() => handleAction(req.catalogId, row.type, 'failed')}
+                              onClick={() => handleAction(req.vendorId, row.type, 'failed')}
                               disabled={actioning}
                               title="Mark failed"
                               className="inline-flex items-center gap-1 rounded-lg border border-red-300 px-2.5 py-1.5 text-xs font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"

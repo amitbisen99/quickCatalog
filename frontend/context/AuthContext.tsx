@@ -13,6 +13,11 @@ export interface AuthUser {
   currency?: string;
   subscriptionType?: string;
   subscriptionExpiresAt?: string;
+  subdomain?: string;
+  subdomainStatus?: 'pending' | 'active' | 'failed';
+  customDomain?: string;
+  customDomainStatus?: 'pending' | 'active' | 'failed';
+  primaryCatalogId?: string;
   status?: string;
   createdAt?: string;
 }

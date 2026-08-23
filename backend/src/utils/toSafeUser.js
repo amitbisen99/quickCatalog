@@ -12,6 +12,11 @@ module.exports = function toSafeUser(user) {
     currency: user.currency,
     subscriptionType: user.subscriptionType,
     subscriptionExpiresAt: user.subscriptionExpiresAt,
+    subdomain: user.subdomain,
+    subdomainStatus: user.subdomainStatus,
+    customDomain: user.customDomain,
+    customDomainStatus: user.customDomainStatus,
+    primaryCatalogId: user.primaryCatalogId,
     status: user.status,
     createdAt: user.createdAt,
   };

@@ -39,10 +39,6 @@ async function toCatalogResponse(catalog, knownCount) {
     slug: catalog.slug,
     qrCode: catalog.qrCode,
     template: catalog.template,
-    subdomain: catalog.subdomain,
-    subdomainStatus: catalog.subdomainStatus,
-    customDomain: catalog.customDomain,
-    customDomainStatus: catalog.customDomainStatus,
     productsCount,
     createdAt: catalog.createdAt,
     updatedAt: catalog.updatedAt,
@@ -172,103 +168,6 @@ exports.deleteCatalog = asyncHandler(async (req, res) => {
   // about), not catalog data. Deleting the catalog shouldn't erase that.
 
   res.json({ success: true, message: 'Catalog deleted successfully' });
-});
-
-// White-label domains — see docs/ARCHITECTURE (or the plan discussed with
-// the vendor) for why these are a manually-actioned request queue rather
-// than instant self-service: this hosting platform has no API to
-// provision a new subdomain/parked-domain automatically, so setting either
-// field here only records the vendor's request as 'pending'. An admin
-// still has to do the actual hPanel + DNS work, then flip it to 'active'
-// via the admin domain-requests screen.
-
-exports.setSubdomain = asyncHandler(async (req, res) => {
-  const { catalogId } = req.params;
-  const { subdomain } = req.body;
-  if (!mongoose.Types.ObjectId.isValid(catalogId)) {
-    throw new AppError('Catalog not found', 404);
-  }
-
-  const catalog = await Catalog.findOne({ _id: catalogId, vendorId: req.user.id });
-  if (!catalog) {
-    throw new AppError('Catalog not found', 404);
-  }
-
-  const existing = await Catalog.findOne({ subdomain, _id: { $ne: catalog._id } });
-  if (existing) {
-    throw new AppError('That subdomain is already taken', 409);
-  }
-
-  catalog.subdomain = subdomain;
-  catalog.subdomainStatus = 'pending';
-  await catalog.save();
-
-  res.json({ success: true, message: 'Subdomain requested — we’ll set this up shortly', catalog: await toCatalogResponse(catalog) });
-});
-
-exports.removeSubdomain = asyncHandler(async (req, res) => {
-  const { catalogId } = req.params;
-  if (!mongoose.Types.ObjectId.isValid(catalogId)) {
-    throw new AppError('Catalog not found', 404);
-  }
-
-  const catalog = await Catalog.findOne({ _id: catalogId, vendorId: req.user.id });
-  if (!catalog) {
-    throw new AppError('Catalog not found', 404);
-  }
-
-  catalog.subdomain = undefined;
-  catalog.subdomainStatus = undefined;
-  await catalog.save();
-
-  res.json({ success: true, message: 'Subdomain removed', catalog: await toCatalogResponse(catalog) });
-});
-
-exports.setCustomDomain = asyncHandler(async (req, res) => {
-  const { catalogId } = req.params;
-  const { customDomain } = req.body;
-  if (!mongoose.Types.ObjectId.isValid(catalogId)) {
-    throw new AppError('Catalog not found', 404);
-  }
-
-  const user = await User.findById(req.user.id);
-  if (user.subscriptionType !== 'paid') {
-    throw new AppError('Custom domains are a paid-plan feature. Upgrade to connect your own domain.', 403);
-  }
-
-  const catalog = await Catalog.findOne({ _id: catalogId, vendorId: req.user.id });
-  if (!catalog) {
-    throw new AppError('Catalog not found', 404);
-  }
-
-  const existing = await Catalog.findOne({ customDomain, _id: { $ne: catalog._id } });
-  if (existing) {
-    throw new AppError('That domain is already connected to another catalog', 409);
-  }
-
-  catalog.customDomain = customDomain;
-  catalog.customDomainStatus = 'pending';
-  await catalog.save();
-
-  res.json({ success: true, message: 'Domain requested — we’ll set this up shortly', catalog: await toCatalogResponse(catalog) });
-});
-
-exports.removeCustomDomain = asyncHandler(async (req, res) => {
-  const { catalogId } = req.params;
-  if (!mongoose.Types.ObjectId.isValid(catalogId)) {
-    throw new AppError('Catalog not found', 404);
-  }
-
-  const catalog = await Catalog.findOne({ _id: catalogId, vendorId: req.user.id });
-  if (!catalog) {
-    throw new AppError('Catalog not found', 404);
-  }
-
-  catalog.customDomain = undefined;
-  catalog.customDomainStatus = undefined;
-  await catalog.save();
-
-  res.json({ success: true, message: 'Domain removed', catalog: await toCatalogResponse(catalog) });
 });
 
 exports.createFromFile = asyncHandler(async (req, res) => {
