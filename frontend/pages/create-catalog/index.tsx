@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { apiFetch, ApiError, API_URL } from '@/utils/api';
 import { autoMapHeaders } from '@/utils/fuzzyMapHeaders';
+import { getCatalogPublicUrl } from '@/utils/catalogUrl';
 
 // Standalone "create your catalog" funnel — deliberately separate from the
 // vendor dashboard (no DashboardLayout/AdminLayout, no sidebar nav). Entered
@@ -40,8 +41,6 @@ import { autoMapHeaders } from '@/utils/fuzzyMapHeaders';
 //     Free — there's no plan-choice step. Free tier is capped at
 //     FREE_PRODUCT_LIMIT products per catalog server-side; the response's
 //     `planLimit` field reports if this import got truncated.
-
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3010';
 
 // Mirrors backend/src/utils/planLimits.js — the server is the real
 // enforcer, this only drives display copy on the Preview step.
@@ -361,7 +360,7 @@ export default function CreateCatalogWizard() {
   async function handleCopyLink() {
     if (!createResult) return;
     try {
-      await navigator.clipboard.writeText(`${APP_URL}/public/${createResult.catalog.slug}`);
+      await navigator.clipboard.writeText(getCatalogPublicUrl(createResult.catalog.slug, user));
     } catch {
       // Clipboard access can fail (permissions, non-secure context) — the
       // URL is already visible and selectable, so this is a soft failure.
@@ -743,7 +742,7 @@ export default function CreateCatalogWizard() {
 
               <div className="mt-6 flex items-center gap-2 rounded-xl border border-brand-border bg-brand-bg/60 p-2 pl-4">
                 <span className="flex-1 truncate text-left text-sm font-semibold text-brand-text">
-                  {APP_URL.replace(/^https?:\/\//, '')}/public/{createResult.catalog.slug}
+                  {getCatalogPublicUrl(createResult.catalog.slug, user).replace(/^https?:\/\//, '')}
                 </span>
                 <button
                   type="button"
@@ -801,7 +800,7 @@ export default function CreateCatalogWizard() {
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
                 <a
-                  href={`${APP_URL}/public/${createResult.catalog.slug}`}
+                  href={getCatalogPublicUrl(createResult.catalog.slug, user)}
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center justify-center gap-2 rounded-2xl border border-brand-border bg-white px-6 py-3 text-sm font-bold text-brand-text shadow-sm transition-colors hover:bg-brand-bg"

@@ -11,6 +11,7 @@ import { downloadFile } from '@/utils/downloadFile';
 import { getCatalogTemplate } from '@/components/catalog-templates/registry';
 import { downloadQrWithLabel } from '@/utils/downloadQrWithLabel';
 import { useAuth } from '@/context/AuthContext';
+import { getCatalogPublicUrl } from '@/utils/catalogUrl';
 
 interface Catalog {
   id: string;
@@ -22,8 +23,6 @@ interface Catalog {
   productsCount: number;
   createdAt: string;
 }
-
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3010';
 
 function CatalogDetail() {
   const router = useRouter();
@@ -60,7 +59,7 @@ function CatalogDetail() {
     );
   }
 
-  const url = `${APP_URL}/public/${catalog.slug}`;
+  const url = getCatalogPublicUrl(catalog.slug, user);
   const businessName = user?.businessName || 'Our Business';
   // Business-formal share copy — reads naturally as a WhatsApp/SMS/email
   // message rather than an ad. Facebook's sharer doesn't take custom

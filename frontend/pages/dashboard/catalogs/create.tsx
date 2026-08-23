@@ -18,6 +18,8 @@ import ProgressBar from '@/components/ProgressBar';
 import { useSimulatedProgress } from '@/hooks/useSimulatedProgress';
 import { apiFetch, ApiError, API_URL } from '@/utils/api';
 import { autoMapHeaders } from '@/utils/fuzzyMapHeaders';
+import { getCatalogPublicUrl } from '@/utils/catalogUrl';
+import { useAuth } from '@/context/AuthContext';
 
 // Reached via CreateCatalogModal's "Import File" option on
 // /dashboard/catalogs — the modal's other option, "Create Manually", stays
@@ -192,6 +194,7 @@ const inputClass =
   'mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-600';
 
 function CreateCatalogWizard() {
+  const { user } = useAuth();
   const [step, setStep] = useState<WizardStep>(1);
 
   const [catalog, setCatalog] = useState<CatalogData>({ name: '', description: '' });
@@ -737,8 +740,7 @@ function CreateCatalogWizard() {
 
             <div className="mt-5 flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 p-2 pl-4">
               <span className="flex-1 truncate text-left text-sm font-medium text-gray-900">
-                {process.env.NEXT_PUBLIC_APP_URL?.replace(/^https?:\/\//, '') || 'localhost:3010'}/public/
-                {createResult.catalog.slug}
+                {getCatalogPublicUrl(createResult.catalog.slug, user).replace(/^https?:\/\//, '')}
               </span>
             </div>
 
@@ -797,7 +799,7 @@ function CreateCatalogWizard() {
 
             <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-center">
               <a
-                href={`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3010'}/public/${createResult.catalog.slug}`}
+                href={getCatalogPublicUrl(createResult.catalog.slug, user)}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"

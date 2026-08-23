@@ -10,6 +10,8 @@ import UpgradePlanModal from '@/components/dashboard/UpgradePlanModal';
 import { CopyIcon, DownloadIcon, EyeIcon, PencilIcon, ShareIcon, SpinnerIcon, TrashIcon } from '@/components/icons';
 import { apiFetch, ApiError } from '@/utils/api';
 import { downloadFile } from '@/utils/downloadFile';
+import { getCatalogPublicUrl } from '@/utils/catalogUrl';
+import { useAuth } from '@/context/AuthContext';
 
 interface Catalog {
   id: string;
@@ -21,14 +23,13 @@ interface Catalog {
   createdAt: string;
 }
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3010';
-
-function publicUrl(slug: string) {
-  return `${APP_URL}/public/${slug}`;
-}
-
 function Catalogs() {
   const router = useRouter();
+  const { user } = useAuth();
+
+  function publicUrl(slug: string) {
+    return getCatalogPublicUrl(slug, user);
+  }
   const [catalogs, setCatalogs] = useState<Catalog[] | null>(null);
   const [error, setError] = useState('');
   const [modalOpen, setModalOpen] = useState(false);

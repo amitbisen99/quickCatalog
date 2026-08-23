@@ -1,8 +1,7 @@
 import { useAuth } from '@/context/AuthContext';
 import { XIcon } from '@/components/icons';
 import ShareOptions from './ShareOptions';
-
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3010';
+import { getCatalogPublicUrl } from '@/utils/catalogUrl';
 
 interface Props {
   catalog: { name: string; slug: string } | null;
@@ -17,7 +16,7 @@ export default function ShareCatalogModal({ catalog, onClose }: Props) {
   const { user } = useAuth();
   if (!catalog) return null;
 
-  const url = `${APP_URL}/public/${catalog.slug}`;
+  const url = getCatalogPublicUrl(catalog.slug, user);
   const businessName = user?.businessName || 'Our Business';
   const message = `${businessName} — Product Catalog\nExplore our full range: ${catalog.name}\n${url}`;
 
