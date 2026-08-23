@@ -13,6 +13,22 @@ exports.login = asyncHandler(async (req, res) => {
   const emailMatches = process.env.ADMIN_EMAIL && email.toLowerCase() === process.env.ADMIN_EMAIL.toLowerCase();
   const passwordMatches = process.env.ADMIN_PASSWORD_HASH && (await bcrypt.compare(password, process.env.ADMIN_PASSWORD_HASH));
 
+  // TEMP DIAGNOSTIC — tracking down a hPanel env-var mismatch. Logs only
+  // shapes/lengths/booleans, never the actual email, password, or hash
+  // values. Remove once the mismatch is found.
+  // eslint-disable-next-line no-console
+  console.log('[admin-login-debug]', {
+    envEmailSet: !!process.env.ADMIN_EMAIL,
+    envEmailLength: process.env.ADMIN_EMAIL ? process.env.ADMIN_EMAIL.length : null,
+    envHashSet: !!process.env.ADMIN_PASSWORD_HASH,
+    envHashLength: process.env.ADMIN_PASSWORD_HASH ? process.env.ADMIN_PASSWORD_HASH.length : null,
+    envHashPrefix: process.env.ADMIN_PASSWORD_HASH ? process.env.ADMIN_PASSWORD_HASH.slice(0, 4) : null,
+    submittedEmailLength: email ? email.length : null,
+    submittedPasswordLength: password ? password.length : null,
+    emailMatches,
+    passwordMatches,
+  });
+
   if (!emailMatches || !passwordMatches) {
     throw new AppError('Invalid email or password', 401);
   }
