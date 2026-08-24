@@ -25,7 +25,7 @@ async function sendEmail({ to, subject, htmlContent }) {
     },
     body: JSON.stringify({
       sender: {
-        name: process.env.BREVO_SENDER_NAME || 'QuickCatalog',
+        name: process.env.BREVO_SENDER_NAME || 'Instant Catalog',
         email: process.env.BREVO_SENDER_EMAIL,
       },
       to: [{ email: to }],
@@ -46,9 +46,9 @@ async function sendEmail({ to, subject, htmlContent }) {
 function sendOtpEmail(email, otp) {
   return sendEmail({
     to: email,
-    subject: 'Verify your QuickCatalog account',
+    subject: 'Verify your Instant Catalog account',
     htmlContent: `
-      <p>Your QuickCatalog verification code is:</p>
+      <p>Your Instant Catalog verification code is:</p>
       <h2 style="letter-spacing:4px;">${otp}</h2>
       <p>This code expires in 10 minutes. If you didn't request this, you can ignore this email.</p>
     `,
@@ -58,9 +58,9 @@ function sendOtpEmail(email, otp) {
 function sendPasswordResetEmail(email, resetLink) {
   return sendEmail({
     to: email,
-    subject: 'Reset your QuickCatalog password',
+    subject: 'Reset your Instant Catalog password',
     htmlContent: `
-      <p>We received a request to reset your QuickCatalog password.</p>
+      <p>We received a request to reset your Instant Catalog password.</p>
       <p><a href="${resetLink}">Click here to reset your password</a></p>
       <p>This link expires in 1 hour. If you didn't request this, you can ignore this email.</p>
     `,
@@ -81,7 +81,7 @@ function sendEnquiryNotificationEmail(vendorEmail, enquiry) {
       Mobile: ${enquiry.customerMobile}${enquiry.customerEmail ? `<br/>Email: ${enquiry.customerEmail}` : ''}</p>
       <p>Products:</p>
       <ul>${itemsHtml}</ul>
-      <p>Log in to QuickCatalog to view the full enquiry.</p>
+      <p>Log in to Instant Catalog to view the full enquiry.</p>
     `,
   });
 }
@@ -98,7 +98,7 @@ function sendSupportTicketNotificationEmail(adminEmail, ticket) {
       <strong>Preferred contact:</strong> ${contactLine}</p>
       <p><strong>Reason for contact:</strong></p>
       <p>${ticket.reason}</p>
-      <p>Log in to the QuickCatalog admin panel to respond.</p>
+      <p>Log in to the Instant Catalog admin panel to respond.</p>
     `,
   });
 }
@@ -106,12 +106,43 @@ function sendSupportTicketNotificationEmail(adminEmail, ticket) {
 function sendSupportTicketReplyEmail(vendorEmail, ticket) {
   return sendEmail({
     to: vendorEmail,
-    subject: 'Reply to your QuickCatalog support request',
+    subject: 'Reply to your Instant Catalog support request',
     htmlContent: `
       <p>Our support team replied to your request:</p>
       <p style="color:#666;">"${ticket.reason}"</p>
       <p><strong>Reply:</strong></p>
       <p>${ticket.adminReply}</p>
+    `,
+  });
+}
+
+// Sent once, right after OTP verification actually completes the
+// registration — separate from sendOtpEmail, which only confirms the
+// vendor owns the address, not that they've finished signing up.
+function sendWelcomeEmail(email, businessName) {
+  return sendEmail({
+    to: email,
+    subject: 'Welcome to Instant Catalog 🎉',
+    htmlContent: `
+      <p>Hi ${businessName || 'there'},</p>
+      <p>Your Instant Catalog account is verified and ready to go.</p>
+      <p>Log in to your dashboard to build your first catalog, add products, and start sharing a link with your customers.</p>
+      <p><a href="${process.env.CLIENT_URL}/login">Log in to Instant Catalog</a></p>
+    `,
+  });
+}
+
+// amount is in the smallest currency unit (paise/cents), same as
+// Payment.amount and what Razorpay itself deals in — see the model.
+function sendPaymentSuccessEmail(email, { amount, currency }) {
+  const majorAmount = (amount / 100).toFixed(2);
+  return sendEmail({
+    to: email,
+    subject: "Payment received — you're on the Instant Catalog Paid plan",
+    htmlContent: `
+      <p>Thanks for upgrading!</p>
+      <p>We've received your payment of ${currency} ${majorAmount} and your account is now on the <strong>Paid plan</strong> — unlimited catalogs and products, plus custom domain support.</p>
+      <p><a href="${process.env.CLIENT_URL}/dashboard/settings">View your subscription</a></p>
     `,
   });
 }
@@ -123,4 +154,6 @@ module.exports = {
   sendEnquiryNotificationEmail,
   sendSupportTicketNotificationEmail,
   sendSupportTicketReplyEmail,
+  sendWelcomeEmail,
+  sendPaymentSuccessEmail,
 };

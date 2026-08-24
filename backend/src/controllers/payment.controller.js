@@ -3,6 +3,7 @@ const Payment = require('../models/Payment');
 const toSafeUser = require('../utils/toSafeUser');
 const { getPlanPricing, resolveVendorPrice } = require('../utils/planPricing');
 const { createOrder, verifyPaymentSignature } = require('../utils/razorpay');
+const { sendPaymentSuccessEmail } = require('../services/email.service');
 const asyncHandler = require('../utils/asyncHandler');
 const AppError = require('../utils/AppError');
 
@@ -95,6 +96,15 @@ exports.verifyRazorpayPayment = asyncHandler(async (req, res) => {
   }
   user.subscriptionType = 'paid';
   await user.save();
+
+  // Best-effort — the upgrade itself is already committed at this point,
+  // so a Brevo hiccup here shouldn't turn into a 500 on an otherwise-
+  // successful payment.
+  try {
+    await sendPaymentSuccessEmail(user.email, { amount: payment.amount, currency: payment.currency });
+  } catch (err) {
+    console.error('Failed to send payment success email:', err);
+  }
 
   res.json({ success: true, message: 'Payment verified — your plan has been upgraded', user: toSafeUser(user) });
 });

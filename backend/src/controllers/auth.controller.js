@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const generateOtp = require('../utils/generateOtp');
-const { sendOtpEmail, sendPasswordResetEmail } = require('../services/email.service');
+const { sendOtpEmail, sendPasswordResetEmail, sendWelcomeEmail } = require('../services/email.service');
 const asyncHandler = require('../utils/asyncHandler');
 const AppError = require('../utils/AppError');
 const toSafeUser = require('../utils/toSafeUser');
@@ -17,7 +17,7 @@ const RESET_TOKEN_TTL_HOURS = 1;
 const GENERIC_RESET_MESSAGE = 'If an account exists for this email, a password reset link has been sent.';
 
 exports.signup = asyncHandler(async (req, res) => {
-  const { email, mobileNo, password } = req.body;
+  const { email, mobileNo, countryCode, password } = req.body;
 
   let user = await User.findOne({ email });
 
@@ -31,11 +31,12 @@ exports.signup = asyncHandler(async (req, res) => {
     // Unverified user retrying signup (e.g. lost the first OTP) — refresh
     // their details instead of leaving them stuck.
     user.mobileNo = mobileNo;
+    user.countryCode = countryCode;
     user.password = password;
     await user.setOtp(otp, OTP_TTL_MINUTES);
     await user.save();
   } else {
-    user = new User({ email, mobileNo, password });
+    user = new User({ email, mobileNo, countryCode, password });
     await user.setOtp(otp, OTP_TTL_MINUTES);
     await user.save();
   }
@@ -80,6 +81,15 @@ exports.verifyEmail = asyncHandler(async (req, res) => {
   // password on a separate login screen right after. Same cookies login()
   // sets, just issued here instead.
   setAuthCookies(res, user, false);
+
+  // Best-effort — registration is already complete and the vendor is
+  // already logged in at this point, so a Brevo hiccup here shouldn't
+  // turn into a 500 on an otherwise-successful verification.
+  try {
+    await sendWelcomeEmail(user.email, user.businessName);
+  } catch (err) {
+    console.error('Failed to send welcome email:', err);
+  }
 
   res.json({ success: true, message: 'Account verified successfully', user: toSafeUser(user) });
 });
