@@ -19,6 +19,7 @@ const { CATALOG_TEMPLATE_IDS, DEFAULT_CATALOG_TEMPLATE } = require('../utils/cat
 const { FREE_CATALOG_LIMIT, FREE_PRODUCT_LIMIT, exceedsFreeProductLimit } = require('../utils/planLimits');
 const findOrCreateCategory = require('../utils/findOrCreateCategory');
 const findOrCreateSpecification = require('../utils/findOrCreateSpecification');
+const generateUniqueProductSlug = require('../utils/generateUniqueProductSlug');
 
 // See product.controller.js's identical constant — per-row image
 // compression is the slow part of an import; this bounds how many rows
@@ -208,6 +209,7 @@ exports.createFromFile = asyncHandler(async (req, res) => {
   const warnings = [];
   const categoryCache = new Map();
   const specCache = new Map();
+  const usedSlugs = new Set();
 
   // Free tier: rows beyond this position get truncated below regardless,
   // so skip their category lookups (and, in the image-resolution pass
@@ -249,7 +251,12 @@ exports.createFromFile = asyncHandler(async (req, res) => {
       }
     }
 
-    pending.push({ rowNumber, data, categoryId, willBeInserted });
+    const slug = willBeInserted
+      ? // eslint-disable-next-line no-await-in-loop
+        await generateUniqueProductSlug(user._id, data.name, usedSlugs)
+      : undefined;
+
+    pending.push({ rowNumber, data, categoryId, slug, willBeInserted });
   }
 
   if (pending.length === 0) {
@@ -259,6 +266,7 @@ exports.createFromFile = asyncHandler(async (req, res) => {
   const validRows = await mapWithConcurrency(pending, IMAGE_RESOLVE_CONCURRENCY, async (row) => ({
     ...row.data,
     categoryId: row.categoryId,
+    slug: row.slug,
     images: row.willBeInserted
       ? await resolveRowImages(row.data, zipEntries, row.rowNumber, warnings)
       : row.data.images,
@@ -277,6 +285,7 @@ exports.createFromFile = asyncHandler(async (req, res) => {
       vendorId: user._id,
       catalogIds: [catalog._id],
       name: row.name,
+      slug: row.slug,
       sku: row.sku,
       description: row.description,
       price: row.price,

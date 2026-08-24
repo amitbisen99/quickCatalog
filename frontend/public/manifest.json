@@ -1,6 +1,6 @@
 {
-  "name": "QuickCatalog",
-  "short_name": "QuickCatalog",
+  "name": "Instant Catalog",
+  "short_name": "Instant Catalog",
   "description": "Build and share product catalogs in minutes.",
   "start_url": "/login",
   "scope": "/",

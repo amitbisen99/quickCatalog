@@ -9,17 +9,17 @@ import type { CatalogProductPageData } from '@/types/publicCatalog';
 export default function PublicCatalogProduct() {
   const router = useRouter();
   const slug = typeof router.query.slug === 'string' ? router.query.slug : '';
-  const productId = typeof router.query.productId === 'string' ? router.query.productId : '';
+  const productSlug = typeof router.query.productSlug === 'string' ? router.query.productSlug : '';
 
   const [data, setData] = useState<CatalogProductPageData | null>(null);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!slug || !productId) return;
-    apiFetch<CatalogProductPageData>(`/public/catalog/${slug}/products/${productId}`)
+    if (!slug || !productSlug) return;
+    apiFetch<CatalogProductPageData>(`/public/catalog/${slug}/products/${productSlug}`)
       .then(setData)
       .catch((err) => setError(err instanceof ApiError ? err.message : 'Could not load this product.'));
-  }, [slug, productId]);
+  }, [slug, productSlug]);
 
   useTrackVisit(data?.catalog.slug, data?.product.id);
 

@@ -21,6 +21,18 @@ const productSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    // SEO-friendly URL segment for the public product-detail page
+    // (/public/{catalogSlug}/products/{slug}) — generated once from the
+    // name at creation time and never regenerated on a later name edit,
+    // same stability convention as Catalog's own slug. Unique per vendor
+    // (not globally — two different vendors' "T-Shirt" shouldn't collide
+    // with each other), enforced via the compound index below rather
+    // than a schema-level unique:true, which would be global.
+    slug: {
+      type: String,
+      lowercase: true,
+      trim: true,
+    },
     // Optional — a vendor may not use SKUs at all. Uniqueness (when one is
     // given) is enforced app-side, scoped per vendor, the same
     // check-before-write pattern category/specification names already use
@@ -91,5 +103,10 @@ const productSchema = new mongoose.Schema(
 // the old standalone index on catalogIds — its leading field covers that
 // case too, so keeping both would just be redundant index maintenance.
 productSchema.index({ catalogIds: 1, createdAt: -1 });
+
+// Enforces slug uniqueness per vendor (not globally) — sparse so products
+// mid-migration (see the startup backfill in server.js) without a slug
+// yet don't collide with each other on `null`.
+productSchema.index({ vendorId: 1, slug: 1 }, { unique: true, sparse: true });
 
 module.exports = mongoose.model('Product', productSchema);

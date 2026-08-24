@@ -46,7 +46,7 @@ export default function Login() {
     <Layout title="Log in">
       <div className="mx-auto max-w-md">
         <h1 className="text-2xl font-bold text-gray-900">Log in</h1>
-        <p className="mt-1 text-sm text-gray-600">Welcome back to QuickCatalog.</p>
+        <p className="mt-1 text-sm text-gray-600">Welcome back to Instant Catalog.</p>
 
         {justVerified && (
           <div className="mt-4">

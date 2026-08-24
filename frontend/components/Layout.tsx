@@ -17,12 +17,12 @@ export default function Layout({ title, children }: LayoutProps) {
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">
       <Head>
-        <title>{title ? `${title} | QuickCatalog` : 'QuickCatalog'}</title>
+        <title>{title ? `${title} | Instant Catalog` : 'Instant Catalog'}</title>
       </Head>
 
       <header className="border-b border-gray-200 bg-white">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
-          <span className="text-lg font-semibold text-primary-700">QuickCatalog</span>
+          <span className="text-lg font-semibold text-primary-700">Instant Catalog</span>
 
           <button
             type="button"
@@ -61,7 +61,7 @@ export default function Layout({ title, children }: LayoutProps) {
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6">{children}</main>
 
       <footer className="border-t border-gray-200 bg-white py-6 text-center text-sm text-gray-500">
-        © {new Date().getFullYear()} QuickCatalog. All rights reserved.
+        © {new Date().getFullYear()} Instant Catalog. All rights reserved.
       </footer>
     </div>
   );

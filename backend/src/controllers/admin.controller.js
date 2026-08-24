@@ -25,6 +25,7 @@ function toUserSummary(user) {
     businessName: user.businessName,
     email: user.email,
     mobileNo: user.mobileNo,
+    countryCode: user.countryCode,
     status: user.status,
     subscriptionType: user.subscriptionType,
     createdAt: user.createdAt,
@@ -137,7 +138,7 @@ exports.exportUsers = asyncHandler(async (req, res) => {
   const rows = users.map((user) => [
     user.businessName || '',
     user.email,
-    user.mobileNo,
+    `${user.countryCode || ''} ${user.mobileNo}`.trim(),
     user.status,
     user.subscriptionType,
     user.createdAt ? user.createdAt.toISOString().slice(0, 10) : '',

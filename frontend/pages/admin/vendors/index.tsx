@@ -11,6 +11,7 @@ interface VendorSummary {
   businessName?: string;
   email: string;
   mobileNo: string;
+  countryCode?: string;
   status: string;
   subscriptionType: string;
 }
@@ -54,7 +55,7 @@ function Vendors() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Vendors</h1>
-          <p className="mt-1 text-sm text-gray-500">All registered vendors on QuickCatalog.</p>
+          <p className="mt-1 text-sm text-gray-500">All registered vendors on Instant Catalog.</p>
         </div>
         <a
           href={exportUrl()}
@@ -120,7 +121,9 @@ function Vendors() {
                   <tr key={vendor.id}>
                     <td className="px-4 py-3 font-medium text-gray-900">{vendor.businessName || '—'}</td>
                     <td className="px-4 py-3 text-gray-600">{vendor.email}</td>
-                    <td className="px-4 py-3 text-gray-600">{vendor.mobileNo}</td>
+                    <td className="px-4 py-3 text-gray-600">
+                      {vendor.countryCode} {vendor.mobileNo}
+                    </td>
                     <td className="px-4 py-3">
                       <Link
                         href={`/admin/vendors/${vendor.id}`}

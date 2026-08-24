@@ -4,8 +4,10 @@ import Link from 'next/link';
 import Layout from '@/components/Layout';
 import Alert from '@/components/Alert';
 import PasswordStrengthMeter from '@/components/PasswordStrengthMeter';
+import MobileNumberInput from '@/components/MobileNumberInput';
 import { apiFetch, ApiError } from '@/utils/api';
 import { isPasswordValid, isValidEmail } from '@/utils/validators';
+import { DEFAULT_COUNTRY_CODE } from '@/utils/countries';
 
 interface FieldErrors {
   [field: string]: string;
@@ -16,6 +18,7 @@ export default function Signup() {
 
   const [email, setEmail] = useState('');
   const [mobileNo, setMobileNo] = useState('');
+  const [countryCode, setCountryCode] = useState(DEFAULT_COUNTRY_CODE);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
@@ -48,7 +51,7 @@ export default function Signup() {
     try {
       const result = await apiFetch<{ devOtp?: string }>('/auth/signup', {
         method: 'POST',
-        body: { email, mobileNo, password, confirmPassword, acceptedTerms },
+        body: { email, mobileNo, countryCode, password, confirmPassword, acceptedTerms },
       });
 
       sessionStorage.setItem('qc_verify_email', email);
@@ -102,20 +105,13 @@ export default function Signup() {
             {touched && fieldErrors.email && <p className="mt-1 text-xs text-red-600">{fieldErrors.email}</p>}
           </div>
 
-          <div>
-            <label htmlFor="mobileNo" className="block text-sm font-medium text-gray-700">
-              Mobile Number
-            </label>
-            <input
-              id="mobileNo"
-              type="tel"
-              value={mobileNo}
-              onChange={(e) => setMobileNo(e.target.value.replace(/[^\d]/g, ''))}
-              className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-700 focus:outline-none focus:ring-1 focus:ring-primary-700"
-              placeholder="9876543210"
-            />
-            {touched && fieldErrors.mobileNo && <p className="mt-1 text-xs text-red-600">{fieldErrors.mobileNo}</p>}
-          </div>
+          <MobileNumberInput
+            countryCode={countryCode}
+            mobileNo={mobileNo}
+            onCountryCodeChange={setCountryCode}
+            onMobileNoChange={setMobileNo}
+            error={touched ? fieldErrors.mobileNo : undefined}
+          />
 
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700">

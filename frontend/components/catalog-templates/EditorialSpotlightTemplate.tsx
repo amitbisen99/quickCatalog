@@ -1,8 +1,9 @@
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef } from 'react';
 import Link from 'next/link';
 import type { CatalogTemplateProps } from '@/types/publicCatalog';
 import { stripHtml, whatsappLink } from './shared';
 import { useEnquiryCart } from './useEnquiryCart';
+import { useCatalogListState } from './useCatalogListState';
 import EnquiryCartWidget from './EnquiryCartWidget';
 import CatalogHero from './CatalogHero';
 import CatalogFilterBar from './CatalogFilterBar';
@@ -22,9 +23,7 @@ const PAGE_SIZE = 1;
 
 export default function EditorialSpotlightTemplate({ catalog, vendor, categories, products }: CatalogTemplateProps) {
   const symbol = currencySymbol(vendor.currency);
-  const [search, setSearch] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('');
-  const [page, setPage] = useState(1);
+  const { search, categoryFilter, page, setPage, updateSearch, updateCategoryFilter } = useCatalogListState();
   const cart = useEnquiryCart(catalog.slug);
   const spreadRef = useRef<HTMLDivElement>(null);
 
@@ -58,9 +57,17 @@ export default function EditorialSpotlightTemplate({ catalog, vendor, categories
   const categoryName = (id?: string) => categories.find((c) => c.id === id)?.name;
   const vendorName = vendor.businessName || catalog.name;
 
-  const generalWhatsapp = whatsappLink(vendor.mobileNo, `Hi, I'd like to know more about your "${catalog.name}" catalog.`);
+  const generalWhatsapp = whatsappLink(
+    vendor.countryCode,
+    vendor.mobileNo,
+    `Hi, I'd like to know more about your "${catalog.name}" catalog.`
+  );
   const productWhatsapp = product
-    ? whatsappLink(vendor.mobileNo, `Hi, I'm interested in "${product.name}" from your ${catalog.name} catalog.`)
+    ? whatsappLink(
+        vendor.countryCode,
+        vendor.mobileNo,
+        `Hi, I'm interested in "${product.name}" from your ${catalog.name} catalog.`
+      )
     : '';
 
   return (
@@ -70,15 +77,9 @@ export default function EditorialSpotlightTemplate({ catalog, vendor, categories
       <CatalogFilterBar
         categories={categories}
         search={search}
-        onSearchChange={(value) => {
-          setSearch(value);
-          setPage(1);
-        }}
+        onSearchChange={updateSearch}
         categoryFilter={categoryFilter}
-        onCategoryChange={(value) => {
-          setCategoryFilter(value);
-          setPage(1);
-        }}
+        onCategoryChange={updateCategoryFilter}
       />
 
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
@@ -175,7 +176,7 @@ export default function EditorialSpotlightTemplate({ catalog, vendor, categories
                   {inCart ? 'Added' : 'Enquire'}
                 </button>
                 <Link
-                  href={`/public/${catalog.slug}/products/${product.id}`}
+                  href={`/public/${catalog.slug}/products/${product.slug}`}
                   className="text-xs font-medium uppercase tracking-wide text-[#C9D3C6] underline decoration-[#C9D3C6]/40 underline-offset-4 hover:text-[#F4EFE3]"
                 >
                   View full details →
@@ -188,7 +189,7 @@ export default function EditorialSpotlightTemplate({ catalog, vendor, categories
         <CatalogPagination page={page} totalPages={totalPages} onPageChange={goToPage} />
       </div>
 
-      <CatalogFooter vendorName={vendorName} mobileNo={vendor.mobileNo} />
+      <CatalogFooter vendorName={vendorName} mobileNo={vendor.mobileNo} countryCode={vendor.countryCode} />
       <WhatsAppFloatButton link={productWhatsapp || generalWhatsapp} />
       <EnquiryCartWidget catalogId={catalog.id} currency={vendor.currency} cart={cart} />
     </div>

@@ -1,17 +1,22 @@
 interface Props {
   vendorName: string;
   mobileNo?: string;
+  countryCode?: string;
 }
 
 // The footer every catalog template shares — kept in one place so
 // switching templates never changes this part of the page.
-export default function CatalogFooter({ vendorName, mobileNo }: Props) {
+export default function CatalogFooter({ vendorName, mobileNo, countryCode }: Props) {
   return (
     <footer className="border-t border-gray-200 bg-white py-8">
       <div className="mx-auto flex max-w-6xl flex-col items-center gap-2 px-4 text-center sm:px-6">
         <p className="text-sm font-semibold text-gray-700">{vendorName}</p>
-        {mobileNo && <p className="text-xs text-gray-500">{mobileNo}</p>}
-        <p className="mt-2 text-xs text-gray-400">Powered by QuickCatalog</p>
+        {mobileNo && (
+          <p className="text-xs text-gray-500">
+            {countryCode} {mobileNo}
+          </p>
+        )}
+        <p className="mt-2 text-xs text-gray-400">Powered by Instant Catalog</p>
       </div>
     </footer>
   );

@@ -8,6 +8,6 @@ const router = express.Router();
 router.get('/resolve-domain', publicController.resolveDomain);
 router.get('/catalog/:catalogSlug', publicController.getCatalogBySlug);
 router.get('/catalog/:catalogSlug/og-image', publicController.getCatalogOgImage);
-router.get('/catalog/:catalogSlug/products/:productId', publicController.getCatalogProductBySlug);
+router.get('/catalog/:catalogSlug/products/:productSlug', publicController.getCatalogProductBySlug);
 
 module.exports = router;

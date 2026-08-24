@@ -374,7 +374,7 @@ export default function CreateCatalogWizard() {
   return (
     <div className="min-h-screen bg-brand-bg font-sans text-brand-text antialiased">
       <Head>
-        <title>Create Your Catalog | QuickCatalog</title>
+        <title>Create Your Catalog | Instant Catalog</title>
       </Head>
 
       {/* Minimal focused header — logo + exit only, no marketing nav, to
@@ -385,7 +385,7 @@ export default function CreateCatalogWizard() {
             <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-accent">
               <i className="fa-solid fa-layer-group text-xs text-white" />
             </span>
-            QuickCatalog
+            Instant Catalog
           </Link>
           <Link
             href="/"

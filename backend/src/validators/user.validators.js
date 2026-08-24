@@ -38,6 +38,7 @@ exports.setPrimaryCatalogValidators = [
 
 exports.updateProfileValidators = [
   body('mobileNo').matches(/^\d{7,15}$/).withMessage('Enter a valid mobile number'),
+  body('countryCode').matches(/^\+\d{1,4}$/).withMessage('Select a valid country code'),
   body('businessName').trim().notEmpty().withMessage('Business name is required'),
   body('businessType').trim().notEmpty().withMessage('Business type is required'),
   body('industry').trim().notEmpty().withMessage('Industry is required'),

@@ -61,7 +61,7 @@ export default function Home() {
   return (
     <div className="bg-brand-bg font-sans text-brand-text antialiased overflow-x-hidden">
       <Head>
-        <title>QuickCatalog — Build Stunning Product Catalogs in Minutes</title>
+        <title>Instant Catalog — Build Stunning Product Catalogs in Minutes</title>
       </Head>
 
       {/* Navigation */}
@@ -72,7 +72,7 @@ export default function Home() {
               <span className="w-7 h-7 bg-brand-accent rounded-lg flex items-center justify-center">
                 <i className="fa-solid fa-layer-group text-white text-xs"></i>
               </span>
-              QuickCatalog
+              Instant Catalog
             </a>
             <div className="hidden md:flex items-center gap-7 text-sm font-semibold text-brand-muted">
               <a href="#features" className="hover:text-brand-accent transition-colors">Features</a>
@@ -164,7 +164,7 @@ export default function Home() {
               <img
                 className="w-full h-auto max-h-[460px] object-cover"
                 src="https://storage.googleapis.com/uxpilot-auth.appspot.com/gen_a02cf0488e_ca343f200a464abc.png"
-                alt="QuickCatalog dashboard interface"
+                alt="Instant Catalog dashboard interface"
               />
             </div>
             {/* Floating Badges */}
@@ -365,7 +365,7 @@ export default function Home() {
       <section id="benefits" className="py-28 px-6 bg-brand-bg">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <span className="inline-block px-4 py-1.5 rounded-full bg-brand-magenta-light text-brand-magenta text-xs font-bold uppercase tracking-widest mb-4">Why QuickCatalog</span>
+            <span className="inline-block px-4 py-1.5 rounded-full bg-brand-magenta-light text-brand-magenta text-xs font-bold uppercase tracking-widest mb-4">Why Instant Catalog</span>
             <h2 className="text-4xl md:text-5xl font-black tracking-tighter mb-5">Built to Grow<br />Your Business Faster</h2>
             <p className="text-brand-muted max-w-xl mx-auto">Real outcomes for real businesses — not just features, but results.</p>
           </div>
@@ -428,7 +428,7 @@ export default function Home() {
           <div className="text-center mb-16">
             <span className="inline-block px-4 py-1.5 rounded-full bg-brand-green-light text-brand-green text-xs font-bold uppercase tracking-widest mb-4">Who It&apos;s For</span>
             <h2 className="text-4xl md:text-5xl font-black tracking-tighter mb-5">Made for Every Business<br />That Sells Products</h2>
-            <p className="text-brand-muted max-w-xl mx-auto">From solo entrepreneurs to large distributors — QuickCatalog adapts to your workflow.</p>
+            <p className="text-brand-muted max-w-xl mx-auto">From solo entrepreneurs to large distributors — Instant Catalog adapts to your workflow.</p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5 mb-12">
@@ -606,7 +606,7 @@ export default function Home() {
             <div className="absolute inset-0 bg-brand-accent/80 backdrop-blur-sm"></div>
             <div className="relative z-10 text-center py-24 px-8 space-y-8">
               <h2 className="text-5xl md:text-6xl font-black tracking-tighter text-white leading-tight">Start Building Your<br />Catalog Today — Free.</h2>
-              <p className="text-white/80 text-lg max-w-lg mx-auto">Join businesses already using QuickCatalog to sell smarter and reach more customers.</p>
+              <p className="text-white/80 text-lg max-w-lg mx-auto">Join businesses already using Instant Catalog to sell smarter and reach more customers.</p>
               <form onSubmit={handleCtaSubmit} className="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto bg-white/15 p-2.5 rounded-2xl backdrop-blur-xl border border-white/20">
                 <input
                   type="email"
@@ -649,7 +649,7 @@ export default function Home() {
                 <span className="w-8 h-8 bg-brand-accent rounded-lg flex items-center justify-center">
                   <i className="fa-solid fa-layer-group text-white text-sm"></i>
                 </span>
-                QuickCatalog
+                Instant Catalog
               </a>
               <p className="text-white/40 max-w-xs text-sm leading-relaxed">The digital catalog builder for modern businesses that want to sell smarter.</p>
               <div className="flex items-center gap-4 mt-6">
@@ -682,7 +682,7 @@ export default function Home() {
             </div>
           </div>
           <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-white/30 text-xs">© {new Date().getFullYear()} QuickCatalog. All rights reserved.</p>
+            <p className="text-white/30 text-xs">© {new Date().getFullYear()} Instant Catalog. All rights reserved.</p>
             <p className="text-white/20 text-xs">
               Crafted with <i className="fa-solid fa-heart text-brand-magenta/60 mx-1"></i> for businesses that want to grow.
             </p>

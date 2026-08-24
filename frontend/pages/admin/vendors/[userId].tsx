@@ -11,6 +11,7 @@ interface Vendor {
   id: string;
   email: string;
   mobileNo: string;
+  countryCode?: string;
   businessName?: string;
   businessType?: string;
   industry?: string;
@@ -165,7 +166,9 @@ function VendorDetail() {
           </div>
           <div>
             <dt className="text-xs font-semibold uppercase tracking-wide text-gray-400">Mobile</dt>
-            <dd className="mt-1 text-sm text-gray-900">{vendor.mobileNo}</dd>
+            <dd className="mt-1 text-sm text-gray-900">
+              {vendor.countryCode} {vendor.mobileNo}
+            </dd>
           </div>
           <div>
             <dt className="text-xs font-semibold uppercase tracking-wide text-gray-400">Business Type</dt>

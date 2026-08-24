@@ -29,7 +29,7 @@ export default function InstallPrompt() {
   // This is the vendor's install prompt for the dashboard app — only
   // relevant on the login screen and inside the vendor dashboard itself.
   // Everywhere else (marketing site, signup/verify, admin panel, public
-  // catalog pages) isn't "using QuickCatalog" as an app yet.
+  // catalog pages) isn't "using Instant Catalog" as an app yet.
   const onVendorAppPage = router.pathname === '/login' || router.pathname.startsWith('/dashboard');
   const showIOSInstructions = isIOS && !isInstalled && !isInstallable;
 
@@ -60,7 +60,7 @@ export default function InstallPrompt() {
       {showIOSInstructions ? (
         <>
           <div>
-            <p className="text-sm font-semibold text-gray-900">Install QuickCatalog</p>
+            <p className="text-sm font-semibold text-gray-900">Install Instant Catalog</p>
             <p className="mt-1 flex items-center gap-1.5 text-sm text-gray-600">
               Tap <ShareGlyph /> Share, then &quot;Add to Home Screen&quot;.
             </p>
@@ -75,9 +75,9 @@ export default function InstallPrompt() {
       ) : (
         <>
           <div>
-            <p className="text-sm font-semibold text-gray-900">Install QuickCatalog</p>
+            <p className="text-sm font-semibold text-gray-900">Install Instant Catalog</p>
             <p className="text-sm text-gray-600">
-              Add QuickCatalog to your home screen for quick access, even offline.
+              Add Instant Catalog to your home screen for quick access, even offline.
             </p>
           </div>
           <div className="flex gap-2">

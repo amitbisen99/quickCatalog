@@ -148,7 +148,7 @@ export default function DashboardLayout({ title, children }: Props) {
   return (
     <div className="min-h-screen bg-gray-50">
       <Head>
-        <title>{title ? `${title} | QuickCatalog` : 'QuickCatalog'}</title>
+        <title>{title ? `${title} | Instant Catalog` : 'Instant Catalog'}</title>
       </Head>
 
       <div className="flex min-h-screen">
@@ -156,9 +156,9 @@ export default function DashboardLayout({ title, children }: Props) {
         <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-gray-200 bg-white lg:flex">
           <div className="flex items-center gap-2.5 px-5 py-6">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-700 text-sm font-bold text-secondary-500">
-              Q
+              I
             </div>
-            <span className="text-lg font-bold text-gray-900">QuickCatalog</span>
+            <span className="text-lg font-bold text-gray-900">Instant Catalog</span>
           </div>
           <nav className="flex-1 overflow-y-auto px-3 pb-4">
             <NavLinks />

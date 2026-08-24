@@ -16,7 +16,7 @@ exports.getProfile = asyncHandler(async (req, res) => {
 });
 
 exports.updateProfile = asyncHandler(async (req, res) => {
-  const { mobileNo, businessName, businessType, industry, currency } = req.body;
+  const { mobileNo, countryCode, businessName, businessType, industry, currency } = req.body;
 
   const user = await User.findById(req.user.id);
   if (!user) {
@@ -24,6 +24,7 @@ exports.updateProfile = asyncHandler(async (req, res) => {
   }
 
   user.mobileNo = mobileNo;
+  user.countryCode = countryCode;
   user.businessName = businessName;
   user.businessType = businessType;
   user.industry = industry;

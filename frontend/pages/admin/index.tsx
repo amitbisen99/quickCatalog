@@ -37,11 +37,11 @@ export default function AdminLogin() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-primary-950 px-4">
       <Head>
-        <title>Admin Login | QuickCatalog</title>
+        <title>Admin Login | Instant Catalog</title>
       </Head>
 
       <div className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-xl">
-        <h1 className="text-xl font-bold text-gray-900">QuickCatalog Admin</h1>
+        <h1 className="text-xl font-bold text-gray-900">Instant Catalog Admin</h1>
         <p className="mt-1 text-sm text-gray-500">Sign in to the admin panel.</p>
 
         {error && (
@@ -62,7 +62,7 @@ export default function AdminLogin() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-700 focus:outline-none focus:ring-1 focus:ring-primary-700"
-              placeholder="admin@quickcatalog.com"
+              placeholder="admin@instantcatalog.app"
             />
           </div>
 

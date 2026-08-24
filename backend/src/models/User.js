@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const { DEFAULT_COUNTRY_CODE } = require('../utils/countryCode');
 
 const SALT_ROUNDS = Number(process.env.BCRYPT_SALT_ROUNDS) || 10;
 
@@ -12,10 +13,25 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
+    // The mobile number itself is stored without a country prefix — the
+    // dial code lives separately in countryCode so a WhatsApp link (see
+    // whatsappLink in frontend/components/catalog-templates/shared.ts)
+    // can be built by simply concatenating the two, and existing numbers
+    // never need reformatting if a vendor changes their country.
     mobileNo: {
       type: String,
       required: true,
       trim: true,
+    },
+    // E.164 dial code, e.g. "+91" — required going forward (enforced at
+    // the validator layer), but not `required` on the schema itself so
+    // existing documents saved before this field existed keep loading;
+    // backfillUserCountryCode.js fills those in with DEFAULT_COUNTRY_CODE
+    // at startup.
+    countryCode: {
+      type: String,
+      trim: true,
+      default: DEFAULT_COUNTRY_CODE,
     },
     password: {
       type: String,

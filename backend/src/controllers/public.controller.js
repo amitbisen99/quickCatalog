@@ -1,4 +1,3 @@
-const mongoose = require('mongoose');
 const Catalog = require('../models/Catalog');
 const Product = require('../models/Product');
 const Category = require('../models/Category');
@@ -10,6 +9,7 @@ const { parseDataUrl } = require('../utils/dataUrl');
 function toPublicProductResponse(product) {
   return {
     id: product._id,
+    slug: product.slug,
     name: product.name,
     description: product.description,
     price: product.price,
@@ -40,6 +40,7 @@ function toPublicVendorResponse(vendor) {
     logo: vendor ? vendor.logo : undefined,
     banner: vendor ? vendor.banner : undefined,
     mobileNo: vendor ? vendor.mobileNo : undefined,
+    countryCode: vendor ? vendor.countryCode : undefined,
     currency: vendor ? vendor.currency : undefined,
   };
 }
@@ -76,16 +77,13 @@ exports.getCatalogBySlug = asyncHandler(async (req, res) => {
 // the catalog listing, scoped to one product so the detail page doesn't
 // have to fetch the whole catalog just to show one item.
 exports.getCatalogProductBySlug = asyncHandler(async (req, res) => {
-  const { catalogSlug, productId } = req.params;
+  const { catalogSlug, productSlug } = req.params;
   const catalog = await Catalog.findOne({ slug: catalogSlug.toLowerCase() });
   if (!catalog) {
     throw new AppError('Catalog not found', 404);
   }
-  if (!mongoose.Types.ObjectId.isValid(productId)) {
-    throw new AppError('Product not found', 404);
-  }
 
-  const product = await Product.findOne({ _id: productId, catalogIds: catalog._id });
+  const product = await Product.findOne({ slug: productSlug.toLowerCase(), catalogIds: catalog._id });
   if (!product) {
     throw new AppError('Product not found', 404);
   }

@@ -13,6 +13,7 @@ const findOrCreateSpecification = require('../utils/findOrCreateSpecification');
 const readImagesZip = require('../utils/readImagesZip');
 const resolveRowImages = require('../utils/resolveRowImages');
 const mapWithConcurrency = require('../utils/mapWithConcurrency');
+const generateUniqueProductSlug = require('../utils/generateUniqueProductSlug');
 const asyncHandler = require('../utils/asyncHandler');
 const AppError = require('../utils/AppError');
 const { FREE_PRODUCT_LIMIT, exceedsFreeProductLimit } = require('../utils/planLimits');
@@ -172,11 +173,13 @@ exports.createProduct = asyncHandler(async (req, res) => {
   await assertSkuAvailable(req.user.id, sku);
   const images = (await Promise.all((req.files || []).map((f) => compressImageToDataUrl(f.buffer)))).slice(0, 3);
   const specifications = parseSpecifications(req);
+  const slug = await generateUniqueProductSlug(req.user.id, name);
 
   const product = await Product.create({
     vendorId: req.user.id,
     catalogIds: [catalogId],
     name,
+    slug,
     sku: sku || undefined,
     description,
     price,
@@ -253,11 +256,13 @@ exports.createStandaloneProduct = asyncHandler(async (req, res) => {
 
   const images = (await Promise.all((req.files || []).map((f) => compressImageToDataUrl(f.buffer)))).slice(0, 3);
   const specifications = parseSpecifications(req);
+  const slug = await generateUniqueProductSlug(req.user.id, name);
 
   const product = await Product.create({
     vendorId: req.user.id,
     catalogIds: [],
     name,
+    slug,
     sku: sku || undefined,
     description,
     price,
@@ -464,6 +469,7 @@ exports.bulkImportProducts = asyncHandler(async (req, res) => {
   const warnings = [];
   const categoryCache = new Map();
   const specCache = new Map();
+  const usedSlugs = new Set();
 
   // Category/spec lookups share a name->id cache and check-then-create —
   // running two rows with the same brand-new name concurrently could
@@ -498,7 +504,12 @@ exports.bulkImportProducts = asyncHandler(async (req, res) => {
       }
     }
 
-    pending.push({ rowNumber, data, categoryId, willBeInserted });
+    const slug = willBeInserted
+      ? // eslint-disable-next-line no-await-in-loop
+        await generateUniqueProductSlug(req.user.id, data.name, usedSlugs)
+      : undefined;
+
+    pending.push({ rowNumber, data, categoryId, slug, willBeInserted });
   }
 
   if (pending.length === 0) {
@@ -508,6 +519,7 @@ exports.bulkImportProducts = asyncHandler(async (req, res) => {
   const validRows = await mapWithConcurrency(pending, IMAGE_RESOLVE_CONCURRENCY, async (row) => ({
     ...row.data,
     categoryId: row.categoryId,
+    slug: row.slug,
     images: row.willBeInserted
       ? await resolveRowImages(row.data, zipEntries, row.rowNumber, warnings)
       : row.data.images,
@@ -524,6 +536,7 @@ exports.bulkImportProducts = asyncHandler(async (req, res) => {
       vendorId: req.user.id,
       catalogIds: [],
       name: row.name,
+      slug: row.slug,
       sku: row.sku,
       description: row.description,
       price: row.price,

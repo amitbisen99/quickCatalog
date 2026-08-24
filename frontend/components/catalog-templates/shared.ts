@@ -1,9 +1,12 @@
 // Small helpers shared across every catalog template — keeps the
 // per-template components focused on layout/presentation only.
 
-export function whatsappLink(mobileNo: string | undefined, text: string): string {
+export function whatsappLink(countryCode: string | undefined, mobileNo: string | undefined, text: string): string {
   if (!mobileNo) return '';
-  const digits = mobileNo.replace(/\D/g, '');
+  // countryCode is stored separately from mobileNo (see the User model)
+  // so a vendor can change their country without reformatting their
+  // number — wa.me just wants the two concatenated with no punctuation.
+  const digits = `${countryCode || ''}${mobileNo}`.replace(/\D/g, '');
   return `https://wa.me/${digits}?text=${encodeURIComponent(text)}`;
 }
 

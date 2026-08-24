@@ -25,6 +25,7 @@ export interface PublicVendorInfo {
   logo?: string;
   banner?: string;
   mobileNo?: string;
+  countryCode?: string;
   currency?: string;
 }
 
@@ -35,6 +36,7 @@ export interface PublicCategoryInfo {
 
 export interface PublicProduct {
   id: string;
+  slug: string;
   name: string;
   description?: string;
   price: number;

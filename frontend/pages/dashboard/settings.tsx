@@ -4,6 +4,7 @@ import DashboardLayout from '@/components/DashboardLayout';
 import withAuth from '@/components/withAuth';
 import Alert from '@/components/Alert';
 import PasswordStrengthMeter from '@/components/PasswordStrengthMeter';
+import MobileNumberInput from '@/components/MobileNumberInput';
 import UpgradePlanModal from '@/components/dashboard/UpgradePlanModal';
 import { FREE_CATALOG_LIMIT, FREE_PRODUCT_LIMIT, isFreePlan } from '@/utils/planLimit';
 import { useAuth, AuthUser } from '@/context/AuthContext';
@@ -11,6 +12,7 @@ import { apiFetch, ApiError } from '@/utils/api';
 import { isPasswordValid } from '@/utils/validators';
 import { BUSINESS_TYPES, INDUSTRIES } from '@/utils/constants';
 import { CURRENCIES } from '@/utils/currency';
+import { DEFAULT_COUNTRY_CODE } from '@/utils/countries';
 import {
   UserIcon,
   LockIcon,
@@ -60,6 +62,7 @@ function Settings() {
 
   // Profile form
   const [mobileNo, setMobileNo] = useState('');
+  const [countryCode, setCountryCode] = useState(DEFAULT_COUNTRY_CODE);
   const [businessName, setBusinessName] = useState('');
   const [businessType, setBusinessType] = useState('');
   const [industry, setIndustry] = useState('');
@@ -107,6 +110,7 @@ function Settings() {
   useEffect(() => {
     apiFetch<{ user: AuthUser }>('/users/profile').then((res) => {
       setMobileNo(res.user.mobileNo || '');
+      setCountryCode(res.user.countryCode || DEFAULT_COUNTRY_CODE);
       setBusinessName(res.user.businessName || '');
       setBusinessType(res.user.businessType || '');
       setIndustry(res.user.industry || '');
@@ -150,6 +154,7 @@ function Settings() {
     try {
       const formData = new FormData();
       formData.append('mobileNo', mobileNo);
+      formData.append('countryCode', countryCode);
       formData.append('businessName', businessName);
       formData.append('businessType', businessType);
       formData.append('industry', industry);
@@ -323,17 +328,13 @@ function Settings() {
             />
           </div>
 
-          <div>
-            <label htmlFor="mobileNo" className="block text-sm font-medium text-gray-700">
-              Mobile Number
-            </label>
-            <input
-              id="mobileNo"
-              value={mobileNo}
-              onChange={(e) => setMobileNo(e.target.value.replace(/[^\d]/g, ''))}
-              className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-600"
-            />
-          </div>
+          <MobileNumberInput
+            countryCode={countryCode}
+            mobileNo={mobileNo}
+            onCountryCodeChange={setCountryCode}
+            onMobileNoChange={setMobileNo}
+            focusClassName="focus:border-primary-600 focus:ring-primary-600"
+          />
 
           <div>
             <label htmlFor="businessName" className="block text-sm font-medium text-gray-700">

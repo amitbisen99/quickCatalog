@@ -6,6 +6,7 @@ const PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
 exports.signupValidators = [
   body('email').isEmail().withMessage('Enter a valid email address').normalizeEmail(),
   body('mobileNo').matches(/^\d{7,15}$/).withMessage('Enter a valid mobile number'),
+  body('countryCode').matches(/^\+\d{1,4}$/).withMessage('Select a valid country code'),
   body('password')
     .matches(PASSWORD_REGEX)
     .withMessage('Password must be at least 8 characters and include an uppercase letter, a number, and a special character'),

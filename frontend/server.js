@@ -21,7 +21,7 @@ app
   .then(() => {
     createServer((req, res) => handle(req, res)).listen(port, '0.0.0.0', (err) => {
       if (err) throw err;
-      console.log(`> QuickCatalog frontend ready on port ${port}`);
+      console.log(`> Instant Catalog frontend ready on port ${port}`);
     });
   })
   .catch((err) => {

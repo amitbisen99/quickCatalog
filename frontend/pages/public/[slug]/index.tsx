@@ -57,7 +57,7 @@ export default function PublicCatalog({ data, error }: Props) {
   const vendorName = data.vendor.businessName || data.catalog.name;
   const pageTitle = `${data.catalog.name} — ${vendorName}`;
   const pageDescription =
-    data.catalog.description || `Browse ${vendorName}'s product catalog on QuickCatalog.`;
+    data.catalog.description || `Browse ${vendorName}'s product catalog on Instant Catalog.`;
   const pageUrl = `${APP_URL}/public/${data.catalog.slug}`;
   // Only set og:image when there's actually a banner/logo to serve —
   // the endpoint 404s otherwise, which crawlers handle fine, but there's

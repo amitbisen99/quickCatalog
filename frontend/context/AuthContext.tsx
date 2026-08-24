@@ -5,6 +5,7 @@ export interface AuthUser {
   id: string;
   email: string;
   mobileNo?: string;
+  countryCode?: string;
   businessName?: string;
   businessType?: string;
   industry?: string;

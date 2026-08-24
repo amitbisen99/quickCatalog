@@ -1,5 +1,5 @@
 /**
- * QuickCatalog "Visit Catalog" embed widget.
+ * Instant Catalog "Visit Catalog" embed widget.
  *
  * Dropped onto a vendor's own site via:
  *   <script src="https://instantcatalog.app/widget.js"

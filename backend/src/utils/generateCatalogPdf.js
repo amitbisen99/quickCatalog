@@ -167,7 +167,7 @@ function drawFooter(doc, { pageWidth, pageIndex, totalPages }) {
     .font('Helvetica')
     .fontSize(8)
     .text(`Page ${pageIndex} of ${totalPages}`, PAGE_MARGIN, y + 11, { width: pageWidth / 2 });
-  doc.text('Powered by QuickCatalog', PAGE_MARGIN, y + 11, { width: pageWidth, align: 'right' });
+  doc.text('Powered by Instant Catalog', PAGE_MARGIN, y + 11, { width: pageWidth, align: 'right' });
 }
 
 async function drawProductRow(doc, product, { x, y, width, height, symbol, categoryName }) {

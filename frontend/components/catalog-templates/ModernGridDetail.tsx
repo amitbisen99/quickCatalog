@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/router';
 import DOMPurify from 'dompurify';
 import { MinusIcon, PlusIcon } from '@/components/icons';
 import type { CatalogTemplateDetailProps } from '@/types/publicCatalog';
@@ -9,6 +9,7 @@ import EnquiryCartWidget from './EnquiryCartWidget';
 import { currencySymbol } from '@/utils/currency';
 
 export default function ModernGridDetail({ catalog, vendor, categories, product }: CatalogTemplateDetailProps) {
+  const router = useRouter();
   const symbol = currencySymbol(vendor.currency);
   const [activeImage, setActiveImage] = useState(0);
   const [quantity, setQuantity] = useState(product.minimumOrderQuantity || 1);
@@ -19,6 +20,7 @@ export default function ModernGridDetail({ catalog, vendor, categories, product 
   const categoryName = categories.find((c) => c.id === product.categoryId)?.name;
   const specEntries = product.specifications ? Object.entries(product.specifications) : [];
   const enquiryLink = whatsappLink(
+    vendor.countryCode,
     vendor.mobileNo,
     `Hi, I'm interested in "${product.name}" from your ${catalog.name} catalog.`
   );
@@ -40,9 +42,13 @@ export default function ModernGridDetail({ catalog, vendor, categories, product 
       </header>
 
       <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6">
-        <Link href={`/public/${catalog.slug}`} className="text-sm font-medium text-gray-500 hover:text-primary-700">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="text-sm font-medium text-gray-500 hover:text-primary-700"
+        >
           ← Back to {catalog.name}
-        </Link>
+        </button>
 
         <div className="mt-4 grid grid-cols-1 gap-8 lg:grid-cols-2">
           <div>
@@ -171,7 +177,7 @@ export default function ModernGridDetail({ catalog, vendor, categories, product 
       </div>
 
       <footer className="mt-6 border-t border-gray-200 bg-white py-8 text-center text-xs text-gray-400">
-        Powered by QuickCatalog
+        Powered by Instant Catalog
       </footer>
 
       <EnquiryCartWidget catalogId={catalog.id} currency={vendor.currency} cart={cart} />

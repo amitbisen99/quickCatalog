@@ -83,7 +83,7 @@ export default function UpgradePlanModal({ isOpen, onClose, reason = 'generic', 
         amount: order.amount,
         currency: order.currency,
         order_id: order.orderId,
-        name: 'QuickCatalog',
+        name: 'Instant Catalog',
         description: 'Upgrade to the Paid plan',
         prefill: {
           name: user?.businessName,

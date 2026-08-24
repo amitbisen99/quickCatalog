@@ -4,6 +4,7 @@ module.exports = function toSafeUser(user) {
     id: user._id,
     email: user.email,
     mobileNo: user.mobileNo,
+    countryCode: user.countryCode,
     businessName: user.businessName,
     businessType: user.businessType,
     industry: user.industry,

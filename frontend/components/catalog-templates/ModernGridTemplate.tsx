@@ -1,8 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import Link from 'next/link';
 import type { CatalogTemplateProps } from '@/types/publicCatalog';
 import { whatsappLink } from './shared';
 import { useEnquiryCart } from './useEnquiryCart';
+import { useCatalogListState } from './useCatalogListState';
 import EnquiryCartWidget from './EnquiryCartWidget';
 import CatalogHero from './CatalogHero';
 import CatalogFilterBar from './CatalogFilterBar';
@@ -15,9 +16,7 @@ const PAGE_SIZE = 12; // 3 rows of 4 on desktop
 
 export default function ModernGridTemplate({ catalog, vendor, categories, products }: CatalogTemplateProps) {
   const symbol = currencySymbol(vendor.currency);
-  const [search, setSearch] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('');
-  const [page, setPage] = useState(1);
+  const { search, categoryFilter, page, setPage, updateSearch, updateCategoryFilter } = useCatalogListState();
   const cart = useEnquiryCart(catalog.slug);
 
   const filteredProducts = useMemo(() => {
@@ -39,7 +38,11 @@ export default function ModernGridTemplate({ catalog, vendor, categories, produc
   const categoryName = (id?: string) => categories.find((c) => c.id === id)?.name;
   const vendorName = vendor.businessName || catalog.name;
 
-  const generalWhatsapp = whatsappLink(vendor.mobileNo, `Hi, I'd like to know more about your "${catalog.name}" catalog.`);
+  const generalWhatsapp = whatsappLink(
+    vendor.countryCode,
+    vendor.mobileNo,
+    `Hi, I'd like to know more about your "${catalog.name}" catalog.`
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -48,15 +51,9 @@ export default function ModernGridTemplate({ catalog, vendor, categories, produc
       <CatalogFilterBar
         categories={categories}
         search={search}
-        onSearchChange={(value) => {
-          setSearch(value);
-          setPage(1);
-        }}
+        onSearchChange={updateSearch}
         categoryFilter={categoryFilter}
-        onCategoryChange={(value) => {
-          setCategoryFilter(value);
-          setPage(1);
-        }}
+        onCategoryChange={updateCategoryFilter}
       />
 
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
@@ -79,7 +76,7 @@ export default function ModernGridTemplate({ catalog, vendor, categories, produc
                   key={product.id}
                   className="group flex flex-col overflow-hidden border border-gray-200 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary-200 hover:shadow-lg"
                 >
-                  <Link href={`/public/${catalog.slug}/products/${product.id}`} className="contents">
+                  <Link href={`/public/${catalog.slug}/products/${product.slug}`} className="contents">
                     <div className="relative aspect-square overflow-hidden bg-gray-100">
                       {product.images[0] ? (
                         // eslint-disable-next-line @next/next/no-img-element
@@ -143,7 +140,7 @@ export default function ModernGridTemplate({ catalog, vendor, categories, produc
         <CatalogPagination page={page} totalPages={totalPages} onPageChange={goToPage} />
       </div>
 
-      <CatalogFooter vendorName={vendorName} mobileNo={vendor.mobileNo} />
+      <CatalogFooter vendorName={vendorName} mobileNo={vendor.mobileNo} countryCode={vendor.countryCode} />
       <WhatsAppFloatButton link={generalWhatsapp} />
       <EnquiryCartWidget catalogId={catalog.id} currency={vendor.currency} cart={cart} />
     </div>
