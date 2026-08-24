@@ -131,7 +131,7 @@ export default function UpgradePlanModal({ isOpen, onClose, reason = 'generic', 
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Upgrade to Paid">
+    <Modal isOpen={isOpen} onClose={onClose} title="Get More With Premium" maxWidthClassName="max-w-2xl">
       <div className="space-y-4">
         <div>
           <p className="text-sm font-semibold text-gray-900">{copy.title}</p>
@@ -140,10 +140,45 @@ export default function UpgradePlanModal({ isOpen, onClose, reason = 'generic', 
 
         {error && <Alert variant="error">{error}</Alert>}
 
-        <ul className="space-y-1.5 rounded-lg bg-primary-50 p-4 text-sm text-primary-900">
+        {/* Called out separately from the plain checklist below — this is
+            the USP that actually moves someone to buy (a real human
+            builds their first catalog for them), so it gets its own
+            gold-accented card instead of blending in as one bullet among
+            eleven. */}
+        <div className="flex items-start gap-3 rounded-lg border border-secondary-400 bg-secondary-50 p-4">
+          <span className="text-xl">🎁</span>
+          <p className="text-sm text-primary-950">
+            <strong>Free Setup Help</strong> — send us your product Excel list and our team will build your first
+            catalog for you, with two 1-hour setup calls included.
+          </p>
+        </div>
+
+        <ul className="grid grid-cols-1 gap-x-6 gap-y-2 rounded-lg bg-primary-50 p-4 text-sm text-primary-900 sm:grid-cols-2">
           <li>✓ Unlimited catalogs</li>
           <li>✓ Unlimited products</li>
           <li>✓ Everything else stays exactly the same</li>
+          <li>
+            ✓ <strong>Your Own Branding</strong> — white-label on your domain
+          </li>
+          <li>
+            ✓ <strong>Install as an App</strong> — manage catalogs from your mobile device, no app store needed
+          </li>
+          <li>
+            ✓ <strong>Add to Your Website</strong> — embed code &amp; widget
+          </li>
+          <li>
+            ✓ <strong>Views &amp; Clicks Tracking</strong> — simple stats on how many people viewed your catalog
+            or specific products
+          </li>
+          <li>
+            ✓ <strong>Bulk Upload</strong> — add many products at once via Excel/CSV
+          </li>
+          <li>
+            ✓ <strong>Download as PDF</strong> — export your catalog to share or print
+          </li>
+          <li>
+            ✓ <strong>Priority Support</strong> — faster help when you need it
+          </li>
         </ul>
 
         <div className="flex items-center gap-3">

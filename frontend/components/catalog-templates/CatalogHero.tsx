@@ -18,8 +18,13 @@ const THEME = {
     overlay: 'bg-gradient-to-br from-primary-950/90 via-primary-900/80 to-primary-950/90',
     decor: true,
     border: '',
-    logoBox: 'border-white/20 bg-white/10',
-    logoFallbackText: 'text-secondary-400',
+    // Solid white, not a translucent wash — a vendor's logo is usually a
+    // transparent PNG, and against bg-white/10 over this dark navy hero
+    // it was rendering as a near-invisible dark box. A plain white card
+    // (same idea the 'light' theme already used) keeps any logo, light
+    // or dark, clearly visible regardless of the hero's own colors.
+    logoBox: 'border-white/20 bg-white',
+    logoFallbackText: 'text-primary-700',
     vendorLabel: 'text-white/70',
     title: 'text-white',
     titleFont: '',
@@ -92,7 +97,7 @@ export default function CatalogHero({ catalog, vendor, productsCount, theme = 'd
           </div>
         </div>
         {catalog.description && (
-          <p className={`mt-3 max-w-3xl truncate text-sm leading-relaxed sm:text-base ${t.description}`}>
+          <p className={`mt-3 max-w-3xl whitespace-pre-line text-sm leading-relaxed sm:text-base ${t.description}`}>
             {truncateWords(catalog.description, 100)}
           </p>
         )}
