@@ -5,6 +5,7 @@ const User = require('../models/User');
 const asyncHandler = require('../utils/asyncHandler');
 const AppError = require('../utils/AppError');
 const { parseDataUrl } = require('../utils/dataUrl');
+const { getPlanPricing } = require('../utils/planPricing');
 
 function toPublicProductResponse(product) {
   return {
@@ -173,6 +174,20 @@ exports.resolveDomain = asyncHandler(async (req, res) => {
   }
 
   res.json({ success: true, slug: catalog.slug });
+});
+
+// Unauthenticated version of payment.controller.js's getPlanPrice — the
+// marketing homepage's pricing card needs the admin-set numbers before a
+// visitor has an account (and therefore no saved currency preference to
+// resolve a single price from, unlike resolveVendorPrice). Returns both
+// regional prices and lets the frontend pick which one to display.
+exports.getPublicPlanPrice = asyncHandler(async (req, res) => {
+  const pricing = await getPlanPricing();
+  res.json({
+    success: true,
+    india: { amount: pricing.indiaPriceInr, currency: 'INR' },
+    international: { amount: pricing.internationalPriceUsd, currency: 'USD' },
+  });
 });
 
 // Enquiry submission lives at POST /api/catalogs/:catalogId/enquiries

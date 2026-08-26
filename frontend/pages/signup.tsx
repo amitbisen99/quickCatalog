@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Layout from '@/components/Layout';
@@ -27,6 +27,17 @@ export default function Signup() {
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Pre-fills from the landing page's email-capture forms, which redirect
+  // here as /signup?email=... — router.query is {} on the very first
+  // client render (a Next.js Pages Router quirk), so this naturally waits
+  // for it to resolve rather than needing a router.isReady guard: the
+  // effect just re-runs once query.email actually has a value.
+  useEffect(() => {
+    if (typeof router.query.email === 'string' && router.query.email) {
+      setEmail(router.query.email);
+    }
+  }, [router.query.email]);
 
   function validate(): FieldErrors {
     const errors: FieldErrors = {};

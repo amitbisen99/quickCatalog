@@ -53,6 +53,12 @@ module.exports = {
         'brand-yellow': '#d97706',
         'brand-yellow-light': '#fef3c7',
       },
+      letterSpacing: {
+        // Default Tailwind value is -0.05em — only pages/index.tsx uses
+        // tracking-tighter (checked), so this only affects the marketing
+        // homepage's headings, not the dashboard/admin/auth pages.
+        tighter: '-0.02em',
+      },
       keyframes: {
         marquee: {
           '0%': { transform: 'translateX(0)' },
