@@ -204,7 +204,7 @@ export default function Home() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 className="w-full h-auto max-h-[460px] object-cover"
-                src="https://storage.googleapis.com/uxpilot-auth.appspot.com/gen_a02cf0488e_ca343f200a464abc.png"
+                src="/screenshots/hero.png"
                 alt="Instant Catalog dashboard interface"
               />
             </div>
@@ -292,7 +292,7 @@ export default function Home() {
             </div>
 
             {/* The Solution */}
-            <div className="relative flex flex-col overflow-hidden rounded-3xl bg-gradient-to-br from-brand-accent to-indigo-700 p-8 shadow-2xl shadow-brand-accent/20">
+            <div className="relative flex flex-col overflow-hidden rounded-3xl p-8 shadow-2xl shadow-brand-accent/20 bg-[radial-gradient(130%_130%_at_15%_10%,_#8b7cf6_0%,_#6d5ef0_50%,_#4f46e5_100%)]">
               <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
               <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/4 pointer-events-none"></div>
               <div className="relative z-10 flex-1">
@@ -306,14 +306,11 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="space-y-2.5">
-                  {SOLUTION_STEPS.map((step, i) => (
+                  {SOLUTION_STEPS.map((step) => (
                     <div
                       key={step.title}
                       className="flex items-center gap-3.5 rounded-2xl bg-white/10 px-4 py-3.5 ring-1 ring-white/10 transition-colors hover:bg-white/15"
                     >
-                      <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-white text-sm font-black text-brand-accent">
-                        {i + 1}
-                      </span>
                       <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-white/15 text-white">
                         <i className={`fa-solid ${step.icon} text-sm`}></i>
                       </span>
@@ -359,7 +356,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <span className="inline-block px-4 py-1.5 rounded-full bg-brand-accent-light text-brand-accent text-xs font-bold uppercase tracking-widest mb-4">Features</span>
-            <h2 className="text-4xl md:text-5xl font-black tracking-tighter mb-5">Everything You Need<br />to Sell Digitally</h2>
+            <h2 className="text-3xl md:text-4xl font-black tracking-tighter mb-5">Everything You Need to <span className="text-gradient">Sell Digitally</span></h2>
             <p className="text-brand-muted max-w-xl mx-auto">Powerful tools designed for speed, simplicity, and impact.</p>
           </div>
 
@@ -398,7 +395,7 @@ export default function Home() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   className="w-full h-auto max-h-80 object-cover"
-                  src="https://storage.googleapis.com/uxpilot-auth.appspot.com/gen_b66ddcc890_e80aa0b69b0e9705.png"
+                  src="/screenshots/builder.png"
                   alt="Catalog builder interface"
                 />
               </div>
@@ -423,7 +420,7 @@ export default function Home() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   className="w-full h-auto max-h-80 object-cover"
-                  src="https://storage.googleapis.com/uxpilot-auth.appspot.com/gen_919058ecc0_e69e0815446a261d.png"
+                  src="/screenshots/branding.jpg"
                   alt="Custom domain settings"
                 />
               </div>
@@ -448,7 +445,7 @@ export default function Home() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   className="w-full h-auto max-h-80 object-cover"
-                  src="https://storage.googleapis.com/uxpilot-auth.appspot.com/gen_403b7aeed0_de0ea8b68fb069bd.png"
+                  src="/screenshots/embed.jpg"
                   alt="Embeddable Visit Catalog button"
                 />
               </div>
@@ -473,7 +470,7 @@ export default function Home() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   className="w-full h-auto max-h-80 object-cover"
-                  src="https://storage.googleapis.com/uxpilot-auth.appspot.com/gen_403b7aeed0_de0ea8b68fb069bd.png"
+                  src="/screenshots/sharing.jpg"
                   alt="Catalog sharing via link and QR code"
                 />
               </div>
@@ -498,7 +495,7 @@ export default function Home() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   className="w-full h-auto max-h-80 object-cover"
-                  src="https://storage.googleapis.com/uxpilot-auth.appspot.com/gen_75a06fee1b_4d28bdaf92e152cb.png"
+                  src="/screenshots/analytics.png"
                   alt="Enquiry dashboard"
                 />
               </div>
@@ -519,11 +516,11 @@ export default function Home() {
                   <CheckItem>Install prompt built in</CheckItem>
                 </ul>
               </div>
-              <div className="rounded-3xl overflow-hidden border border-brand-border shadow-xl bg-brand-bg">
+              <div className="flex justify-center rounded-3xl overflow-hidden border border-brand-border shadow-xl bg-brand-bg">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  className="w-full h-auto max-h-80 object-cover"
-                  src="https://storage.googleapis.com/uxpilot-auth.appspot.com/gen_598a10b089_6a10fe057074f179.png"
+                  className="w-auto h-auto max-h-[600px] object-contain"
+                  src="/screenshots/pwa.jpeg"
                   alt="Progressive web app install prompt"
                 />
               </div>
@@ -537,7 +534,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <span className="inline-block px-4 py-1.5 rounded-full bg-brand-magenta-light text-brand-magenta text-xs font-bold uppercase tracking-widest mb-4">Why Instant Catalog</span>
-            <h2 className="text-4xl md:text-5xl font-black tracking-tighter mb-5">Built to Grow<br />Your Business Faster</h2>
+            <h2 className="text-3xl md:text-4xl font-black tracking-tighter mb-5">Built to Grow Your <span className="text-gradient">Business Faster</span></h2>
             <p className="text-brand-muted max-w-xl mx-auto">Real outcomes for real businesses — not just features, but results.</p>
           </div>
 
@@ -598,65 +595,41 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <span className="inline-block px-4 py-1.5 rounded-full bg-brand-green-light text-brand-green text-xs font-bold uppercase tracking-widest mb-4">Who It&apos;s For</span>
-            <h2 className="text-4xl md:text-5xl font-black tracking-tighter mb-5">Made for Every Business<br />That Sells Products</h2>
+            <h2 className="text-3xl md:text-4xl font-black tracking-tighter mb-5">Made for Every Business That <span className="text-gradient">Sells Products</span></h2>
             <p className="text-brand-muted max-w-xl mx-auto">From solo entrepreneurs to large distributors — Instant Catalog adapts to your workflow.</p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5 mb-12">
-            <div className="rounded-3xl overflow-hidden border border-brand-border group hover:shadow-xl transition-all duration-300">
-              <div className="h-44 overflow-hidden">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/gen_a8a072d73a_87c45d07c0b6ffc5.png" alt="Manufacturers" />
+            <div className="rounded-3xl border border-brand-border p-6 bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+              <div className="w-16 h-16 rounded-2xl bg-brand-magenta-light flex items-center justify-center text-brand-magenta mb-4">
+                <i className="fa-solid fa-industry text-2xl"></i>
               </div>
-              <div className="p-6 bg-white">
-                <div className="w-8 h-8 rounded-xl bg-brand-magenta-light flex items-center justify-center text-brand-magenta mb-3">
-                  <i className="fa-solid fa-industry text-sm"></i>
-                </div>
-                <h3 className="font-bold text-lg mb-1">Manufacturers</h3>
-                <p className="text-brand-muted text-sm">Launch a digital catalog straight from your production line — dealers and buyers always see your latest specs and pricing.</p>
-              </div>
+              <h3 className="font-bold text-lg mb-1">Manufacturers</h3>
+              <p className="text-brand-muted text-sm">Launch a digital catalog straight from your production line — dealers and buyers always see your latest specs and pricing.</p>
             </div>
 
-            <div className="rounded-3xl overflow-hidden border border-brand-border group hover:shadow-xl transition-all duration-300">
-              <div className="h-44 overflow-hidden">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/gen_cea937556b_a10946a1cbc6a602.png" alt="Online sellers" />
+            <div className="rounded-3xl border border-brand-border p-6 bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+              <div className="w-16 h-16 rounded-2xl bg-brand-accent-light flex items-center justify-center text-brand-accent mb-4">
+                <i className="fa-solid fa-cart-shopping text-2xl"></i>
               </div>
-              <div className="p-6 bg-white">
-                <div className="w-8 h-8 rounded-xl bg-brand-accent-light flex items-center justify-center text-brand-accent mb-3">
-                  <i className="fa-solid fa-cart-shopping text-sm"></i>
-                </div>
-                <h3 className="font-bold text-lg mb-1">Online Sellers</h3>
-                <p className="text-brand-muted text-sm">Turn your product list into a shareable catalog customers can browse, enquire from, and buy through anywhere.</p>
-              </div>
+              <h3 className="font-bold text-lg mb-1">Online Sellers</h3>
+              <p className="text-brand-muted text-sm">Turn your product list into a shareable catalog customers can browse, enquire from, and buy through anywhere.</p>
             </div>
 
-            <div className="rounded-3xl overflow-hidden border border-brand-border group hover:shadow-xl transition-all duration-300">
-              <div className="h-44 overflow-hidden">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/gen_7b2cf81222_355188624a667261.png" alt="Wholesalers & distributors" />
+            <div className="rounded-3xl border border-brand-border p-6 bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+              <div className="w-16 h-16 rounded-2xl bg-brand-yellow-light flex items-center justify-center text-brand-yellow mb-4">
+                <i className="fa-solid fa-boxes-stacked text-2xl"></i>
               </div>
-              <div className="p-6 bg-white">
-                <div className="w-8 h-8 rounded-xl bg-brand-yellow-light flex items-center justify-center text-brand-yellow mb-3">
-                  <i className="fa-solid fa-boxes-stacked text-sm"></i>
-                </div>
-                <h3 className="font-bold text-lg mb-1">Wholesalers/Distributors</h3>
-                <p className="text-brand-muted text-sm">Share bulk pricing, MOQs, and product specs with buyers and resellers instantly.</p>
-              </div>
+              <h3 className="font-bold text-lg mb-1">Wholesalers/Distributors</h3>
+              <p className="text-brand-muted text-sm">Share bulk pricing, MOQs, and product specs with buyers and resellers instantly.</p>
             </div>
 
-            <div className="rounded-3xl overflow-hidden border border-brand-border group hover:shadow-xl transition-all duration-300">
-              <div className="h-44 overflow-hidden">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/gen_9e0a18aca9_47e4398d928bd36c.png" alt="Industrial suppliers" />
+            <div className="rounded-3xl border border-brand-border p-6 bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+              <div className="w-16 h-16 rounded-2xl bg-brand-green-light flex items-center justify-center text-brand-green mb-4">
+                <i className="fa-solid fa-screwdriver-wrench text-2xl"></i>
               </div>
-              <div className="p-6 bg-white">
-                <div className="w-8 h-8 rounded-xl bg-brand-green-light flex items-center justify-center text-brand-green mb-3">
-                  <i className="fa-solid fa-screwdriver-wrench text-sm"></i>
-                </div>
-                <h3 className="font-bold text-lg mb-1">Industrial Suppliers</h3>
-                <p className="text-brand-muted text-sm">Showcase technical specs, bulk SKUs, and part numbers in one catalog that&apos;s always up to date.</p>
-              </div>
+              <h3 className="font-bold text-lg mb-1">Industrial Suppliers</h3>
+              <p className="text-brand-muted text-sm">Showcase technical specs, bulk SKUs, and part numbers in one catalog that&apos;s always up to date.</p>
             </div>
           </div>
 
@@ -687,22 +660,21 @@ export default function Home() {
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <span className="inline-block px-4 py-1.5 rounded-full bg-brand-accent-light text-brand-accent text-xs font-bold uppercase tracking-widest mb-4">Pricing</span>
-            <h2 className="text-4xl md:text-5xl font-black tracking-tighter mb-5">Simple Plans.<br />No Surprises.</h2>
+            <h2 className="text-3xl md:text-4xl font-black tracking-tighter mb-5">Simple Pricing. <span className="text-gradient">Powerful Features</span></h2>
             <p className="text-brand-muted max-w-lg mx-auto">Two straightforward plans. Cancel anytime.</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-8 items-start">
             {/* Free Plan */}
-            <div className="bg-white rounded-[2rem] p-10 border border-brand-border flex flex-col shadow-sm hover:shadow-lg transition-shadow">
-              <div className="mb-8">
-                <div className="w-10 h-10 rounded-xl bg-brand-bg flex items-center justify-center text-brand-muted mb-4">
+            <div className="bg-white rounded-[2rem] p-9 border border-brand-border flex flex-col shadow-sm hover:shadow-lg transition-shadow">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-11 h-11 rounded-xl bg-brand-bg flex items-center justify-center text-brand-muted flex-shrink-0">
                   <i className="fa-solid fa-seedling"></i>
                 </div>
-                <h4 className="text-2xl font-black mb-1">Free</h4>
-                <p className="text-brand-muted text-sm">Perfect to get started</p>
+                <h4 className="text-2xl font-black">Free</h4>
               </div>
               <div className="flex items-baseline gap-1 mb-8">
-                <span className="text-5xl font-black">$0</span>
+                <span className="text-6xl font-black">$0</span>
                 <span className="text-brand-muted text-sm">/ forever</span>
               </div>
               <ul className="space-y-4 mb-10 flex-1">
@@ -722,30 +694,24 @@ export default function Home() {
             </div>
 
             {/* Premium Plan */}
-            <div className="bg-brand-accent rounded-[2rem] p-10 flex flex-col shadow-2xl shadow-brand-accent/20 relative overflow-hidden">
+            <div className="rounded-[2rem] p-9 flex flex-col shadow-2xl shadow-brand-accent/20 relative overflow-hidden bg-[radial-gradient(130%_130%_at_15%_10%,_#8b7cf6_0%,_#6d5ef0_50%,_#4f46e5_100%)]">
               <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/4"></div>
               <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/4"></div>
               <div className="relative z-10 flex flex-1 flex-col">
-                <div className="flex items-center justify-between mb-8">
-                  <div>
-                    <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-white mb-4">
-                      <i className="fa-solid fa-rocket"></i>
-                    </div>
-                    <h4 className="text-2xl font-black text-white mb-1">Premium</h4>
-                    <p className="text-white/70 text-sm">For growing businesses</p>
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center text-white flex-shrink-0">
+                    <i className="fa-solid fa-rocket"></i>
                   </div>
-                  <span className="bg-brand-magenta text-white px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest">Best Value</span>
+                  <h4 className="text-2xl font-black text-white">Premium</h4>
                 </div>
                 <div className="flex items-baseline gap-1 mb-8">
                   {premiumPrice ? (
-                    <>
-                      <span className="text-5xl font-black text-white">
-                        {currencySymbol(premiumPrice.currency)}
-                        {premiumPrice.amount}
-                      </span>
-                    </>
+                    <span className="text-6xl font-black text-white">
+                      {currencySymbol(premiumPrice.currency)}
+                      {premiumPrice.amount}
+                    </span>
                   ) : (
-                    <span className="text-5xl font-black text-white/40">···</span>
+                    <span className="text-6xl font-black text-white/40">···</span>
                   )}
                 </div>
                 {/* Free Setup Help is the one line most likely to convert a
@@ -778,7 +744,7 @@ export default function Home() {
                   </li>
                   <li className="flex items-start gap-3 text-sm text-white">
                     <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-white flex-shrink-0 mt-0.5"><i className="fa-solid fa-check text-[9px]"></i></span>
-                    <span>Everything else stays exactly the same</span>
+                    <span>Everything in free plan</span>
                   </li>
                 </ul>
                 <Link href="/signup" className="w-full py-4 rounded-2xl bg-white text-brand-accent font-bold text-sm uppercase tracking-widest text-center hover:bg-indigo-50 transition-all block shadow-lg">
@@ -801,7 +767,7 @@ export default function Home() {
             </div>
             <div className="absolute inset-0 bg-brand-accent/80 backdrop-blur-sm"></div>
             <div className="relative z-10 text-center py-24 px-8 space-y-8">
-              <h2 className="text-5xl md:text-6xl font-black tracking-tighter text-white leading-tight">Start Building Your<br />Catalog Today — Free.</h2>
+              <h2 className="text-5xl md:text-6xl font-black tracking-tighter text-white leading-tight">Turn Your Product Range<br />Into a Sales Tool - Free</h2>
               <p className="text-white/80 text-lg max-w-lg mx-auto">Join businesses already using Instant Catalog to sell smarter and reach more customers.</p>
               <form onSubmit={handleCtaSubmit} className="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto bg-white/15 p-2.5 rounded-2xl backdrop-blur-xl border border-white/20">
                 <input
@@ -872,8 +838,8 @@ export default function Home() {
             <div className="space-y-5">
               <h4 className="font-bold uppercase text-[10px] tracking-widest text-white/30">Legal</h4>
               <ul className="space-y-3 text-sm text-white/50">
-                <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
+                <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+                <li><Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
               </ul>
             </div>
           </div>

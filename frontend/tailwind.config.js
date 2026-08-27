@@ -59,6 +59,31 @@ module.exports = {
         // homepage's headings, not the dashboard/admin/auth pages.
         tighter: '-0.02em',
       },
+      // Every named size bumped +2px site-wide (dashboard, admin, auth
+      // pages, public catalog pages, marketing homepage — this scale is
+      // global, not per-page). Line-heights bumped the same +2px to keep
+      // each size's original leading proportional; the 5xl-9xl display
+      // sizes keep Tailwind's own unitless line-height:1 since there's no
+      // length value there to add to. Every <h1> on every page is
+      // explicitly exempted back to Tailwind's stock values in
+      // globals.css, since a class-based scale override can't tell "this
+      // text-3xl is an h1" from "this text-3xl is a card title" — only
+      // the CSS there can target the element itself.
+      fontSize: {
+        xs: ['calc(0.75rem + 2px)', { lineHeight: 'calc(1rem + 2px)' }],
+        sm: ['calc(0.875rem + 2px)', { lineHeight: 'calc(1.25rem + 2px)' }],
+        base: ['calc(1rem + 2px)', { lineHeight: 'calc(1.5rem + 2px)' }],
+        lg: ['calc(1.125rem + 2px)', { lineHeight: 'calc(1.75rem + 2px)' }],
+        xl: ['calc(1.25rem + 2px)', { lineHeight: 'calc(1.75rem + 2px)' }],
+        '2xl': ['calc(1.5rem + 2px)', { lineHeight: 'calc(2rem + 2px)' }],
+        '3xl': ['calc(1.875rem + 2px)', { lineHeight: 'calc(2.25rem + 2px)' }],
+        '4xl': ['calc(2.25rem + 2px)', { lineHeight: 'calc(2.5rem + 2px)' }],
+        '5xl': ['calc(3rem + 2px)', { lineHeight: '1' }],
+        '6xl': ['calc(3.75rem + 2px)', { lineHeight: '1' }],
+        '7xl': ['calc(4.5rem + 2px)', { lineHeight: '1' }],
+        '8xl': ['calc(6rem + 2px)', { lineHeight: '1' }],
+        '9xl': ['calc(8rem + 2px)', { lineHeight: '1' }],
+      },
       keyframes: {
         marquee: {
           '0%': { transform: 'translateX(0)' },

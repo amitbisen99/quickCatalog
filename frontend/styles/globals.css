@@ -36,3 +36,46 @@ body {
   background: white;
   color: #6b6891;
 }
+
+/* Keeps every <h1> on every page at its original size after the +2px
+   site-wide font-size bump in tailwind.config.js — a class-based scale
+   override can't distinguish "this text-3xl is a page's <h1>" from
+   "this text-3xl is a card title" using the same class, so it has to be
+   undone here, targeted at the element itself, instead. Covers every
+   size token + responsive-breakpoint combination actually used on an h1
+   anywhere in the app (checked directly, not guessed) — the marketing
+   homepage's hero (text-2xl sm:text-4xl md:text-5xl lg:text-6xl), the
+   public catalog hero/product-detail headings (text-3xl sm:text-4xl,
+   text-2xl sm:text-3xl), dashboard/admin page titles (text-xl/2xl/3xl),
+   and the create-catalog wizard's step headings (text-2xl sm:text-3xl).
+   These rules work without !important or higher specificity because
+   they're plain (non-@layer) CSS — Tailwind wraps its own utilities in
+   @layer utilities, and unlayered CSS always wins over layered CSS
+   regardless of selector specificity or source order (standard CSS
+   Cascade Layers behavior, not a hack). If a future page's <h1> uses a
+   text-size class not listed here, add a matching line rather than
+   letting it silently get the +2px bump. */
+h1.text-xs { font-size: 0.75rem; line-height: 1rem; }
+h1.text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+h1.text-base { font-size: 1rem; line-height: 1.5rem; }
+h1.text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+h1.text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+h1.text-2xl { font-size: 1.5rem; line-height: 2rem; }
+h1.text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+h1.text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
+h1.text-5xl { font-size: 3rem; line-height: 1; }
+h1.text-6xl { font-size: 3.75rem; line-height: 1; }
+h1.text-7xl { font-size: 4.5rem; line-height: 1; }
+h1.text-8xl { font-size: 6rem; line-height: 1; }
+h1.text-9xl { font-size: 8rem; line-height: 1; }
+
+@media (min-width: 640px) {
+  h1.sm\:text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+  h1.sm\:text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
+}
+@media (min-width: 768px) {
+  h1.md\:text-5xl { font-size: 3rem; line-height: 1; }
+}
+@media (min-width: 1024px) {
+  h1.lg\:text-6xl { font-size: 3.75rem; line-height: 1; }
+}

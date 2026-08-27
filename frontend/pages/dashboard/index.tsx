@@ -21,6 +21,8 @@ function Dashboard() {
   const { user: contextUser } = useAuth();
   const [profileUser, setProfileUser] = useState<AuthUser | null>(null);
   const [catalogCount, setCatalogCount] = useState(0);
+  const [productCount, setProductCount] = useState(0);
+  const [enquiriesThisMonth, setEnquiriesThisMonth] = useState(0);
 
   useEffect(() => {
     apiFetch<{ user: AuthUser }>('/users/profile')
@@ -33,6 +35,26 @@ function Dashboard() {
       .catch(() => {
         // Leave at 0 if this fails — not worth blocking the rest of the page.
       });
+    // limit=1 — the count comes from pagination.total, not the returned
+    // rows, so there's no reason to fetch the vendor's whole product list
+    // just to read a number off the front of it.
+    apiFetch<{ pagination: { total: number } }>('/products?limit=1')
+      .then((res) => setProductCount(res.pagination.total))
+      .catch(() => {
+        // Leave at 0 if this fails.
+      });
+    apiFetch<{ enquiries: { createdAt: string }[] }>('/enquiries')
+      .then((res) => {
+        const now = new Date();
+        const count = res.enquiries.filter((e) => {
+          const d = new Date(e.createdAt);
+          return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+        }).length;
+        setEnquiriesThisMonth(count);
+      })
+      .catch(() => {
+        // Leave at 0 if this fails.
+      });
   }, []);
 
   const user = profileUser || contextUser;
@@ -43,11 +65,12 @@ function Dashboard() {
       <p className="mt-1.5 text-base text-gray-500">Here&apos;s an overview of your catalogs.</p>
 
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Products/enquiries/views stay 0 until those models exist
-            (Prompts 10, 13, 14). Catalogs is real as of Prompt 8. */}
+        {/* Views stays 0 — there's no vendor-wide (cross-catalog)
+            aggregate endpoint yet, only GET /analytics/:catalogId for a
+            single catalog at a time. */}
         <StatCard label="Total Catalogs" value={catalogCount} icon={GridIcon} accent="primary" />
-        <StatCard label="Total Products" value={0} icon={TagIcon} accent="secondary" />
-        <StatCard label="Enquiries" value={0} hint="This month" icon={MailIcon} accent="green" />
+        <StatCard label="Total Products" value={productCount} icon={TagIcon} accent="secondary" />
+        <StatCard label="Enquiries" value={enquiriesThisMonth} hint="This month" icon={MailIcon} accent="green" />
         <StatCard label="Views" value={0} hint="This month" icon={ChartBarIcon} accent="gray" />
       </div>
 

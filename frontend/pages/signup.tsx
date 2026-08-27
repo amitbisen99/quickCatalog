@@ -165,7 +165,14 @@ export default function Signup() {
                 onChange={(e) => setAcceptedTerms(e.target.checked)}
                 className="mt-0.5 h-4 w-4 rounded border-gray-300 text-primary-700 focus:ring-primary-700"
               />
-              I agree to the Terms &amp; Conditions and Privacy Policy
+              I agree to the{' '}
+              <Link href="/terms" target="_blank" className="text-primary-700 hover:text-primary-800" onClick={(e) => e.stopPropagation()}>
+                Terms of Service
+              </Link>{' '}
+              and{' '}
+              <Link href="/privacy" target="_blank" className="text-primary-700 hover:text-primary-800" onClick={(e) => e.stopPropagation()}>
+                Privacy Policy
+              </Link>
             </label>
             {touched && fieldErrors.acceptedTerms && (
               <p className="mt-1 text-xs text-red-600">{fieldErrors.acceptedTerms}</p>
