@@ -6,7 +6,7 @@ import { apiFetch } from '@/utils/api';
 import { currencySymbol } from '@/utils/currency';
 
 // Marketing homepage. Styling for this page only lives in
-// tailwind.config.js (brand-* colors, marquee/float keyframes) and
+// tailwind.config.js (brand-* colors, float keyframe) and
 // styles/globals.css (.text-gradient, .hero-grid-bg, .feature-tab-*) —
 // none of it is used by the vendor dashboard or auth pages.
 
@@ -36,6 +36,61 @@ const SOLUTION_STEPS: { icon: string; title: string; body: string }[] = [
   { icon: 'fa-inbox', title: 'Receive Enquiries', body: 'Sales enquiries land straight in your dashboard.' },
 ];
 
+const COMPARISON_ROWS: { feature: string; pdf: string; ecommerce: string; instantCatalog: string }[] = [
+  { feature: 'Setup Time', pdf: 'Hours in InDesign/Canva', ecommerce: 'Days or weeks of store build', instantCatalog: 'Under 5 Minutes from Excel' },
+  { feature: 'Price Updates', pdf: 'Re-export & resend everywhere', ecommerce: 'Edit individual database items', instantCatalog: '1-Click Excel Sync' },
+  { feature: 'Buyer Experience', pdf: 'Clunky pinch-and-zoom', ecommerce: 'Requires cart/checkout flow', instantCatalog: 'Fast Mobile Web/App + Instant Inquiry' },
+  { feature: 'Analytics', pdf: 'Zero visibility', ecommerce: 'Requires analytics setup', instantCatalog: 'Built-in View & Inquiry Tracking' },
+];
+
+const TRUST_STATS: { icon: string; value: string; label: string }[] = [
+  { icon: 'fa-users', value: '500+', label: 'Users' },
+  { icon: 'fa-layer-group', value: '4000+', label: 'Catalogs' },
+  { icon: 'fa-tags', value: '20K+', label: 'Products' },
+  { icon: 'fa-inbox', value: '8K+', label: 'Enquiries Generated' },
+];
+
+type WhoItsForId = 'manufacturers' | 'wholesalers' | 'jewelry' | 'industrial' | 'furniture' | 'electronics';
+
+const WHO_ITS_FOR: { id: WhoItsForId; label: string; headline: string; copy: string }[] = [
+  {
+    id: 'manufacturers',
+    label: 'Manufacturers',
+    headline: 'Publish Live Product Specs Straight from Your Production Line',
+    copy: 'Keep your global distributor network continuously updated with your latest product variations, safety certifications, and baseline pricing. Update your master spreadsheet once to push real-time updates across every shared link, ensuring buyers always quote from your latest catalog version.',
+  },
+  {
+    id: 'wholesalers',
+    label: 'Wholesalers & Distributors',
+    headline: 'Share Volume Pricing & MOQs Without Exposing Margins',
+    copy: 'Share bulk pricing, tiered volume discounts, and minimum order quantities with verified buyers without exposing your margins to the public. Enable regional dealers to browse live inventory, select quantities, and submit bulk inquiries directly to your sales team in seconds — eliminating constant price-list back-and-forth over email.',
+  },
+  {
+    id: 'jewelry',
+    label: 'Jewelry & Fashion Brands',
+    headline: 'High-Res Visual Showcases That Look Stunning on Mobile',
+    copy: 'Turn seasonal releases into visually stunning interactive lookbooks. Display high-resolution image galleries, color variants, and spec details on mobile-optimized layouts. Let boutique buyers and retail customers curate their order list and send instant inquiries straight to your WhatsApp or inbox while interest is at its highest.',
+  },
+  {
+    id: 'industrial',
+    label: 'Industrial & Hardware Suppliers',
+    headline: 'Make Thousands of Technical Parts Searchable in Seconds',
+    copy: 'Make thousands of part numbers, dimension charts, and technical spec sheets instantly searchable on any device. Allow contractors, engineers, and purchasing agents to quickly filter complex product lines, find exact SKUs on-site, and request formal price quotes without digging through 200-page printed binders or broken PDF downloads.',
+  },
+  {
+    id: 'furniture',
+    label: 'Home & Furniture',
+    headline: "Bring Your Showroom Collections Directly to Buyers' Screens",
+    copy: 'Show off material finishes, dimensions, and custom configuration options with clean visual layouts. Help interior designers and retail shoppers browse entire room packages, save item selections, and send quick availability inquiries directly to your sales representatives.',
+  },
+  {
+    id: 'electronics',
+    label: 'Electronics',
+    headline: 'Simplify Complex Tech Specs Into Clean, Fast-Loading Catalogs',
+    copy: 'Highlight model specs, compatibility matrices, and component details without overwhelming buyers with clunky tables. Give retail partners and B2B clients a fast, searchable digital catalog where they can compare features and submit quick stock inquiries on the go.',
+  },
+];
+
 function CheckItem({ children, muted }: { children: React.ReactNode; muted?: boolean }) {
   return (
     <li className={`flex items-start gap-3 text-sm ${muted ? 'text-brand-muted/50' : ''}`}>
@@ -54,6 +109,8 @@ function CheckItem({ children, muted }: { children: React.ReactNode; muted?: boo
 export default function Home() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<FeatureTabId>('builder');
+  const [activeWho, setActiveWho] = useState<WhoItsForId>('manufacturers');
+  const activeWhoItem = WHO_ITS_FOR.find((item) => item.id === activeWho) ?? WHO_ITS_FOR[0];
   const [ctaEmail, setCtaEmail] = useState('');
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [premiumPrice, setPremiumPrice] = useState<{ amount: number; currency: string } | null>(null);
@@ -121,6 +178,7 @@ export default function Home() {
               <a href="#features" className="hover:text-brand-accent transition-colors">Features</a>
               <a href="#benefits" className="hover:text-brand-accent transition-colors">Benefits</a>
               <a href="#who" className="hover:text-brand-accent transition-colors">Who It&apos;s For</a>
+              <a href="#comparison" className="hover:text-brand-accent transition-colors">Comparison</a>
               <a href="#pricing" className="hover:text-brand-accent transition-colors">Pricing</a>
             </div>
           </div>
@@ -128,7 +186,7 @@ export default function Home() {
             <Link href="/login" className="hidden text-sm font-semibold text-brand-muted transition-colors hover:text-brand-text md:block px-4 py-2">
               Log In
             </Link>
-            <Link href="/signup" className="bg-brand-accent text-white px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-indigo-700 transition-all shadow-md shadow-brand-accent/30">
+            <Link href="/signup" className="hidden md:inline-block bg-brand-accent text-white px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-indigo-700 transition-all shadow-md shadow-brand-accent/30">
               Start Free
             </Link>
             <button
@@ -157,6 +215,9 @@ export default function Home() {
             <a href="#who" onClick={() => setMobileNavOpen(false)} className="rounded-lg px-3 py-2.5 text-sm font-semibold text-brand-muted hover:bg-brand-border/40 hover:text-brand-text">
               Who It&apos;s For
             </a>
+            <a href="#comparison" onClick={() => setMobileNavOpen(false)} className="rounded-lg px-3 py-2.5 text-sm font-semibold text-brand-muted hover:bg-brand-border/40 hover:text-brand-text">
+              Comparison
+            </a>
             <a href="#pricing" onClick={() => setMobileNavOpen(false)} className="rounded-lg px-3 py-2.5 text-sm font-semibold text-brand-muted hover:bg-brand-border/40 hover:text-brand-text">
               Pricing
             </a>
@@ -175,11 +236,11 @@ export default function Home() {
         <div className="max-w-7xl mx-auto w-full relative z-10">
           <div className="text-center space-y-8 max-w-4xl mx-auto">
             <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter leading-[1.1]">
-              Turn your product Excel into a<br />
-              <span className="text-gradient">sales catalog</span>—in minutes.
+              Turn your product Excel into<br />
+              <span className="text-gradient">interactive sales catalog</span>—that close deals.
             </h1>
             <p className="text-lg md:text-xl text-brand-muted max-w-2xl mx-auto leading-relaxed">
-              Stop spending days designing catalogs. Upload your spreadsheet, choose a template, and publish a professional digital catalog your sales team can share instantly.
+              Stop sending outdated PDFs and messy photo attachments. Upload your Excel file, choose a mobile-ready layout, and capture inbound buyer inquiries in under 10 minutes.
             </p>
             <form onSubmit={handleCtaSubmit} className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto pt-2">
               <input
@@ -191,9 +252,18 @@ export default function Home() {
                 className="flex-1 rounded-2xl border border-brand-border bg-white px-5 py-4 text-sm text-brand-text placeholder-brand-muted/70 shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-accent/30"
               />
               <button type="submit" className="bg-brand-accent text-white px-8 py-4 rounded-2xl font-bold uppercase tracking-wider text-sm hover:bg-indigo-700 transition-all shadow-xl shadow-brand-accent/25 whitespace-nowrap">
-                Start Free
+                Create First Catalog Free
               </button>
             </form>
+            <div className="pt-1">
+              <Link
+                href="/public/home-living-collection"
+                target="_blank"
+                className="text-sm font-semibold text-brand-muted underline underline-offset-4 hover:text-brand-accent transition-colors"
+              >
+                View Sample Catalog
+              </Link>
+            </div>
             <p className="text-xs text-brand-muted">No credit card required · Free forever plan available</p>
           </div>
 
@@ -231,21 +301,22 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Marquee / Social Proof */}
-      <section className="py-10 border-y border-brand-border bg-white overflow-hidden">
-        <div className="flex w-[200%]">
-          {[0, 1].map((rep) => (
-            <div key={rep} className="animate-marquee whitespace-nowrap flex items-center gap-14 pr-14">
-              {['Digital Catalog', 'PWA Ready', 'No-Code Builder', 'Instant Sharing', 'Multiple Templates', 'Multi-Platform', 'Enquiry Tracking'].map(
-                (label) => (
-                  <span key={label} className="flex items-center gap-14">
-                    <span className="text-xs font-bold uppercase tracking-[0.3em] text-brand-muted/50">{label}</span>
-                    <i className="fa-solid fa-circle text-brand-accent/20 text-[6px]"></i>
-                  </span>
-                )
-              )}
-            </div>
-          ))}
+      {/* Trust Ribbon */}
+      <section className="py-16 border-y border-brand-border bg-white">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="flex flex-wrap items-center justify-center gap-x-24 gap-y-10">
+            {TRUST_STATS.map((stat) => (
+              <div key={stat.label} className="flex items-center gap-4">
+                <span className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl bg-brand-accent-light text-brand-accent">
+                  <i className={`fa-solid ${stat.icon} text-2xl`}></i>
+                </span>
+                <div>
+                  <p className="text-4xl font-black leading-none text-brand-text">{stat.value}</p>
+                  <p className="mt-1.5 text-sm font-semibold uppercase tracking-wide text-brand-muted">{stat.label}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -534,7 +605,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <span className="inline-block px-4 py-1.5 rounded-full bg-brand-magenta-light text-brand-magenta text-xs font-bold uppercase tracking-widest mb-4">Why Instant Catalog</span>
-            <h2 className="text-3xl md:text-4xl font-black tracking-tighter mb-5">Built to Grow Your <span className="text-gradient">Business Faster</span></h2>
+            <h2 className="text-3xl md:text-4xl font-black tracking-tighter mb-5">Turn Casual Product List Into <span className="text-gradient">Active Inquiries &amp; Sales</span></h2>
             <p className="text-brand-muted max-w-xl mx-auto">Real outcomes for real businesses — not just features, but results.</p>
           </div>
 
@@ -599,37 +670,41 @@ export default function Home() {
             <p className="text-brand-muted max-w-xl mx-auto">From solo entrepreneurs to large distributors — Instant Catalog adapts to your workflow.</p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5 mb-12">
-            <div className="rounded-3xl border border-brand-border p-6 bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-              <div className="w-16 h-16 rounded-2xl bg-brand-magenta-light flex items-center justify-center text-brand-magenta mb-4">
-                <i className="fa-solid fa-industry text-2xl"></i>
-              </div>
-              <h3 className="font-bold text-lg mb-1">Manufacturers</h3>
-              <p className="text-brand-muted text-sm">Launch a digital catalog straight from your production line — dealers and buyers always see your latest specs and pricing.</p>
+          <div className="grid md:grid-cols-[300px_1fr] gap-6 items-start mb-12">
+            {/* Plain vertical link list — deliberately not styled like the
+                Features section's icon-badge tabs, just simple text links
+                with a left accent bar marking the active one. */}
+            <div className="flex flex-col gap-1 md:border-r md:border-brand-border md:pr-4">
+              {WHO_ITS_FOR.map((item) => {
+                const active = activeWho === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveWho(item.id)}
+                    className={`border-l-2 px-4 py-3 text-left text-sm font-semibold transition-colors ${
+                      active
+                        ? 'border-brand-accent text-brand-accent'
+                        : 'border-transparent text-brand-muted hover:border-brand-border hover:text-brand-text'
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                );
+              })}
             </div>
 
-            <div className="rounded-3xl border border-brand-border p-6 bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-              <div className="w-16 h-16 rounded-2xl bg-brand-accent-light flex items-center justify-center text-brand-accent mb-4">
-                <i className="fa-solid fa-cart-shopping text-2xl"></i>
-              </div>
-              <h3 className="font-bold text-lg mb-1">Online Sellers</h3>
-              <p className="text-brand-muted text-sm">Turn your product list into a shareable catalog customers can browse, enquire from, and buy through anywhere.</p>
-            </div>
-
-            <div className="rounded-3xl border border-brand-border p-6 bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-              <div className="w-16 h-16 rounded-2xl bg-brand-yellow-light flex items-center justify-center text-brand-yellow mb-4">
-                <i className="fa-solid fa-boxes-stacked text-2xl"></i>
-              </div>
-              <h3 className="font-bold text-lg mb-1">Wholesalers/Distributors</h3>
-              <p className="text-brand-muted text-sm">Share bulk pricing, MOQs, and product specs with buyers and resellers instantly.</p>
-            </div>
-
-            <div className="rounded-3xl border border-brand-border p-6 bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-              <div className="w-16 h-16 rounded-2xl bg-brand-green-light flex items-center justify-center text-brand-green mb-4">
-                <i className="fa-solid fa-screwdriver-wrench text-2xl"></i>
-              </div>
-              <h3 className="font-bold text-lg mb-1">Industrial Suppliers</h3>
-              <p className="text-brand-muted text-sm">Showcase technical specs, bulk SKUs, and part numbers in one catalog that&apos;s always up to date.</p>
+            {/* Content panel */}
+            <div className="rounded-3xl border border-brand-border bg-brand-bg p-8 md:p-10">
+              <h3 className="text-2xl md:text-3xl font-black tracking-tight mb-4">{activeWhoItem.headline}</h3>
+              <p className="text-brand-muted leading-relaxed mb-8">{activeWhoItem.copy}</p>
+              <Link
+                href="/public/home-living-collection"
+                target="_blank"
+                className="inline-flex items-center gap-2 rounded-xl bg-brand-accent px-6 py-3 text-sm font-bold uppercase tracking-wide text-white transition-all hover:bg-indigo-700"
+              >
+                View Sample Catalog
+                <i className="fa-solid fa-arrow-right text-xs"></i>
+              </Link>
             </div>
           </div>
 
@@ -638,18 +713,64 @@ export default function Home() {
             <div className="flex flex-wrap gap-3">
               {[
                 { icon: 'fa-shirt', label: 'Fashion & Retail' },
-                { icon: 'fa-couch', label: 'Home & Furniture' },
                 { icon: 'fa-utensils', label: 'Food & Beverage' },
-                { icon: 'fa-gem', label: 'Jewelry & Accessories' },
-                { icon: 'fa-laptop', label: 'Electronics' },
                 { icon: 'fa-seedling', label: 'Agriculture & Organic' },
-                { icon: 'fa-paint-roller', label: 'Hardware & Paint' },
               ].map(({ icon, label }) => (
                 <span key={label} className="px-4 py-2 rounded-full bg-white border border-brand-border text-sm font-medium text-brand-text flex items-center gap-2">
                   <i className={`fa-solid ${icon} text-brand-accent text-xs`}></i>
                   {label}
                 </span>
               ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Comparison Section */}
+      <section id="comparison" className="py-28 px-6 bg-brand-bg">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-16">
+            <span className="inline-block px-4 py-1.5 rounded-full bg-brand-accent-light text-brand-accent text-xs font-bold uppercase tracking-widest mb-4">Comparison</span>
+            <h2 className="text-3xl md:text-4xl font-black tracking-tighter mb-5">Instant Catalog vs. <span className="text-gradient">The Alternatives</span></h2>
+            <p className="text-brand-muted max-w-2xl mx-auto">
+              Static PDFs frustrate buyers. E-commerce sites take weeks to build. Instant Catalog gives you the
+              perfect balance of speed, interaction, and simplicity.
+            </p>
+          </div>
+
+          <div className="rounded-3xl border border-brand-border shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[720px] border-collapse text-left">
+                <thead>
+                  <tr>
+                    <th className="w-1/5 bg-white px-6 py-5 text-xs font-bold uppercase tracking-widest text-brand-muted">
+                      Feature
+                    </th>
+                    <th className="w-1/4 bg-white px-6 py-5 text-center text-sm font-bold text-brand-muted">
+                      <i className="fa-solid fa-file-pdf mr-1.5 text-red-400"></i> Static PDFs
+                    </th>
+                    <th className="w-1/4 bg-white px-6 py-5 text-center text-sm font-bold text-brand-muted">
+                      <i className="fa-solid fa-cart-shopping mr-1.5 text-brand-muted"></i> Traditional E-commerce
+                    </th>
+                    <th className="w-1/4 bg-brand-accent px-6 py-5 text-center text-sm font-bold text-white">
+                      <i className="fa-solid fa-bolt mr-1.5"></i> Instant Catalog
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {COMPARISON_ROWS.map((row, i) => (
+                    <tr key={row.feature} className={i % 2 === 0 ? 'bg-white' : 'bg-brand-bg/60'}>
+                      <td className="px-6 py-5 text-sm font-semibold text-brand-text">{row.feature}</td>
+                      <td className="px-6 py-5 text-center text-sm text-brand-muted">{row.pdf}</td>
+                      <td className="px-6 py-5 text-center text-sm text-brand-muted">{row.ecommerce}</td>
+                      <td className="bg-brand-accent-light/50 px-6 py-5 text-center text-sm font-semibold text-brand-accent">
+                        <i className="fa-solid fa-circle-check mr-1.5"></i>
+                        {row.instantCatalog}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -674,22 +795,18 @@ export default function Home() {
                 <h4 className="text-2xl font-black">Free</h4>
               </div>
               <div className="flex items-baseline gap-1 mb-8">
-                <span className="text-6xl font-black">$0</span>
-                <span className="text-brand-muted text-sm">/ forever</span>
+                <span className="text-3xl md:text-4xl font-black">Free Forever</span>
               </div>
               <ul className="space-y-4 mb-10 flex-1">
-                <CheckItem><strong>1 catalog</strong></CheckItem>
+                <CheckItem><strong>1 Catalog</strong> (with limited products)</CheckItem>
                 <CheckItem>Shareable link &amp; QR code</CheckItem>
+                <CheckItem>CSV import &amp; templates</CheckItem>
+                <CheckItem>Receive enquiries &amp; Analytics</CheckItem>
                 <CheckItem>Add to Your Website (Embed Code)</CheckItem>
-                <CheckItem>Enquiry cart &amp; dashboard</CheckItem>
-                <CheckItem>Multiple templates</CheckItem>
-                <CheckItem>Install as an App (PWA)</CheckItem>
-                <CheckItem>Views &amp; Clicks Tracking</CheckItem>
-                <CheckItem>Bulk product upload</CheckItem>
-                <CheckItem>Download as PDF</CheckItem>
+                <CheckItem>Install as an App (PWA) &amp; PDF Download</CheckItem>
               </ul>
-              <Link href="/signup" className="w-full py-4 rounded-2xl border-2 border-brand-border font-bold text-sm uppercase tracking-widest text-center hover:bg-brand-bg transition-all">
-                Get Started Free
+              <Link href="/signup" className="w-full py-4 rounded-2xl border-2 border-brand-border font-bold text-sm uppercase tracking-widest text-center transition-all duration-300 hover:border-brand-accent hover:bg-brand-accent hover:text-white hover:shadow-lg hover:shadow-brand-accent/30">
+                Launch 1 Free Catalog Now
               </Link>
             </div>
 
@@ -706,24 +823,33 @@ export default function Home() {
                 </div>
                 <div className="flex items-baseline gap-1 mb-8">
                   {premiumPrice ? (
-                    <span className="text-6xl font-black text-white">
+                    <span className="text-white" style={{ fontWeight: 800, fontSize: '44px' }}>
                       {currencySymbol(premiumPrice.currency)}
                       {premiumPrice.amount}
                     </span>
                   ) : (
-                    <span className="text-6xl font-black text-white/40">···</span>
+                    <span className="text-white/40" style={{ fontWeight: 800, fontSize: '44px' }}>···</span>
                   )}
                 </div>
                 {/* Free Setup Help is the one line most likely to convert a
-                    fence-sitter — a gold callout instead of a plain bullet
-                    among six, matching the same treatment already used in
-                    the Upgrade-to-Paid dashboard modal. */}
-                <div className="mb-5 flex items-start gap-3 rounded-2xl border border-white/20 bg-white/10 p-4">
-                  <span className="text-xl">🎁</span>
-                  <p className="text-sm text-white">
-                    <strong>Free Setup Help</strong> — send us your product Excel and our team builds your first
-                    catalog for you.
+                    fence-sitter — a solid gold callout instead of a plain
+                    bullet among six, matching the same treatment already
+                    used in the Upgrade-to-Paid dashboard modal. The 'i' icon
+                    carries the full pitch as a hover tooltip so the headline
+                    itself can stay short and scannable. */}
+                <div className="mb-5 flex items-center gap-3 rounded-2xl border border-black/10 bg-white p-4">
+                  <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-brand-accent-light text-brand-accent">
+                    <i className="fa-solid fa-headset"></i>
+                  </span>
+                  <p className="flex-1 font-bold text-brand-text" style={{ fontSize: 'calc(0.875rem + 4px)' }}>
+                    Don&apos;t Have Time to Build It? We&apos;ll Do It For You.
                   </p>
+                  <span className="group relative flex-shrink-0">
+                    <i className="fa-solid fa-circle-info cursor-help text-brand-text/70"></i>
+                    <span className="pointer-events-none absolute bottom-full right-0 z-20 mb-2 w-60 rounded-xl bg-brand-text px-3 py-2 text-xs font-normal normal-case leading-relaxed text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 sm:w-72">
+                      Send us your product Excel file and our team will set up, format, and publish your first digital catalog—100% free within 24 hours.
+                    </span>
+                  </span>
                 </div>
                 <ul className="space-y-4 mb-10 flex-1">
                   <li className="flex items-start gap-3 text-sm text-white">
@@ -747,10 +873,9 @@ export default function Home() {
                     <span>Everything in free plan</span>
                   </li>
                 </ul>
-                <Link href="/signup" className="w-full py-4 rounded-2xl bg-white text-brand-accent font-bold text-sm uppercase tracking-widest text-center hover:bg-indigo-50 transition-all block shadow-lg">
-                  Get Started Free
+                <Link href="/signup" className="w-full py-4 rounded-2xl bg-white text-brand-accent font-bold text-sm uppercase tracking-widest text-center transition-all duration-300 block shadow-lg hover:bg-brand-accent hover:text-white hover:shadow-xl hover:shadow-black/20">
+                  Unlock Premium Features
                 </Link>
-                <p className="text-center text-white/50 text-xs mt-4">Talk to us for pricing that fits your business</p>
               </div>
             </div>
           </div>
@@ -778,7 +903,7 @@ export default function Home() {
                   className="flex-1 bg-transparent border-none text-white placeholder-white/50 px-5 py-3.5 focus:outline-none text-sm"
                 />
                 <button type="submit" className="bg-white text-brand-accent px-8 py-3.5 rounded-xl font-bold uppercase tracking-wider text-xs hover:bg-indigo-50 transition-all shadow-xl whitespace-nowrap">
-                  Get Started Free
+                  Get Free Catalog
                 </button>
               </form>
               <div className="flex items-center justify-center gap-8 text-xs font-semibold uppercase tracking-widest text-white/60">
@@ -815,9 +940,8 @@ export default function Home() {
               </a>
               <p className="text-white/40 max-w-xs text-sm leading-relaxed">The digital catalog builder for modern businesses that want to sell smarter.</p>
               <div className="flex items-center gap-4 mt-6">
-                <a href="#" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/20 transition-all"><i className="fa-brands fa-x-twitter text-xs"></i></a>
                 <a href="#" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/20 transition-all"><i className="fa-brands fa-instagram text-xs"></i></a>
-                <a href="#" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/20 transition-all"><i className="fa-brands fa-linkedin-in text-xs"></i></a>
+                <a href="#" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/20 transition-all"><i className="fa-brands fa-facebook-f text-xs"></i></a>
               </div>
             </div>
             <div className="space-y-5">

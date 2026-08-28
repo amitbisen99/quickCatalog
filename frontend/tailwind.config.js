@@ -85,17 +85,12 @@ module.exports = {
         '9xl': ['calc(8rem + 2px)', { lineHeight: '1' }],
       },
       keyframes: {
-        marquee: {
-          '0%': { transform: 'translateX(0)' },
-          '100%': { transform: 'translateX(-50%)' },
-        },
         float: {
           '0%, 100%': { transform: 'translateY(0px)' },
           '50%': { transform: 'translateY(-10px)' },
         },
       },
       animation: {
-        marquee: 'marquee 25s linear infinite',
         float: 'float 4s ease-in-out infinite',
       },
     },
