@@ -189,7 +189,7 @@ export default function EditorialSpotlightTemplate({ catalog, vendor, categories
         <CatalogPagination page={page} totalPages={totalPages} onPageChange={goToPage} />
       </div>
 
-      <CatalogFooter vendorName={vendorName} mobileNo={vendor.mobileNo} countryCode={vendor.countryCode} />
+      <CatalogFooter vendorName={vendorName} mobileNo={vendor.mobileNo} countryCode={vendor.countryCode} subscriptionType={vendor.subscriptionType} />
       <WhatsAppFloatButton link={productWhatsapp || generalWhatsapp} />
       <EnquiryCartWidget catalogId={catalog.id} currency={vendor.currency} cart={cart} />
     </div>

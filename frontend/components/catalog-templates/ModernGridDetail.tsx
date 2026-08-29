@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import DOMPurify from 'dompurify';
 import { MinusIcon, PlusIcon } from '@/components/icons';
 import type { CatalogTemplateDetailProps } from '@/types/publicCatalog';
-import { whatsappLink, initialsOf } from './shared';
+import { whatsappLink } from './shared';
 import { useEnquiryCart } from './useEnquiryCart';
 import EnquiryCartWidget from './EnquiryCartWidget';
 import { currencySymbol } from '@/utils/currency';
@@ -33,9 +34,10 @@ export default function ModernGridDetail({ catalog, vendor, categories, product 
             // eslint-disable-next-line @next/next/no-img-element
             <img src={vendor.logo} alt={vendorName} className="h-10 w-10 rounded-lg object-cover" />
           ) : (
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-700 text-sm font-bold text-secondary-500">
-              {initialsOf(vendorName)}
-            </div>
+            // Default logo until the vendor uploads their own — same mark
+            // used as the site favicon, not text initials.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src="/icons/icon.svg" alt={vendorName} className="h-10 w-10 rounded-lg" />
           )}
           <span className="text-lg font-bold text-gray-900">{vendorName}</span>
         </div>
@@ -177,7 +179,17 @@ export default function ModernGridDetail({ catalog, vendor, categories, product 
       </div>
 
       <footer className="mt-6 border-t border-gray-200 bg-white py-8 text-center text-xs text-gray-400">
-        Powered by Instant Catalog
+        {vendor.subscriptionType !== 'paid' ? (
+          <>
+            Want a digital catalog for your products? Try{' '}
+            <Link href="/" target="_blank" className="underline hover:text-primary-700">
+              Instant Catalog
+            </Link>{' '}
+            Free
+          </>
+        ) : (
+          'Powered by Instant Catalog'
+        )}
       </footer>
 
       <EnquiryCartWidget catalogId={catalog.id} currency={vendor.currency} cart={cart} />

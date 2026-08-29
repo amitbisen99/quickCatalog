@@ -199,10 +199,17 @@ exports.createProduct = asyncHandler(async (req, res) => {
   });
 });
 
-// Adds an existing (already-owned) product to another catalog.
+// Adds an existing (already-owned) product to another catalog. No
+// capacity check here — this attaches an already-existing Product document
+// to one more catalog (`$addToSet` on catalogIds below), it doesn't create
+// a new one, so it never changes the vendor's total product count the
+// free-tier cap is actually measuring. Free vendors can freely link any of
+// their existing products across as many of their catalogs as they like;
+// only creating brand-new products (createProduct, bulkImportProducts)
+// counts against the cap.
 exports.linkExistingProduct = asyncHandler(async (req, res) => {
   const { catalogId, productId } = req.params;
-  await requireOwnedCatalog(catalogId, req.user.id, 1);
+  await requireOwnedCatalog(catalogId, req.user.id);
 
   if (!mongoose.Types.ObjectId.isValid(productId)) {
     throw new AppError('Product not found', 404);

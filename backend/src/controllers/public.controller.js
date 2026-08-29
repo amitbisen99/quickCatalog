@@ -35,6 +35,9 @@ function toPublicCatalogResponse(catalog) {
 }
 
 // Only vendor fields safe to expose to anonymous visitors — no email.
+// subscriptionType is included too (just a plan tier, not billing data) so
+// the public catalog footer can show a "Build yours free" upsell line only
+// on free-plan vendors' catalogs.
 function toPublicVendorResponse(vendor) {
   return {
     businessName: vendor ? vendor.businessName : undefined,
@@ -43,6 +46,7 @@ function toPublicVendorResponse(vendor) {
     mobileNo: vendor ? vendor.mobileNo : undefined,
     countryCode: vendor ? vendor.countryCode : undefined,
     currency: vendor ? vendor.currency : undefined,
+    subscriptionType: vendor ? vendor.subscriptionType : undefined,
   };
 }
 

@@ -140,7 +140,7 @@ export default function ModernGridTemplate({ catalog, vendor, categories, produc
         <CatalogPagination page={page} totalPages={totalPages} onPageChange={goToPage} />
       </div>
 
-      <CatalogFooter vendorName={vendorName} mobileNo={vendor.mobileNo} countryCode={vendor.countryCode} />
+      <CatalogFooter vendorName={vendorName} mobileNo={vendor.mobileNo} countryCode={vendor.countryCode} subscriptionType={vendor.subscriptionType} />
       <WhatsAppFloatButton link={generalWhatsapp} />
       <EnquiryCartWidget catalogId={catalog.id} currency={vendor.currency} cart={cart} />
     </div>

@@ -4,6 +4,7 @@ import DashboardLayout from '@/components/DashboardLayout';
 import withAuth from '@/components/withAuth';
 import Alert from '@/components/Alert';
 import ProgressBar from '@/components/ProgressBar';
+import UpgradePlanModal from '@/components/dashboard/UpgradePlanModal';
 import { useSimulatedProgress } from '@/hooks/useSimulatedProgress';
 import { DownloadIcon, UploadIcon } from '@/components/icons';
 import { apiFetch, ApiError, API_URL } from '@/utils/api';
@@ -15,6 +16,9 @@ interface ImportResult {
   productsCreated: number;
   errors: { rowNumber: number; error: string }[];
   warnings: { rowNumber: number; warning: string }[];
+  // Present only when the free-tier product cap truncated this import —
+  // set by the backend (bulkImportProducts), not derived here.
+  planLimit?: { limit: number; totalValidRows: number; imported: number } | null;
 }
 
 function BulkImportProducts() {
@@ -23,6 +27,7 @@ function BulkImportProducts() {
   const [error, setError] = useState('');
   const [importing, setImporting] = useState(false);
   const [result, setResult] = useState<ImportResult | null>(null);
+  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
   const importProgress = useSimulatedProgress(importing);
 
   function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
@@ -79,6 +84,7 @@ function BulkImportProducts() {
   }
 
   return (
+    <>
     <DashboardLayout title="Bulk Import Products">
       <Link href="/dashboard/products" className="text-sm font-medium text-gray-500 hover:text-primary-700">
         ← Back to products
@@ -170,7 +176,23 @@ function BulkImportProducts() {
       {result && (
         <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
           <Alert variant="success">
-            {result.productsCreated} product{result.productsCreated === 1 ? '' : 's'} imported successfully.
+            {result.planLimit ? (
+              <>
+                As you have a free plan, {result.planLimit.imported} out of {result.planLimit.totalValidRows} products
+                were uploaded successfully. To upload unlimited products —{' '}
+                <button
+                  type="button"
+                  onClick={() => setUpgradeModalOpen(true)}
+                  className="font-semibold text-blue-600 underline hover:text-blue-700"
+                >
+                  Upgrade
+                </button>
+              </>
+            ) : (
+              <>
+                {result.productsCreated} product{result.productsCreated === 1 ? '' : 's'} imported successfully.
+              </>
+            )}
           </Alert>
 
           {result.errors.length > 0 && (
@@ -212,6 +234,8 @@ function BulkImportProducts() {
         </div>
       )}
     </DashboardLayout>
+    <UpgradePlanModal isOpen={upgradeModalOpen} onClose={() => setUpgradeModalOpen(false)} reason="product" />
+    </>
   );
 }
 

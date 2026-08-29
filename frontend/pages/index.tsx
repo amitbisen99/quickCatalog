@@ -52,42 +52,48 @@ const TRUST_STATS: { icon: string; value: string; label: string }[] = [
 
 type WhoItsForId = 'manufacturers' | 'wholesalers' | 'jewelry' | 'industrial' | 'furniture' | 'electronics';
 
-const WHO_ITS_FOR: { id: WhoItsForId; label: string; headline: string; copy: string }[] = [
+const WHO_ITS_FOR: { id: WhoItsForId; label: string; headline: string; copy: string; catalogSlug: string }[] = [
   {
     id: 'manufacturers',
     label: 'Manufacturers',
     headline: 'Publish Live Product Specs Straight from Your Production Line',
     copy: 'Keep your global distributor network continuously updated with your latest product variations, safety certifications, and baseline pricing. Update your master spreadsheet once to push real-time updates across every shared link, ensuring buyers always quote from your latest catalog version.',
+    catalogSlug: 'precision-metal-components',
   },
   {
     id: 'wholesalers',
     label: 'Wholesalers & Distributors',
     headline: 'Share Volume Pricing & MOQs Without Exposing Margins',
     copy: 'Share bulk pricing, tiered volume discounts, and minimum order quantities with verified buyers without exposing your margins to the public. Enable regional dealers to browse live inventory, select quantities, and submit bulk inquiries directly to your sales team in seconds — eliminating constant price-list back-and-forth over email.',
+    catalogSlug: 'bulk-grocery-wholesale',
   },
   {
     id: 'jewelry',
     label: 'Jewelry & Fashion Brands',
     headline: 'High-Res Visual Showcases That Look Stunning on Mobile',
     copy: 'Turn seasonal releases into visually stunning interactive lookbooks. Display high-resolution image galleries, color variants, and spec details on mobile-optimized layouts. Let boutique buyers and retail customers curate their order list and send instant inquiries straight to your WhatsApp or inbox while interest is at its highest.',
+    catalogSlug: 'elegance-jewelry-collection',
   },
   {
     id: 'industrial',
     label: 'Industrial & Hardware Suppliers',
     headline: 'Make Thousands of Technical Parts Searchable in Seconds',
     copy: 'Make thousands of part numbers, dimension charts, and technical spec sheets instantly searchable on any device. Allow contractors, engineers, and purchasing agents to quickly filter complex product lines, find exact SKUs on-site, and request formal price quotes without digging through 200-page printed binders or broken PDF downloads.',
+    catalogSlug: 'industrial-hardware-supply',
   },
   {
     id: 'furniture',
     label: 'Home & Furniture',
     headline: "Bring Your Showroom Collections Directly to Buyers' Screens",
     copy: 'Show off material finishes, dimensions, and custom configuration options with clean visual layouts. Help interior designers and retail shoppers browse entire room packages, save item selections, and send quick availability inquiries directly to your sales representatives.',
+    catalogSlug: 'home-living-collection',
   },
   {
     id: 'electronics',
     label: 'Electronics',
     headline: 'Simplify Complex Tech Specs Into Clean, Fast-Loading Catalogs',
     copy: 'Highlight model specs, compatibility matrices, and component details without overwhelming buyers with clunky tables. Give retail partners and B2B clients a fast, searchable digital catalog where they can compare features and submit quick stock inquiries on the go.',
+    catalogSlug: 'techpro-electronics-catalog',
   },
 ];
 
@@ -235,7 +241,7 @@ export default function Home() {
 
         <div className="max-w-7xl mx-auto w-full relative z-10">
           <div className="text-center space-y-8 max-w-4xl mx-auto">
-            <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter leading-[1.1]">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter leading-[1.1]">
               Turn your product Excel into<br />
               <span className="text-gradient">interactive sales catalog</span>—that close deals.
             </h1>
@@ -304,7 +310,7 @@ export default function Home() {
       {/* Trust Ribbon */}
       <section className="py-16 border-y border-brand-border bg-white">
         <div className="max-w-6xl mx-auto px-6">
-          <div className="flex flex-wrap items-center justify-center gap-x-24 gap-y-10">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-10 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-x-24">
             {TRUST_STATS.map((stat) => (
               <div key={stat.label} className="flex items-center gap-4">
                 <span className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl bg-brand-accent-light text-brand-accent">
@@ -403,17 +409,17 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-xs font-semibold uppercase tracking-widest text-brand-muted">
+          <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-x-8 sm:gap-y-3 text-xs font-semibold uppercase tracking-widest text-brand-muted">
             <div className="flex items-center gap-2">
               <i className="fa-solid fa-circle-check text-brand-green"></i>
               No Credit Card Required
             </div>
-            <div className="h-1 w-1 rounded-full bg-brand-border"></div>
+            <div className="hidden h-1 w-1 rounded-full bg-brand-border sm:block"></div>
             <div className="flex items-center gap-2">
               <i className="fa-solid fa-circle-check text-brand-green"></i>
               Setup in Minutes
             </div>
-            <div className="h-1 w-1 rounded-full bg-brand-border"></div>
+            <div className="hidden h-1 w-1 rounded-full bg-brand-border sm:block"></div>
             <div className="flex items-center gap-2">
               <i className="fa-solid fa-circle-check text-brand-green"></i>
               Free Forever Plan
@@ -698,7 +704,7 @@ export default function Home() {
               <h3 className="text-2xl md:text-3xl font-black tracking-tight mb-4">{activeWhoItem.headline}</h3>
               <p className="text-brand-muted leading-relaxed mb-8">{activeWhoItem.copy}</p>
               <Link
-                href="/public/home-living-collection"
+                href={`/public/${activeWhoItem.catalogSlug}`}
                 target="_blank"
                 className="inline-flex items-center gap-2 rounded-xl bg-brand-accent px-6 py-3 text-sm font-bold uppercase tracking-wide text-white transition-all hover:bg-indigo-700"
               >

@@ -90,12 +90,6 @@ interface Props {
   children: ReactNode;
 }
 
-function initialsOf(name: string): string {
-  const parts = name.trim().split(/\s+/);
-  const initials = parts.length >= 2 ? parts[0][0] + parts[1][0] : name.slice(0, 2);
-  return initials.toUpperCase();
-}
-
 export default function DashboardLayout({ title, children }: Props) {
   const { user, logout } = useAuth();
   const router = useRouter();
@@ -154,11 +148,19 @@ export default function DashboardLayout({ title, children }: Props) {
       <div className="flex min-h-screen">
         {/* Sidebar (desktop) */}
         <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-gray-200 bg-white lg:flex">
-          <div className="flex items-center gap-2.5 px-5 py-6">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-700 text-sm font-bold text-secondary-500">
-              I
-            </div>
-            <span className="text-lg font-bold text-gray-900">Instant Catalog</span>
+          <div className="flex items-center px-5 py-6">
+            {/* Instant Catalog's own full lockup by default — completely
+                replaced by the vendor's own uploaded logo once they set
+                one, not combined with it. Height-constrained with
+                object-contain so either shape (this wide lockup, or a
+                vendor's typically-square logo) renders at its own natural
+                width without distortion. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={user?.logo || '/logo-full.svg'}
+              alt={user?.logo ? vendorName : 'Instant Catalog'}
+              className="h-8 w-auto max-w-[180px] object-contain"
+            />
           </div>
           <nav className="flex-1 overflow-y-auto px-3 pb-4">
             <NavLinks />
@@ -186,8 +188,12 @@ export default function DashboardLayout({ title, children }: Props) {
                     onClick={() => setAvatarMenuOpen((open) => !open)}
                     className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-gray-50"
                   >
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-700 text-xs font-semibold text-white">
-                      {vendorName ? initialsOf(vendorName) : ''}
+                    <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-gray-200 bg-white">
+                      {/* Vendor's own uploaded logo once they set one in
+                          Settings — the default brand mark until then,
+                          never text initials. */}
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={user?.logo || '/icons/icon.svg'} alt={vendorName} className="h-full w-full object-cover" />
                     </div>
                     <span className="hidden text-sm font-medium text-gray-700 sm:inline">{vendorName}</span>
                     <ChevronDownIcon className="h-4 w-4 text-gray-400" />
@@ -266,8 +272,9 @@ export default function DashboardLayout({ title, children }: Props) {
           <div className="relative flex max-h-[80vh] w-full flex-col rounded-t-2xl bg-white pb-[env(safe-area-inset-bottom)] shadow-xl">
             <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
               <div className="flex items-center gap-2.5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-700 text-xs font-semibold text-white">
-                  {vendorName ? initialsOf(vendorName) : ''}
+                <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-gray-200 bg-white">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={user?.logo || '/icons/icon.svg'} alt={vendorName} className="h-full w-full object-cover" />
                 </div>
                 <span className="text-sm font-semibold text-gray-900">{vendorName}</span>
               </div>

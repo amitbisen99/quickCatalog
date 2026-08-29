@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import DashboardLayout from '@/components/DashboardLayout';
 import withAuth from '@/components/withAuth';
 import Alert from '@/components/Alert';
+import PasswordInput from '@/components/PasswordInput';
 import PasswordStrengthMeter from '@/components/PasswordStrengthMeter';
 import MobileNumberInput from '@/components/MobileNumberInput';
 import UpgradePlanModal from '@/components/dashboard/UpgradePlanModal';
@@ -408,14 +409,22 @@ function Settings() {
           <div>
             <label className="block text-sm font-medium text-gray-700">Logo</label>
             <div className="mt-1 flex items-center gap-4">
-              {logoPreview ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={logoPreview} alt="Logo preview" className="h-16 w-16 rounded-lg object-cover" />
-              ) : (
-                <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-gray-100 text-xs text-gray-400">
-                  No logo
-                </div>
-              )}
+              {/* Rectangular (not square) — matches the logo box's actual
+                  proportions on the vendor's live public catalog page
+                  (CatalogHero), so this preview shows the logo the same
+                  shape it'll really be displayed in. */}
+              <div className="flex h-[50px] w-[120px] shrink-0 items-center justify-center overflow-hidden rounded-lg border border-gray-200 bg-white">
+                {logoPreview ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={logoPreview} alt="Logo preview" className="h-full w-full object-contain p-1.5" />
+                ) : (
+                  // Default logo shown until a vendor uploads their own —
+                  // the same mark shown everywhere else by default, not a
+                  // "no logo" placeholder.
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src="/icons/icon.svg" alt="Default logo" className="h-full w-full object-contain p-1.5" />
+                )}
+              </div>
               <input type="file" accept="image/*" onChange={handleLogoChange} className="text-sm text-gray-600" />
             </div>
             <p className="mt-1 text-xs text-gray-400">Recommended: square, at least 200 × 200px. JPG or PNG, max 5MB.</p>
@@ -474,24 +483,22 @@ function Settings() {
             <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700">
               Current Password
             </label>
-            <input
+            <PasswordInput
               id="currentPassword"
-              type="password"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-600"
+              inputClassName="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-600"
             />
           </div>
           <div>
             <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700">
               New Password
             </label>
-            <input
+            <PasswordInput
               id="newPassword"
-              type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-600"
+              inputClassName="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-600"
             />
             <PasswordStrengthMeter password={newPassword} />
           </div>
@@ -499,12 +506,11 @@ function Settings() {
             <label htmlFor="confirmNewPassword" className="block text-sm font-medium text-gray-700">
               Confirm New Password
             </label>
-            <input
+            <PasswordInput
               id="confirmNewPassword"
-              type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-600"
+              inputClassName="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-600"
             />
           </div>
 
@@ -538,8 +544,12 @@ function Settings() {
         )}
       </section>
 
-      {/* White-label domain */}
-      <section className="mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+      {/* White-label domain — Premium-only. Free-plan vendors see the whole
+          section blurred out with a single upgrade CTA instead of the
+          previous per-field gating (which only gated the custom-domain
+          half, leaving the branded-subdomain half free to use). */}
+      <section className="relative mt-6 overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div className={isFreePlan(user) ? 'pointer-events-none select-none blur-[2px]' : undefined}>
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-100 text-primary-700">
             <ShareIcon className="h-5 w-5" />
@@ -608,14 +618,7 @@ function Settings() {
 
         <div className="mt-5 border-t border-gray-100 pt-5">
           <p className="text-sm font-medium text-gray-700">Custom domain</p>
-          {isFreePlan(user) && !customDomain ? (
-            <button
-              onClick={() => setDomainUpgradeModalOpen(true)}
-              className="mt-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-            >
-              Upgrade to connect your own domain
-            </button>
-          ) : customDomain ? (
+          {customDomain ? (
             <div className="mt-2 flex items-start justify-between gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3">
               <div>
                 <p className="text-sm font-medium text-gray-900">{customDomain}</p>
@@ -686,6 +689,32 @@ function Settings() {
                 </option>
               ))}
             </select>
+          </div>
+        )}
+        </div>
+
+        {isFreePlan(user) && (
+          <div className="absolute inset-0 flex items-center justify-center px-6">
+            {/* A light blur on the content behind (not a heavy white wash)
+                keeps the section's own text legible — free vendors should
+                still be able to read what the feature offers. This card
+                floats on top just so the upgrade pitch itself stays crisp
+                regardless of what's blurred behind it. */}
+            <div className="flex flex-col items-center gap-3 rounded-2xl border border-gray-200 bg-white/95 px-6 py-5 text-center shadow-lg backdrop-blur-sm">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 text-primary-700">
+                <LockIcon className="h-5 w-5" />
+              </div>
+              <p className="max-w-xs text-sm font-medium text-gray-700">
+                White-label domains are a Premium feature — connect your own branded subdomain or custom domain.
+              </p>
+              <button
+                type="button"
+                onClick={() => setDomainUpgradeModalOpen(true)}
+                className="rounded-lg bg-primary-700 px-4 py-2 text-sm font-medium text-white hover:bg-primary-800"
+              >
+                Upgrade to Paid
+              </button>
+            </div>
           </div>
         )}
       </section>

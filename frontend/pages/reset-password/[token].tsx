@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Layout from '@/components/Layout';
 import Alert from '@/components/Alert';
+import PasswordInput from '@/components/PasswordInput';
 import PasswordStrengthMeter from '@/components/PasswordStrengthMeter';
 import { apiFetch, ApiError } from '@/utils/api';
 import { isPasswordValid } from '@/utils/validators';
@@ -73,12 +74,11 @@ export default function ResetPassword() {
                 <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700">
                   New Password
                 </label>
-                <input
+                <PasswordInput
                   id="newPassword"
-                  type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-700 focus:outline-none focus:ring-1 focus:ring-primary-700"
+                  inputClassName="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-700 focus:outline-none focus:ring-1 focus:ring-primary-700"
                   placeholder="••••••••"
                 />
                 <PasswordStrengthMeter password={newPassword} />
@@ -88,12 +88,11 @@ export default function ResetPassword() {
                 <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
                   Confirm Password
                 </label>
-                <input
+                <PasswordInput
                   id="confirmPassword"
-                  type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-700 focus:outline-none focus:ring-1 focus:ring-primary-700"
+                  inputClassName="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-700 focus:outline-none focus:ring-1 focus:ring-primary-700"
                   placeholder="••••••••"
                 />
               </div>

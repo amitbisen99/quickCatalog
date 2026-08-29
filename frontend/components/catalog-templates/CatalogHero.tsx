@@ -1,5 +1,5 @@
 import type { PublicCatalogInfo, PublicVendorInfo } from '@/types/publicCatalog';
-import { initialsOf, truncateWords } from './shared';
+import { truncateWords } from './shared';
 import { playfairDisplay } from '@/utils/fonts';
 
 interface Props {
@@ -81,7 +81,10 @@ export default function CatalogHero({ catalog, vendor, productsCount, theme = 'd
               // eslint-disable-next-line @next/next/no-img-element
               <img src={vendor.logo} alt={vendorName} className="h-full w-full object-contain p-1.5" />
             ) : (
-              <span className={`text-sm font-bold ${t.logoFallbackText}`}>{initialsOf(vendorName)}</span>
+              // Default logo until the vendor uploads their own — same mark
+              // used as the site favicon, not text initials.
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src="/icons/icon.svg" alt={vendorName} className="h-full w-full object-contain p-1.5" />
             )}
           </div>
           <span className={`text-sm font-semibold uppercase tracking-wide ${t.vendorLabel}`}>{vendorName}</span>

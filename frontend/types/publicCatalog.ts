@@ -27,6 +27,7 @@ export interface PublicVendorInfo {
   mobileNo?: string;
   countryCode?: string;
   currency?: string;
+  subscriptionType?: string;
 }
 
 export interface PublicCategoryInfo {
