@@ -385,6 +385,55 @@ exports.deleteProduct = asyncHandler(async (req, res) => {
   res.json({ success: true, message: 'Product deleted successfully' });
 });
 
+// Bulk price update — one MongoDB round-trip via bulkWrite instead of N
+// separate document saves. Takes exact {productId, price} pairs rather
+// than a "+10%" style instruction: the frontend already has every
+// selected product's current price loaded (it rendered the list), so it
+// computes and previews the new values itself, and this just writes
+// exactly what the vendor confirmed — no risk of the frontend's preview
+// and the backend's math disagreeing on rounding.
+exports.bulkUpdatePrice = asyncHandler(async (req, res) => {
+  const { updates } = req.body;
+
+  const result = await Product.bulkWrite(
+    updates.map(({ productId, price }) => ({
+      updateOne: {
+        // vendorId in the filter, not just _id — a productId for another
+        // vendor's product simply matches nothing rather than updating it.
+        filter: { _id: productId, vendorId: req.user.id },
+        update: { $set: { price } },
+      },
+    }))
+  );
+
+  res.json({
+    success: true,
+    message: `Updated price on ${result.modifiedCount} of ${updates.length} product(s)`,
+    matched: result.matchedCount,
+    modified: result.modifiedCount,
+  });
+});
+
+// Bulk category reassignment (or clear, when categoryId is omitted) for
+// a set of the vendor's own products. $unset rather than $set: null so
+// "no category" stays genuinely absent from the document, matching how
+// a single product's categoryId is treated everywhere else.
+exports.bulkUpdateCategory = asyncHandler(async (req, res) => {
+  const { productIds, categoryId } = req.body;
+
+  const result = await Product.updateMany(
+    { _id: { $in: productIds }, vendorId: req.user.id },
+    categoryId ? { $set: { categoryId } } : { $unset: { categoryId: '' } }
+  );
+
+  res.json({
+    success: true,
+    message: `Updated category on ${result.modifiedCount} of ${productIds.length} product(s)`,
+    matched: result.matchedCount,
+    modified: result.modifiedCount,
+  });
+});
+
 // Fixed-format .xlsx template for bulk product import — column headers
 // match normalizeBulkProductRow's expectations exactly, so there's no
 // column-mapping step (unlike the catalog-from-file wizard). Includes a
