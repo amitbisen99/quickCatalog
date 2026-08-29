@@ -408,7 +408,7 @@ function Settings() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700">Logo</label>
-            <div className="mt-1 flex items-center gap-4">
+            <div className="mt-1 flex flex-wrap items-center gap-4">
               {/* Rectangular (not square) — matches the logo box's actual
                   proportions on the vendor's live public catalog page
                   (CatalogHero), so this preview shows the logo the same
@@ -566,7 +566,7 @@ function Settings() {
           <p className="text-sm font-medium text-gray-700">Branded subdomain</p>
           {subdomain ? (
             <div className="mt-2 flex items-start justify-between gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3">
-              <div>
+              <div className="min-w-0 break-words">
                 <p className="text-sm font-medium text-gray-900">
                   {subdomain}.{APP_BASE_DOMAIN}
                 </p>
@@ -593,13 +593,13 @@ function Settings() {
             </div>
           ) : (
             <form onSubmit={handleSetSubdomain} className="mt-2">
-              <div className="flex items-center gap-2">
-                <div className="flex flex-1 items-center rounded-lg border border-gray-300 focus-within:border-primary-600 focus-within:ring-1 focus-within:ring-primary-600">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                <div className="flex min-w-0 items-center rounded-lg border border-gray-300 focus-within:border-primary-600 focus-within:ring-1 focus-within:ring-primary-600 sm:flex-1">
                   <input
                     value={subdomainInput}
                     onChange={(e) => setSubdomainInput(e.target.value)}
                     placeholder="yourbrand"
-                    className="w-full rounded-l-lg px-3 py-2 text-sm focus:outline-none"
+                    className="w-full min-w-0 rounded-l-lg px-3 py-2 text-sm focus:outline-none"
                   />
                   <span className="shrink-0 pr-3 text-sm text-gray-400">.{APP_BASE_DOMAIN}</span>
                 </div>
@@ -620,7 +620,7 @@ function Settings() {
           <p className="text-sm font-medium text-gray-700">Custom domain</p>
           {customDomain ? (
             <div className="mt-2 flex items-start justify-between gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3">
-              <div>
+              <div className="min-w-0 break-words">
                 <p className="text-sm font-medium text-gray-900">{customDomain}</p>
                 {customDomainStatus === 'active' ? (
                   <p className="mt-1 flex items-center gap-1 text-xs text-green-700">
@@ -645,12 +645,12 @@ function Settings() {
             </div>
           ) : (
             <form onSubmit={handleSetCustomDomain} className="mt-2">
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                 <input
                   value={customDomainInput}
                   onChange={(e) => setCustomDomainInput(e.target.value)}
                   placeholder="catalog.yourbrand.com"
-                  className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-600"
+                  className="w-full min-w-0 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-600 sm:flex-1"
                 />
                 <button
                   type="submit"

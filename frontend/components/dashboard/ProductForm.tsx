@@ -395,21 +395,23 @@ export default function ProductForm({ catalogId, mode, productId, initial }: Pro
           {Object.keys(specs).length > 0 && (
             <div className="mt-2 space-y-2">
               {Object.entries(specs).map(([key, value]) => (
-                <div key={key} className="flex items-center gap-2">
-                  <span className="w-32 shrink-0 truncate text-sm text-gray-600">{key}</span>
-                  <input
-                    value={value}
-                    onChange={(e) => setSpecs((prev) => ({ ...prev, [key]: e.target.value }))}
-                    placeholder="Value"
-                    className="flex-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-600"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeSpec(key)}
-                    className="shrink-0 text-gray-400 hover:text-red-600"
-                  >
-                    <TrashIcon className="h-4 w-4" />
-                  </button>
+                <div key={key} className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-2">
+                  <span className="shrink-0 truncate text-sm text-gray-600 sm:w-32">{key}</span>
+                  <div className="flex items-center gap-2">
+                    <input
+                      value={value}
+                      onChange={(e) => setSpecs((prev) => ({ ...prev, [key]: e.target.value }))}
+                      placeholder="Value"
+                      className="min-w-0 flex-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-600"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeSpec(key)}
+                      className="shrink-0 text-gray-400 hover:text-red-600"
+                    >
+                      <TrashIcon className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

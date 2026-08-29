@@ -310,7 +310,7 @@ export default function Home() {
       {/* Trust Ribbon */}
       <section className="py-16 border-y border-brand-border bg-white">
         <div className="max-w-6xl mx-auto px-6">
-          <div className="grid grid-cols-2 gap-x-6 gap-y-10 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-x-24">
+          <div className="flex flex-col items-center gap-y-8 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-x-24">
             {TRUST_STATS.map((stat) => (
               <div key={stat.label} className="flex items-center gap-4">
                 <span className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl bg-brand-accent-light text-brand-accent">
