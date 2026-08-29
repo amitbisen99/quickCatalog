@@ -44,6 +44,24 @@ exports.trackVisit = asyncHandler(async (req, res) => {
   res.json({ success: true });
 });
 
+// Vendor-wide "Views" stat for the dashboard home page — catalog-page
+// views only (productId: null), matching getCatalogAnalytics's own
+// totalViews definition below, summed across every catalog this vendor
+// owns rather than requiring one call per catalog.
+exports.getVendorAnalyticsSummary = asyncHandler(async (req, res) => {
+  const startOfMonth = new Date();
+  startOfMonth.setUTCDate(1);
+  startOfMonth.setUTCHours(0, 0, 0, 0);
+
+  const viewsThisMonth = await Visit.countDocuments({
+    vendorId: req.user.id,
+    productId: null,
+    createdAt: { $gte: startOfMonth },
+  });
+
+  res.json({ success: true, viewsThisMonth });
+});
+
 exports.getCatalogAnalytics = asyncHandler(async (req, res) => {
   const { catalogId } = req.params;
   if (!mongoose.Types.ObjectId.isValid(catalogId)) {

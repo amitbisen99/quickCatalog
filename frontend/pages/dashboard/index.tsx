@@ -23,6 +23,7 @@ function Dashboard() {
   const [catalogCount, setCatalogCount] = useState(0);
   const [productCount, setProductCount] = useState(0);
   const [enquiriesThisMonth, setEnquiriesThisMonth] = useState(0);
+  const [viewsThisMonth, setViewsThisMonth] = useState(0);
 
   useEffect(() => {
     apiFetch<{ user: AuthUser }>('/users/profile')
@@ -55,6 +56,11 @@ function Dashboard() {
       .catch(() => {
         // Leave at 0 if this fails.
       });
+    apiFetch<{ viewsThisMonth: number }>('/analytics/summary')
+      .then((res) => setViewsThisMonth(res.viewsThisMonth))
+      .catch(() => {
+        // Leave at 0 if this fails.
+      });
   }, []);
 
   const user = profileUser || contextUser;
@@ -65,13 +71,10 @@ function Dashboard() {
       <p className="mt-1.5 text-base text-gray-500">Here&apos;s an overview of your catalogs.</p>
 
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Views stays 0 — there's no vendor-wide (cross-catalog)
-            aggregate endpoint yet, only GET /analytics/:catalogId for a
-            single catalog at a time. */}
         <StatCard label="Total Catalogs" value={catalogCount} icon={GridIcon} accent="primary" />
         <StatCard label="Total Products" value={productCount} icon={TagIcon} accent="secondary" />
         <StatCard label="Enquiries" value={enquiriesThisMonth} hint="This month" icon={MailIcon} accent="green" />
-        <StatCard label="Views" value={0} hint="This month" icon={ChartBarIcon} accent="gray" />
+        <StatCard label="Views" value={viewsThisMonth} hint="This month" icon={ChartBarIcon} accent="gray" />
       </div>
 
       <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
