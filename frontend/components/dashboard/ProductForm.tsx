@@ -423,7 +423,12 @@ export default function ProductForm({ catalogId, mode, productId, initial }: Pro
                 const specName = e.target.value;
                 if (specName) setSpecs((prev) => ({ ...prev, [specName]: prev[specName] ?? '' }));
               }}
-              className="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-600"
+              // min-w-0 + truncate: a long specification name (from
+              // specMaster, vendor-entered — no length cap) otherwise sets
+              // this <select>'s intrinsic width to fit its longest
+              // <option>, which overrides flex-1's shrinking on mobile
+              // Chrome and pushes the whole page wider than the viewport.
+              className="min-w-0 flex-1 truncate rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-600"
             >
               <option value="">+ Add specification…</option>
               {specMaster
