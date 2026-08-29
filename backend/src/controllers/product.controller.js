@@ -7,7 +7,15 @@ const Specification = require('../models/Specification');
 const User = require('../models/User');
 const { compressImageToDataUrl } = require('../utils/imageProcessor');
 const { parseWorkbook } = require('../utils/excelParser');
-const { normalizeBulkProductRow, HEADERS: BULK_HEADERS } = require('../utils/normalizeBulkProductRow');
+const { normalizeProductRow } = require('../utils/normalizeProductRow');
+const { HEADERS: BULK_HEADERS } = require('../utils/normalizeBulkProductRow');
+
+// bulkImportSample's downloadable template is keyed by these exact
+// column names (BULK_HEADERS uses `name`; normalizeProductRow's
+// fieldMappings expects `productName` — everything else lines up) —
+// used as the fallback mapping in bulkImportProducts when the caller
+// doesn't send its own (a direct API call with no mapping step).
+const BULK_HEADERS_AS_MAPPING = { ...BULK_HEADERS, productName: BULK_HEADERS.name };
 const findOrCreateCategory = require('../utils/findOrCreateCategory');
 const findOrCreateSpecification = require('../utils/findOrCreateSpecification');
 const readImagesZip = require('../utils/readImagesZip');
@@ -434,9 +442,9 @@ exports.bulkUpdateCategory = asyncHandler(async (req, res) => {
   });
 });
 
-// Fixed-format .xlsx template for bulk product import — column headers
-// match normalizeBulkProductRow's expectations exactly, so there's no
-// column-mapping step (unlike the catalog-from-file wizard). Includes a
+// Sample .xlsx template for bulk product import — a starting point, not a
+// strict requirement, since bulkImportProducts below now maps columns by
+// name the same way the catalog-from-file wizard does. Includes a
 // second "Reference" tab listing the vendor's existing category and
 // specification names, so they can be copied into a row exactly instead
 // of retyped (typos would otherwise silently create duplicates).
@@ -497,12 +505,31 @@ exports.bulkImportSample = asyncHandler(async (req, res) => {
 });
 
 // Bulk-creates standalone products (vendor library, no catalog attached
-// yet — link them to catalogs afterward) from a file matching the
-// bulkImportSample template, plus an optional ZIP of product photos.
+// yet — link them to catalogs afterward) from an Excel file — any column
+// names, via fieldMappings (same wizard flow as catalog.controller.js's
+// createFromFile: /upload/parse-catalog to read headers, fuzzy-matched
+// client-side, previewed, then submitted here) — plus an optional ZIP of
+// product photos.
 exports.bulkImportProducts = asyncHandler(async (req, res) => {
   const excelFile = req.files?.file?.[0];
   if (!excelFile) {
     throw new AppError('No file uploaded', 400);
+  }
+
+  // Optional — falls back to the fixed template's own header names so a
+  // direct API call (or an older client) without a mapping step still
+  // works. The wizard always sends this, resolved client-side from
+  // /upload/parse-catalog's headers via the same fuzzy matching the
+  // catalog-from-file wizard uses, so a vendor's own column names (not
+  // just the exact template headers) are accepted here too.
+  let fieldMappings;
+  try {
+    fieldMappings = req.body.fieldMappings ? JSON.parse(req.body.fieldMappings) : BULK_HEADERS_AS_MAPPING;
+  } catch (err) {
+    throw new AppError('Invalid field mappings', 400);
+  }
+  if (!fieldMappings.productName || !fieldMappings.price) {
+    throw new AppError('Product Name and Price must be mapped', 400);
   }
 
   const { records } = parseWorkbook(excelFile.buffer);
@@ -536,7 +563,7 @@ exports.bulkImportProducts = asyncHandler(async (req, res) => {
   // both of those for them — no point paying for work that's thrown away.
   for (let i = 0; i < records.length; i += 1) {
     const rowNumber = i + 2; // +1 for header row, +1 for 1-indexing
-    const { data, error } = normalizeBulkProductRow(records[i]);
+    const { data, error } = normalizeProductRow(records[i], fieldMappings);
     if (error) {
       errors.push({ rowNumber, error });
       continue;
