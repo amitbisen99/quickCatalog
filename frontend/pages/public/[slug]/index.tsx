@@ -1,8 +1,8 @@
 import type { GetServerSideProps } from 'next';
-import Head from 'next/head';
 import { absoluteApiUrl } from '@/utils/api';
 import { getCatalogTemplate } from '@/components/catalog-templates/registry';
 import { useTrackVisit } from '@/utils/analytics';
+import Seo from '@/components/Seo';
 import type { CatalogPageData } from '@/types/publicCatalog';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3010';
@@ -62,23 +62,32 @@ export default function PublicCatalog({ data, error }: Props) {
   // Only set og:image when there's actually a banner/logo to serve —
   // the endpoint 404s otherwise, which crawlers handle fine, but there's
   // no reason to point at a URL we already know is empty.
-  const ogImage = data.vendor.banner || data.vendor.logo ? absoluteApiUrl(`/public/catalog/${data.catalog.slug}/og-image`) : null;
+  const ogImage = data.vendor.banner || data.vendor.logo ? absoluteApiUrl(`/public/catalog/${data.catalog.slug}/og-image`) : undefined;
+
+  const itemListJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    itemListElement: data.products.map((p, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      item: {
+        '@type': 'Product',
+        name: p.name,
+        // Same reasoning as ogImage above — a product's own images are
+        // inline base64 data URLs, which a crawler validating structured
+        // data can't fetch. Reuses the same per-product image endpoint
+        // the product detail page's own OG tag uses.
+        image: p.images.length ? absoluteApiUrl(`/public/catalog/${data.catalog.slug}/products/${p.slug}/og-image`) : undefined,
+        description: p.description || undefined,
+      },
+    })),
+  };
 
   return (
     <>
-      <Head>
-        <title>{pageTitle}</title>
-        <meta name="description" content={pageDescription} />
-        <meta property="og:type" content="website" />
-        <meta property="og:title" content={pageTitle} />
-        <meta property="og:description" content={pageDescription} />
-        <meta property="og:url" content={pageUrl} />
-        {ogImage && <meta property="og:image" content={ogImage} />}
-        <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
-        <meta name="twitter:title" content={pageTitle} />
-        <meta name="twitter:description" content={pageDescription} />
-        {ogImage && <meta name="twitter:image" content={ogImage} />}
-      </Head>
+      <Seo title={pageTitle} description={pageDescription} image={ogImage} canonicalUrl={pageUrl} />
+      {/* eslint-disable-next-line react/no-danger */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
       <Template {...data} />
     </>
   );

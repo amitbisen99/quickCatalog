@@ -1,9 +1,55 @@
 import { FormEvent, useEffect, useState } from 'react';
+import type { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
-import Head from 'next/head';
+import Image from 'next/image';
 import Link from 'next/link';
-import { apiFetch } from '@/utils/api';
+import Seo, { SITE_URL } from '@/components/Seo';
+import { apiFetch, absoluteApiUrl } from '@/utils/api';
 import { currencySymbol } from '@/utils/currency';
+import type { IconType } from 'react-icons';
+import {
+  FaArrowRight,
+  FaBars,
+  FaBolt,
+  FaCartShopping,
+  FaChartLine,
+  FaCheck,
+  FaCircleCheck,
+  FaCircleInfo,
+  FaCode,
+  FaCodeBranch,
+  FaEarthAmericas,
+  FaFacebookF,
+  FaFileExcel,
+  FaFilePdf,
+  FaGaugeHigh,
+  FaGlobe,
+  FaHandPointer,
+  FaHeadset,
+  FaHeart,
+  FaHourglassHalf,
+  FaInbox,
+  FaInfinity,
+  FaInstagram,
+  FaImages,
+  FaLayerGroup,
+  FaLightbulb,
+  FaMobileScreen,
+  FaPalette,
+  FaPenRuler,
+  FaPrint,
+  FaRocket,
+  FaSeedling,
+  FaShareNodes,
+  FaShieldHalved,
+  FaShirt,
+  FaTag,
+  FaTags,
+  FaTriangleExclamation,
+  FaUsers,
+  FaUtensils,
+  FaXmark,
+} from 'react-icons/fa6';
 
 // Marketing homepage. Styling for this page only lives in
 // tailwind.config.js (brand-* colors, float keyframe) and
@@ -12,28 +58,28 @@ import { currencySymbol } from '@/utils/currency';
 
 type FeatureTabId = 'builder' | 'branding' | 'embed' | 'sharing' | 'analytics' | 'pwa';
 
-const FEATURE_TABS: { id: FeatureTabId; label: string; icon: string }[] = [
-  { id: 'builder', label: 'Builder', icon: 'fa-pen-ruler' },
-  { id: 'branding', label: 'Your Own Branding', icon: 'fa-globe' },
-  { id: 'embed', label: 'Add to Your Website', icon: 'fa-code' },
-  { id: 'sharing', label: 'Sharing', icon: 'fa-share-nodes' },
-  { id: 'analytics', label: 'Analytics', icon: 'fa-chart-line' },
-  { id: 'pwa', label: 'PWA', icon: 'fa-mobile-screen' },
+const FEATURE_TABS: { id: FeatureTabId; label: string; icon: IconType }[] = [
+  { id: 'builder', label: 'Builder', icon: FaPenRuler },
+  { id: 'branding', label: 'Your Own Branding', icon: FaGlobe },
+  { id: 'embed', label: 'Add to Your Website', icon: FaCode },
+  { id: 'sharing', label: 'Sharing', icon: FaShareNodes },
+  { id: 'analytics', label: 'Analytics', icon: FaChartLine },
+  { id: 'pwa', label: 'PWA', icon: FaMobileScreen },
 ];
 
-const PROBLEMS: { icon: string; label: string }[] = [
-  { icon: 'fa-tag', label: 'Updating prices takes hours every time?' },
-  { icon: 'fa-images', label: 'Every small product change requires redesigning the catalog?' },
-  { icon: 'fa-hourglass-half', label: 'Dealers and customers keep using outdated catalogs?' },
-  { icon: 'fa-file-pdf', label: 'Multiple versions of catalogs are scattered everywhere?' },
-  { icon: 'fa-code-branch', label: 'Still struggling to get sales enquiry?' },
+const PROBLEMS: { icon: IconType; label: string }[] = [
+  { icon: FaTag, label: 'Updating prices takes hours every time?' },
+  { icon: FaImages, label: 'Every small product change requires redesigning the catalog?' },
+  { icon: FaHourglassHalf, label: 'Dealers and customers keep using outdated catalogs?' },
+  { icon: FaFilePdf, label: 'Multiple versions of catalogs are scattered everywhere?' },
+  { icon: FaCodeBranch, label: 'Still struggling to get sales enquiry?' },
 ];
 
-const SOLUTION_STEPS: { icon: string; title: string; body: string }[] = [
-  { icon: 'fa-file-excel', title: 'Upload Excel', body: 'Your products, images and prices.' },
-  { icon: 'fa-palette', title: 'Choose Design -> Catalog Ready', body: 'Pick a professional template and catalog generated automatically.' },
-  { icon: 'fa-share-nodes', title: 'Share Everywhere', body: 'Website, WhatsApp, Email, Messages.' },
-  { icon: 'fa-inbox', title: 'Receive Enquiries', body: 'Sales enquiries land straight in your dashboard.' },
+const SOLUTION_STEPS: { icon: IconType; title: string; body: string }[] = [
+  { icon: FaFileExcel, title: 'Upload Excel', body: 'Your products, images and prices.' },
+  { icon: FaPalette, title: 'Choose Design -> Catalog Ready', body: 'Pick a professional template and catalog generated automatically.' },
+  { icon: FaShareNodes, title: 'Share Everywhere', body: 'Website, WhatsApp, Email, Messages.' },
+  { icon: FaInbox, title: 'Receive Enquiries', body: 'Sales enquiries land straight in your dashboard.' },
 ];
 
 const COMPARISON_ROWS: { feature: string; pdf: string; ecommerce: string; instantCatalog: string }[] = [
@@ -43,11 +89,11 @@ const COMPARISON_ROWS: { feature: string; pdf: string; ecommerce: string; instan
   { feature: 'Analytics', pdf: 'Zero visibility', ecommerce: 'Requires analytics setup', instantCatalog: 'Built-in View & Inquiry Tracking' },
 ];
 
-const TRUST_STATS: { icon: string; value: string; label: string }[] = [
-  { icon: 'fa-users', value: '500+', label: 'Users' },
-  { icon: 'fa-layer-group', value: '4000+', label: 'Catalogs' },
-  { icon: 'fa-tags', value: '20K+', label: 'Products' },
-  { icon: 'fa-inbox', value: '8K+', label: 'Enquiries Generated' },
+const TRUST_STATS: { icon: IconType; value: string; label: string }[] = [
+  { icon: FaUsers, value: '500+', label: 'Users' },
+  { icon: FaLayerGroup, value: '4000+', label: 'Catalogs' },
+  { icon: FaTags, value: '20K+', label: 'Products' },
+  { icon: FaInbox, value: '8K+', label: 'Enquiries Generated' },
 ];
 
 type WhoItsForId = 'manufacturers' | 'wholesalers' | 'jewelry' | 'industrial' | 'furniture' | 'electronics';
@@ -105,14 +151,38 @@ function CheckItem({ children, muted }: { children: React.ReactNode; muted?: boo
           muted ? 'bg-brand-border text-brand-muted/40' : 'bg-brand-green-light text-brand-green'
         }`}
       >
-        <i className={`fa-solid ${muted ? 'fa-xmark' : 'fa-check'} text-[9px]`}></i>
+        {muted ? <FaXmark className="text-[9px]" /> : <FaCheck className="text-[9px]" />}
       </span>
       <span>{children}</span>
     </li>
   );
 }
 
-export default function Home() {
+interface HomeProps {
+  // Server-fetched only for the JSON-LD SoftwareApplication schema below
+  // (structured data has to be present in the raw HTML, not injected
+  // client-side after a useEffect) — the visible price card still uses
+  // its own client-side, browser-timezone-guessed currency, unchanged.
+  indiaPrice: number;
+  internationalPrice: number;
+}
+
+export const getServerSideProps: GetServerSideProps<HomeProps> = async () => {
+  try {
+    const res = await fetch(absoluteApiUrl('/public/plan-price'));
+    const body = await res.json();
+    return {
+      props: {
+        indiaPrice: body.india?.amount ?? 999,
+        internationalPrice: body.international?.amount ?? 19,
+      },
+    };
+  } catch {
+    return { props: { indiaPrice: 999, internationalPrice: 19 } };
+  }
+};
+
+export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<FeatureTabId>('builder');
   const [activeWho, setActiveWho] = useState<WhoItsForId>('manufacturers');
@@ -163,22 +233,52 @@ export default function Home() {
     window.location.href = `/signup${ctaEmail ? `?email=${encodeURIComponent(ctaEmail)}` : ''}`;
   }
 
+  const organizationJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Instant Catalog',
+    url: SITE_URL,
+    logo: `${SITE_URL}/icons/icon-512.png`,
+    sameAs: ['https://www.instagram.com/amitbisen1608', 'https://www.facebook.com/profile.php?id=61593785046838'],
+  };
+
+  const softwareApplicationJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'Instant Catalog',
+    applicationCategory: 'BusinessApplication',
+    operatingSystem: 'Web',
+    offers: [
+      { '@type': 'Offer', name: 'Free', price: '0', priceCurrency: 'USD' },
+      { '@type': 'Offer', name: 'Premium', price: String(indiaPrice), priceCurrency: 'INR' },
+      { '@type': 'Offer', name: 'Premium', price: String(internationalPrice), priceCurrency: 'USD' },
+    ],
+  };
+
   return (
     <div className="bg-brand-bg font-sans text-brand-text antialiased overflow-x-hidden">
-      <Head>
-        <title>Instant Catalog — Build Stunning Product Catalogs in Minutes</title>
-      </Head>
+      <Seo
+        title="Instant Catalog — Build Stunning Product Catalogs in Minutes"
+        description="Turn your product Excel sheet into an interactive digital sales catalog. Build, share, and track a catalog that closes deals — free to start."
+      />
+      {/* eslint-disable-next-line react/no-danger */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }} />
+      {/* eslint-disable-next-line react/no-danger */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationJsonLd) }}
+      />
 
       {/* Navigation */}
       <nav className="fixed top-5 left-1/2 z-50 w-[92%] max-w-7xl -translate-x-1/2">
         <div className="flex items-center justify-between rounded-full border border-brand-border bg-white/90 px-6 py-3 shadow-lg shadow-brand-accent/5 backdrop-blur-xl">
           <div className="flex items-center gap-8">
-            <a href="#" className="text-xl font-black tracking-tight flex items-center gap-2 text-brand-text">
+            <Link href="/" className="text-xl font-black tracking-tight flex items-center gap-2 text-brand-text">
               <span className="w-7 h-7 bg-brand-accent rounded-lg flex items-center justify-center">
-                <i className="fa-solid fa-layer-group text-white text-xs"></i>
+                <FaLayerGroup className="text-white text-xs" />
               </span>
               Instant Catalog
-            </a>
+            </Link>
             <div className="hidden md:flex items-center gap-7 text-sm font-semibold text-brand-muted">
               <a href="#problem-solution" className="hover:text-brand-accent transition-colors">Problem &amp; Solution</a>
               <a href="#features" className="hover:text-brand-accent transition-colors">Features</a>
@@ -202,7 +302,7 @@ export default function Home() {
               aria-expanded={mobileNavOpen}
               className="flex h-9 w-9 items-center justify-center rounded-full text-brand-text hover:bg-brand-border/40 md:hidden"
             >
-              <i className={`fa-solid ${mobileNavOpen ? 'fa-xmark' : 'fa-bars'}`}></i>
+              {mobileNavOpen ? <FaXmark /> : <FaBars />}
             </button>
           </div>
         </div>
@@ -242,7 +342,8 @@ export default function Home() {
         <div className="max-w-7xl mx-auto w-full relative z-10">
           <div className="text-center space-y-8 max-w-4xl mx-auto">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter leading-[1.1]">
-              Turn your product Excel into<br />
+              Turn your product Excel into{' '}
+              <br />
               <span className="text-gradient">interactive sales catalog</span>—that close deals.
             </h1>
             <p className="text-lg md:text-xl text-brand-muted max-w-2xl mx-auto leading-relaxed">
@@ -277,17 +378,19 @@ export default function Home() {
           <div className="mt-16 relative max-w-5xl mx-auto">
             <div className="absolute -inset-4 bg-gradient-to-r from-brand-accent/20 via-brand-magenta/10 to-brand-accent/20 rounded-[3rem] blur-2xl opacity-60"></div>
             <div className="relative rounded-[2rem] overflow-hidden border border-brand-border shadow-2xl shadow-brand-accent/10 bg-white">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 className="w-full h-auto max-h-[460px] object-cover"
-                src="/screenshots/hero.png"
+                src="/screenshots/hero.webp"
                 alt="Instant Catalog dashboard interface"
+                width={956}
+                height={504}
+                priority
               />
             </div>
             {/* Floating Badges */}
             <div className="absolute -top-5 -left-4 bg-white border border-brand-border px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3 animate-float">
               <div className="w-9 h-9 rounded-full bg-brand-green-light flex items-center justify-center text-brand-green">
-                <i className="fa-solid fa-check text-sm"></i>
+                <FaCheck className="text-sm" />
               </div>
               <div>
                 <p className="text-[9px] font-bold uppercase tracking-widest text-brand-muted">Published</p>
@@ -296,7 +399,7 @@ export default function Home() {
             </div>
             <div className="absolute -bottom-5 -right-4 bg-white border border-brand-border px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3" style={{ animation: 'float 4s ease-in-out infinite 2s' }}>
               <div className="w-9 h-9 rounded-full bg-brand-accent-light flex items-center justify-center text-brand-accent">
-                <i className="fa-solid fa-users text-sm"></i>
+                <FaUsers className="text-sm" />
               </div>
               <div>
                 <p className="text-[9px] font-bold uppercase tracking-widest text-brand-muted">This week</p>
@@ -314,7 +417,7 @@ export default function Home() {
             {TRUST_STATS.map((stat) => (
               <div key={stat.label} className="flex items-center gap-4">
                 <span className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl bg-brand-accent-light text-brand-accent">
-                  <i className={`fa-solid ${stat.icon} text-2xl`}></i>
+                  <stat.icon className="text-2xl" />
                 </span>
                 <div>
                   <p className="text-4xl font-black leading-none text-brand-text">{stat.value}</p>
@@ -331,7 +434,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-accent-light text-brand-accent text-xs font-bold uppercase tracking-widest mb-4">
-              <i className="fa-solid fa-circle-info text-[10px]"></i>
+              <FaCircleInfo className="text-[10px]" />
               Problem &amp; Solution
             </span>
             <h2 className="text-4xl md:text-5xl font-black tracking-tighter mb-5">
@@ -349,7 +452,7 @@ export default function Home() {
               <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-red-400 to-red-200"></div>
               <div className="flex items-center gap-3 mb-6">
                 <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-red-50 text-red-500">
-                  <i className="fa-solid fa-triangle-exclamation"></i>
+                  <FaTriangleExclamation />
                 </span>
                 <div>
                   <h3 className="text-xl font-black tracking-tight">The Problem</h3>
@@ -357,10 +460,10 @@ export default function Home() {
                 </div>
               </div>
               <div className="space-y-3">
-                {PROBLEMS.map(({ icon, label }) => (
+                {PROBLEMS.map(({ icon: Icon, label }) => (
                   <div key={label} className="flex items-center gap-3 rounded-2xl bg-red-50/60 px-4 py-3.5">
                     <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-white text-red-500 text-sm">
-                      <i className={`fa-solid ${icon}`}></i>
+                      <Icon />
                     </span>
                     <span className="text-sm font-semibold text-brand-text">{label}</span>
                   </div>
@@ -375,7 +478,7 @@ export default function Home() {
               <div className="relative z-10 flex-1">
                 <div className="flex items-center gap-3 mb-6">
                   <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-white/15 text-white">
-                    <i className="fa-solid fa-lightbulb"></i>
+                    <FaLightbulb />
                   </span>
                   <div>
                     <h3 className="text-xl font-black tracking-tight text-white">The Solution</h3>
@@ -389,7 +492,7 @@ export default function Home() {
                       className="flex items-center gap-3.5 rounded-2xl bg-white/10 px-4 py-3.5 ring-1 ring-white/10 transition-colors hover:bg-white/15"
                     >
                       <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-white/15 text-white">
-                        <i className={`fa-solid ${step.icon} text-sm`}></i>
+                        <step.icon className="text-sm" />
                       </span>
                       <div className="min-w-0">
                         <p className="text-sm font-bold text-white">{step.title}</p>
@@ -404,24 +507,24 @@ export default function Home() {
                 className="relative z-10 mt-8 flex w-full items-center justify-center gap-2 rounded-2xl bg-white py-3.5 text-center text-sm font-bold uppercase tracking-widest text-brand-accent shadow-lg transition-all hover:bg-indigo-50"
               >
                 Start Building Free
-                <i className="fa-solid fa-arrow-right text-xs"></i>
+                <FaArrowRight className="text-xs" />
               </Link>
             </div>
           </div>
 
           <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-x-8 sm:gap-y-3 text-xs font-semibold uppercase tracking-widest text-brand-muted">
             <div className="flex items-center gap-2">
-              <i className="fa-solid fa-circle-check text-brand-green"></i>
+              <FaCircleCheck className="text-brand-green" />
               No Credit Card Required
             </div>
             <div className="hidden h-1 w-1 rounded-full bg-brand-border sm:block"></div>
             <div className="flex items-center gap-2">
-              <i className="fa-solid fa-circle-check text-brand-green"></i>
+              <FaCircleCheck className="text-brand-green" />
               Setup in Minutes
             </div>
             <div className="hidden h-1 w-1 rounded-full bg-brand-border sm:block"></div>
             <div className="flex items-center gap-2">
-              <i className="fa-solid fa-circle-check text-brand-green"></i>
+              <FaCircleCheck className="text-brand-green" />
               Free Forever Plan
             </div>
           </div>
@@ -447,7 +550,7 @@ export default function Home() {
                   activeTab === tab.id ? 'feature-tab-active' : 'feature-tab-inactive border border-brand-border'
                 }`}
               >
-                <i className={`fa-solid ${tab.icon} mr-2`}></i>
+                <tab.icon className="mr-2 inline" />
                 {tab.label}
               </button>
             ))}
@@ -458,7 +561,7 @@ export default function Home() {
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div className="space-y-6">
                 <div className="w-14 h-14 rounded-2xl bg-brand-accent-light flex items-center justify-center text-brand-accent text-xl">
-                  <i className="fa-solid fa-pen-ruler"></i>
+                  <FaPenRuler />
                 </div>
                 <h3 className="text-3xl font-black tracking-tight">Simple Catalog Builder</h3>
                 <p className="text-brand-muted text-lg leading-relaxed">No design skills needed. Add products, categories, and specifications through a clean dashboard, and pick a layout — what you build is exactly what your customers see.</p>
@@ -469,11 +572,12 @@ export default function Home() {
                 </ul>
               </div>
               <div className="rounded-3xl overflow-hidden border border-brand-border shadow-xl shadow-brand-accent/5 bg-brand-bg">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   className="w-full h-auto max-h-80 object-cover"
-                  src="/screenshots/builder.png"
+                  src="/screenshots/builder.webp"
                   alt="Catalog builder interface"
+                  width={1366}
+                  height={599}
                 />
               </div>
             </div>
@@ -483,7 +587,7 @@ export default function Home() {
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div className="space-y-6">
                 <div className="w-14 h-14 rounded-2xl bg-brand-magenta-light flex items-center justify-center text-brand-magenta text-xl">
-                  <i className="fa-solid fa-globe"></i>
+                  <FaGlobe />
                 </div>
                 <h3 className="text-3xl font-black tracking-tight">Your Own Branding, Not Ours</h3>
                 <p className="text-brand-muted text-lg leading-relaxed">Point your own domain — or a free branded subdomain — at your catalog. Visitors never see a shared link; every catalog you own looks like it lives on your own website.</p>
@@ -494,11 +598,12 @@ export default function Home() {
                 </ul>
               </div>
               <div className="rounded-3xl overflow-hidden border border-brand-border shadow-xl bg-brand-bg">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   className="w-full h-auto max-h-80 object-cover"
-                  src="/screenshots/branding.jpg"
+                  src="/screenshots/branding.webp"
                   alt="Custom domain settings"
+                  width={1100}
+                  height={379}
                 />
               </div>
             </div>
@@ -508,7 +613,7 @@ export default function Home() {
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div className="space-y-6">
                 <div className="w-14 h-14 rounded-2xl bg-brand-yellow-light flex items-center justify-center text-brand-yellow text-xl">
-                  <i className="fa-solid fa-code"></i>
+                  <FaCode />
                 </div>
                 <h3 className="text-3xl font-black tracking-tight">Add It to Your Website</h3>
                 <p className="text-brand-muted text-lg leading-relaxed">Drop one line of code onto your existing website and a &ldquo;Visit Catalog&rdquo; button appears instantly — no developer needed.</p>
@@ -519,11 +624,12 @@ export default function Home() {
                 </ul>
               </div>
               <div className="rounded-3xl overflow-hidden border border-brand-border shadow-xl bg-brand-bg">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   className="w-full h-auto max-h-80 object-cover"
-                  src="/screenshots/embed.jpg"
+                  src="/screenshots/embed.webp"
                   alt="Embeddable Visit Catalog button"
+                  width={1100}
+                  height={517}
                 />
               </div>
             </div>
@@ -533,7 +639,7 @@ export default function Home() {
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div className="space-y-6">
                 <div className="w-14 h-14 rounded-2xl bg-brand-yellow-light flex items-center justify-center text-brand-yellow text-xl">
-                  <i className="fa-solid fa-share-nodes"></i>
+                  <FaShareNodes />
                 </div>
                 <h3 className="text-3xl font-black tracking-tight">Share Instantly, Everywhere</h3>
                 <p className="text-brand-muted text-lg leading-relaxed">Publish your catalog with a unique link and QR code. Your customers always see the latest version — no downloads, no outdated PDFs floating around.</p>
@@ -544,11 +650,12 @@ export default function Home() {
                 </ul>
               </div>
               <div className="rounded-3xl overflow-hidden border border-brand-border shadow-xl bg-brand-bg">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   className="w-full h-auto max-h-80 object-cover"
-                  src="/screenshots/sharing.jpg"
+                  src="/screenshots/sharing.webp"
                   alt="Catalog sharing via link and QR code"
+                  width={1200}
+                  height={556}
                 />
               </div>
             </div>
@@ -558,7 +665,7 @@ export default function Home() {
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div className="space-y-6">
                 <div className="w-14 h-14 rounded-2xl bg-brand-green-light flex items-center justify-center text-brand-green text-xl">
-                  <i className="fa-solid fa-chart-line"></i>
+                  <FaChartLine />
                 </div>
                 <h3 className="text-3xl font-black tracking-tight">Never Miss an Enquiry</h3>
                 <p className="text-brand-muted text-lg leading-relaxed">Buyers add products to an enquiry cart and submit their contact details directly from your catalog — every enquiry lands in one dashboard so you can follow up fast.</p>
@@ -569,11 +676,12 @@ export default function Home() {
                 </ul>
               </div>
               <div className="rounded-3xl overflow-hidden border border-brand-border shadow-xl bg-brand-bg">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   className="w-full h-auto max-h-80 object-cover"
-                  src="/screenshots/analytics.png"
+                  src="/screenshots/analytics.webp"
                   alt="Enquiry dashboard"
+                  width={1366}
+                  height={599}
                 />
               </div>
             </div>
@@ -583,7 +691,7 @@ export default function Home() {
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div className="space-y-6">
                 <div className="w-14 h-14 rounded-2xl bg-brand-accent-light flex items-center justify-center text-brand-accent text-xl">
-                  <i className="fa-solid fa-mobile-screen"></i>
+                  <FaMobileScreen />
                 </div>
                 <h3 className="text-3xl font-black tracking-tight">App-Like Experience with PWA</h3>
                 <p className="text-brand-muted text-lg leading-relaxed">Your dashboard can be installed as an app on any smartphone or desktop — no app store required. It loads instantly, giving you a native app feel.</p>
@@ -594,11 +702,12 @@ export default function Home() {
                 </ul>
               </div>
               <div className="flex justify-center rounded-3xl overflow-hidden border border-brand-border shadow-xl bg-brand-bg">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   className="w-auto h-auto max-h-[600px] object-contain"
-                  src="/screenshots/pwa.jpeg"
+                  src="/screenshots/pwa.webp"
                   alt="Progressive web app install prompt"
+                  width={722}
+                  height={1600}
                 />
               </div>
             </div>
@@ -618,7 +727,7 @@ export default function Home() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="bg-white rounded-3xl p-8 border border-brand-border hover:shadow-xl hover:shadow-brand-accent/5 hover:-translate-y-1 transition-all duration-300 group">
               <div className="w-12 h-12 rounded-2xl bg-brand-accent-light flex items-center justify-center text-brand-accent mb-6 group-hover:scale-110 transition-transform">
-                <i className="fa-solid fa-gauge-high text-lg"></i>
+                <FaGaugeHigh className="text-lg" />
               </div>
               <h3 className="text-xl font-bold mb-3">Launch in Minutes</h3>
               <p className="text-brand-muted text-sm leading-relaxed">Go from zero to a fully published catalog faster than making a cup of coffee. No setup headaches, no technical know-how required.</p>
@@ -626,7 +735,7 @@ export default function Home() {
 
             <div className="bg-white rounded-3xl p-8 border border-brand-border hover:shadow-xl hover:shadow-brand-magenta/5 hover:-translate-y-1 transition-all duration-300 group">
               <div className="w-12 h-12 rounded-2xl bg-brand-magenta-light flex items-center justify-center text-brand-magenta mb-6 group-hover:scale-110 transition-transform">
-                <i className="fa-solid fa-print text-lg"></i>
+                <FaPrint className="text-lg" />
               </div>
               <h3 className="text-xl font-bold mb-3">Replace Expensive Print Catalogs</h3>
               <p className="text-brand-muted text-sm leading-relaxed">Save on printing costs. Update products, prices, and images instantly — your catalog is always accurate and up to date.</p>
@@ -634,7 +743,7 @@ export default function Home() {
 
             <div className="bg-white rounded-3xl p-8 border border-brand-border hover:shadow-xl hover:shadow-brand-green/5 hover:-translate-y-1 transition-all duration-300 group">
               <div className="w-12 h-12 rounded-2xl bg-brand-green-light flex items-center justify-center text-brand-green mb-6 group-hover:scale-110 transition-transform">
-                <i className="fa-solid fa-earth-americas text-lg"></i>
+                <FaEarthAmericas className="text-lg" />
               </div>
               <h3 className="text-xl font-bold mb-3">Reach Customers Anywhere</h3>
               <p className="text-brand-muted text-sm leading-relaxed">Share your catalog via link, QR code, or downloadable PDF. Customers browse from any device — phone, tablet, or desktop.</p>
@@ -642,7 +751,7 @@ export default function Home() {
 
             <div className="bg-white rounded-3xl p-8 border border-brand-border hover:shadow-xl hover:shadow-brand-yellow/5 hover:-translate-y-1 transition-all duration-300 group">
               <div className="w-12 h-12 rounded-2xl bg-brand-yellow-light flex items-center justify-center text-brand-yellow mb-6 group-hover:scale-110 transition-transform">
-                <i className="fa-solid fa-hand-pointer text-lg"></i>
+                <FaHandPointer className="text-lg" />
               </div>
               <h3 className="text-xl font-bold mb-3">Boost Engagement &amp; Enquiries</h3>
               <p className="text-brand-muted text-sm leading-relaxed">Interactive product pages with an enquiry cart, image galleries, and video support keep visitors engaged and turn browsers into buyers.</p>
@@ -650,7 +759,7 @@ export default function Home() {
 
             <div className="bg-white rounded-3xl p-8 border border-brand-border hover:shadow-xl hover:shadow-brand-accent/5 hover:-translate-y-1 transition-all duration-300 group">
               <div className="w-12 h-12 rounded-2xl bg-brand-accent-light flex items-center justify-center text-brand-accent mb-6 group-hover:scale-110 transition-transform">
-                <i className="fa-solid fa-shield-halved text-lg"></i>
+                <FaShieldHalved className="text-lg" />
               </div>
               <h3 className="text-xl font-bold mb-3">Built for Multiple Catalogs</h3>
               <p className="text-brand-muted text-sm leading-relaxed">Run separate catalogs for different product lines or customer segments, each with its own template, link, and QR code.</p>
@@ -658,7 +767,7 @@ export default function Home() {
 
             <div className="bg-gradient-to-br from-brand-accent to-indigo-700 rounded-3xl p-8 hover:-translate-y-1 transition-all duration-300 group">
               <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform">
-                <i className="fa-solid fa-infinity text-lg"></i>
+                <FaInfinity className="text-lg" />
               </div>
               <h3 className="text-xl font-bold mb-3 text-white">Always Up-to-Date</h3>
               <p className="text-white/80 text-sm leading-relaxed">One update and every link instantly reflects your changes. No reprinting, no resending, no outdated files floating around.</p>
@@ -709,7 +818,7 @@ export default function Home() {
                 className="inline-flex items-center gap-2 rounded-xl bg-brand-accent px-6 py-3 text-sm font-bold uppercase tracking-wide text-white transition-all hover:bg-indigo-700"
               >
                 View Sample Catalog
-                <i className="fa-solid fa-arrow-right text-xs"></i>
+                <FaArrowRight className="text-xs" />
               </Link>
             </div>
           </div>
@@ -718,12 +827,12 @@ export default function Home() {
             <p className="text-sm font-bold uppercase tracking-widest text-brand-muted mb-6">And many more...</p>
             <div className="flex flex-wrap gap-3">
               {[
-                { icon: 'fa-shirt', label: 'Fashion & Retail' },
-                { icon: 'fa-utensils', label: 'Food & Beverage' },
-                { icon: 'fa-seedling', label: 'Agriculture & Organic' },
-              ].map(({ icon, label }) => (
+                { icon: FaShirt, label: 'Fashion & Retail' },
+                { icon: FaUtensils, label: 'Food & Beverage' },
+                { icon: FaSeedling, label: 'Agriculture & Organic' },
+              ].map(({ icon: Icon, label }) => (
                 <span key={label} className="px-4 py-2 rounded-full bg-white border border-brand-border text-sm font-medium text-brand-text flex items-center gap-2">
-                  <i className={`fa-solid ${icon} text-brand-accent text-xs`}></i>
+                  <Icon className="text-brand-accent text-xs" />
                   {label}
                 </span>
               ))}
@@ -753,13 +862,13 @@ export default function Home() {
                       Feature
                     </th>
                     <th className="w-1/4 bg-white px-6 py-5 text-center text-sm font-bold text-brand-muted">
-                      <i className="fa-solid fa-file-pdf mr-1.5 text-red-400"></i> Static PDFs
+                      <FaFilePdf className="mr-1.5 text-red-400" /> Static PDFs
                     </th>
                     <th className="w-1/4 bg-white px-6 py-5 text-center text-sm font-bold text-brand-muted">
-                      <i className="fa-solid fa-cart-shopping mr-1.5 text-brand-muted"></i> Traditional E-commerce
+                      <FaCartShopping className="mr-1.5 text-brand-muted" /> Traditional E-commerce
                     </th>
                     <th className="w-1/4 bg-brand-accent px-6 py-5 text-center text-sm font-bold text-white">
-                      <i className="fa-solid fa-bolt mr-1.5"></i> Instant Catalog
+                      <FaBolt className="mr-1.5" /> Instant Catalog
                     </th>
                   </tr>
                 </thead>
@@ -770,7 +879,7 @@ export default function Home() {
                       <td className="px-6 py-5 text-center text-sm text-brand-muted">{row.pdf}</td>
                       <td className="px-6 py-5 text-center text-sm text-brand-muted">{row.ecommerce}</td>
                       <td className="bg-brand-accent-light/50 px-6 py-5 text-center text-sm font-semibold text-brand-accent">
-                        <i className="fa-solid fa-circle-check mr-1.5"></i>
+                        <FaCircleCheck className="mr-1.5" />
                         {row.instantCatalog}
                       </td>
                     </tr>
@@ -796,9 +905,9 @@ export default function Home() {
             <div className="bg-white rounded-[2rem] p-9 border border-brand-border flex flex-col shadow-sm hover:shadow-lg transition-shadow">
               <div className="flex items-center gap-3 mb-5">
                 <div className="w-11 h-11 rounded-xl bg-brand-bg flex items-center justify-center text-brand-muted flex-shrink-0">
-                  <i className="fa-solid fa-seedling"></i>
+                  <FaSeedling />
                 </div>
-                <h4 className="text-2xl font-black">Free</h4>
+                <h3 className="text-2xl font-black">Free</h3>
               </div>
               <div className="flex items-baseline gap-1 mb-8">
                 <span className="text-3xl md:text-4xl font-black">Free Forever</span>
@@ -823,9 +932,9 @@ export default function Home() {
               <div className="relative z-10 flex flex-1 flex-col">
                 <div className="flex items-center gap-3 mb-5">
                   <div className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center text-white flex-shrink-0">
-                    <i className="fa-solid fa-rocket"></i>
+                    <FaRocket />
                   </div>
-                  <h4 className="text-2xl font-black text-white">Premium</h4>
+                  <h3 className="text-2xl font-black text-white">Premium</h3>
                 </div>
                 <div className="flex items-baseline gap-1.5 mb-8">
                   {premiumPrice ? (
@@ -848,13 +957,13 @@ export default function Home() {
                     itself can stay short and scannable. */}
                 <div className="mb-5 flex items-center gap-3 rounded-2xl border border-black/10 bg-white p-4">
                   <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-brand-accent-light text-brand-accent">
-                    <i className="fa-solid fa-headset"></i>
+                    <FaHeadset />
                   </span>
                   <p className="flex-1 font-bold text-brand-text" style={{ fontSize: 'calc(0.875rem + 4px)' }}>
                     Don&apos;t Have Time to Build It? We&apos;ll Do It For You.
                   </p>
                   <span className="group relative flex-shrink-0">
-                    <i className="fa-solid fa-circle-info cursor-help text-brand-text/70"></i>
+                    <FaCircleInfo className="cursor-help text-brand-text/70" />
                     <span className="pointer-events-none absolute bottom-full right-0 z-20 mb-2 w-60 rounded-xl bg-brand-text px-3 py-2 text-xs font-normal normal-case leading-relaxed text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 sm:w-72">
                       Send us your product Excel file and our team will set up, format, and publish your first digital catalog—100% free within 24 hours.
                     </span>
@@ -862,23 +971,23 @@ export default function Home() {
                 </div>
                 <ul className="space-y-4 mb-10 flex-1">
                   <li className="flex items-start gap-3 text-sm text-white">
-                    <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-white flex-shrink-0 mt-0.5"><i className="fa-solid fa-check text-[9px]"></i></span>
+                    <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-white flex-shrink-0 mt-0.5"><FaCheck className="text-[9px]" /></span>
                     <span>Unlimited catalogs</span>
                   </li>
                   <li className="flex items-start gap-3 text-sm text-white">
-                    <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-white flex-shrink-0 mt-0.5"><i className="fa-solid fa-check text-[9px]"></i></span>
+                    <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-white flex-shrink-0 mt-0.5"><FaCheck className="text-[9px]" /></span>
                     <span>Unlimited products</span>
                   </li>
                   <li className="flex items-start gap-3 text-sm text-white">
-                    <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-white flex-shrink-0 mt-0.5"><i className="fa-solid fa-check text-[9px]"></i></span>
+                    <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-white flex-shrink-0 mt-0.5"><FaCheck className="text-[9px]" /></span>
                     <span>Your Own Branding</span>
                   </li>
                   <li className="flex items-start gap-3 text-sm text-white">
-                    <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-white flex-shrink-0 mt-0.5"><i className="fa-solid fa-check text-[9px]"></i></span>
+                    <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-white flex-shrink-0 mt-0.5"><FaCheck className="text-[9px]" /></span>
                     <span>Priority support</span>
                   </li>
                   <li className="flex items-start gap-3 text-sm text-white">
-                    <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-white flex-shrink-0 mt-0.5"><i className="fa-solid fa-check text-[9px]"></i></span>
+                    <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-white flex-shrink-0 mt-0.5"><FaCheck className="text-[9px]" /></span>
                     <span>Everything in free plan</span>
                   </li>
                 </ul>
@@ -897,7 +1006,7 @@ export default function Home() {
           <div className="relative rounded-[3rem] overflow-hidden">
             <div className="absolute inset-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img className="w-full h-full object-cover" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/gen_781b258343_ce01d165ca6b7dcd.png" alt="Abstract gradient background" />
+              <Image className="object-cover" src="/images/cta-gradient-bg.webp" alt="" fill sizes="100vw" />
             </div>
             <div className="absolute inset-0 bg-brand-accent/80 backdrop-blur-sm"></div>
             <div className="relative z-10 text-center py-24 px-8 space-y-8">
@@ -917,17 +1026,17 @@ export default function Home() {
               </form>
               <div className="flex items-center justify-center gap-8 text-xs font-semibold uppercase tracking-widest text-white/60">
                 <div className="flex items-center gap-2">
-                  <i className="fa-solid fa-check"></i>
+                  <FaCheck />
                   Free Forever Plan
                 </div>
                 <div className="w-1 h-1 bg-white/30 rounded-full"></div>
                 <div className="flex items-center gap-2">
-                  <i className="fa-solid fa-check"></i>
+                  <FaCheck />
                   No Credit Card
                 </div>
                 <div className="w-1 h-1 bg-white/30 rounded-full hidden sm:block"></div>
                 <div className="hidden sm:flex items-center gap-2">
-                  <i className="fa-solid fa-check"></i>
+                  <FaCheck />
                   Setup in Minutes
                 </div>
               </div>
@@ -941,20 +1050,20 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-12 mb-16">
             <div className="col-span-2 lg:col-span-2">
-              <a href="#" className="text-2xl font-black tracking-tight flex items-center gap-2 text-white mb-5">
+              <Link href="/" className="text-2xl font-black tracking-tight flex items-center gap-2 text-white mb-5">
                 <span className="w-8 h-8 bg-brand-accent rounded-lg flex items-center justify-center">
-                  <i className="fa-solid fa-layer-group text-white text-sm"></i>
+                  <FaLayerGroup className="text-white text-sm" />
                 </span>
                 Instant Catalog
-              </a>
+              </Link>
               <p className="text-white/40 max-w-xs text-sm leading-relaxed">The digital catalog builder for modern businesses that want to sell smarter.</p>
               <div className="flex items-center gap-4 mt-6">
-                <a href="https://www.instagram.com/amitbisen1608" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/20 transition-all"><i className="fa-brands fa-instagram text-xs"></i></a>
-                <a href="https://www.facebook.com/profile.php?id=61593785046838" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/20 transition-all"><i className="fa-brands fa-facebook-f text-xs"></i></a>
+                <a href="https://www.instagram.com/amitbisen1608" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/20 transition-all"><FaInstagram className="text-xs" /></a>
+                <a href="https://www.facebook.com/profile.php?id=61593785046838" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/20 transition-all"><FaFacebookF className="text-xs" /></a>
               </div>
             </div>
             <div className="space-y-5">
-              <h4 className="font-bold uppercase text-[10px] tracking-widest text-white/30">Product</h4>
+              <h3 className="font-bold uppercase text-[10px] tracking-widest text-white/30">Product</h3>
               <ul className="space-y-3 text-sm text-white/50">
                 <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
                 <li><a href="#pricing" className="hover:text-white transition-colors">Pricing</a></li>
@@ -962,14 +1071,14 @@ export default function Home() {
               </ul>
             </div>
             <div className="space-y-5">
-              <h4 className="font-bold uppercase text-[10px] tracking-widest text-white/30">Company</h4>
+              <h3 className="font-bold uppercase text-[10px] tracking-widest text-white/30">Company</h3>
               <ul className="space-y-3 text-sm text-white/50">
-                <li><a href="#" className="hover:text-white transition-colors">About</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
+                <li><Link href="/about" className="hover:text-white transition-colors">About</Link></li>
+                <li><Link href="/contact" className="hover:text-white transition-colors">Contact</Link></li>
               </ul>
             </div>
             <div className="space-y-5">
-              <h4 className="font-bold uppercase text-[10px] tracking-widest text-white/30">Legal</h4>
+              <h3 className="font-bold uppercase text-[10px] tracking-widest text-white/30">Legal</h3>
               <ul className="space-y-3 text-sm text-white/50">
                 <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
                 <li><Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
@@ -979,7 +1088,7 @@ export default function Home() {
           <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-white/30 text-xs">© {new Date().getFullYear()} Instant Catalog. All rights reserved.</p>
             <p className="text-white/20 text-xs">
-              Crafted with <i className="fa-solid fa-heart text-brand-magenta/60 mx-1"></i> for businesses that want to grow.
+              Crafted with <FaHeart className="text-brand-magenta/60 mx-1" /> for businesses that want to grow.
             </p>
           </div>
         </div>

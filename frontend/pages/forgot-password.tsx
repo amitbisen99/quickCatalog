@@ -37,7 +37,7 @@ export default function ForgotPassword() {
   }
 
   return (
-    <Layout title="Forgot password">
+    <Layout title="Forgot password" description="Reset your Instant Catalog account password." noindex>
       <div className="mx-auto max-w-md">
         <h1 className="text-2xl font-bold text-gray-900">Forgot password</h1>
         <p className="mt-1 text-sm text-gray-600">

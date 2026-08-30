@@ -7,8 +7,10 @@ const router = express.Router();
 
 router.get('/resolve-domain', publicController.resolveDomain);
 router.get('/plan-price', publicController.getPublicPlanPrice);
+router.get('/sitemap-catalogs', publicController.getSitemapCatalogs);
 router.get('/catalog/:catalogSlug', publicController.getCatalogBySlug);
 router.get('/catalog/:catalogSlug/og-image', publicController.getCatalogOgImage);
 router.get('/catalog/:catalogSlug/products/:productSlug', publicController.getCatalogProductBySlug);
+router.get('/catalog/:catalogSlug/products/:productSlug/og-image', publicController.getProductOgImage);
 
 module.exports = router;

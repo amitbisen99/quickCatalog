@@ -7,14 +7,31 @@ import { apiFetch, ApiError, API_URL } from '@/utils/api';
 import { autoMapHeaders } from '@/utils/fuzzyMapHeaders';
 import { getCatalogPublicUrl } from '@/utils/catalogUrl';
 import { isFreePlan } from '@/utils/planLimit';
+import {
+  FaArrowLeft,
+  FaArrowRight,
+  FaArrowUpRightFromSquare,
+  FaCheck,
+  FaCircleCheck,
+  FaCircleExclamation,
+  FaClipboardList,
+  FaCopy,
+  FaFileExcel,
+  FaImage,
+  FaImages,
+  FaLayerGroup,
+  FaSpinner,
+  FaTriangleExclamation,
+  FaXmark,
+} from 'react-icons/fa6';
 
 // Standalone "create your catalog" funnel — deliberately separate from the
 // vendor dashboard (no DashboardLayout/AdminLayout, no sidebar nav). Entered
 // from the "Start Free" CTA on the marketing homepage, so it borrows the
-// homepage's brand-* palette/typography (tailwind.config.js) and Font
-// Awesome icon set instead of the dashboard's primary/secondary navy+gold
-// theme, so it reads as a continuation of the site the visitor just clicked
-// from.
+// homepage's brand-* palette/typography (tailwind.config.js) and its
+// react-icons/fa6 icon set instead of the dashboard's primary/secondary
+// navy+gold theme, so it reads as a continuation of the site the visitor
+// just clicked from.
 //
 // Account creation is NOT a step in this wizard — /verify-email already
 // collects businessName/businessType/industry as the final step of
@@ -133,7 +150,7 @@ function StepIndicator({ current }: { current: WizardStep }) {
                         : 'bg-white text-brand-muted border border-brand-border'
                   }`}
                 >
-                  {state === 'done' ? <i className="fa-solid fa-check text-[11px]" /> : s.id}
+                  {state === 'done' ? <FaCheck className="text-[11px]" /> : s.id}
                 </div>
                 <span
                   className={`text-[11px] font-semibold uppercase tracking-wide ${
@@ -170,7 +187,7 @@ function ErrorBanner({ message }: { message: string }) {
   if (!message) return null;
   return (
     <div className="mt-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-      <i className="fa-solid fa-circle-exclamation mt-0.5" />
+      <FaCircleExclamation className="mt-0.5" />
       <span>{message}</span>
     </div>
   );
@@ -197,7 +214,7 @@ function FooterNav({
           onClick={onBack}
           className="inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-bold text-brand-muted transition-colors hover:text-brand-text"
         >
-          <i className="fa-solid fa-arrow-left text-xs" />
+          <FaArrowLeft className="text-xs" />
           Back
         </button>
       ) : (
@@ -210,7 +227,7 @@ function FooterNav({
         className="inline-flex items-center gap-2 rounded-2xl bg-brand-accent px-7 py-3 text-sm font-bold uppercase tracking-wider text-white shadow-lg shadow-brand-accent/25 transition-all hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
       >
         {nextLabel}
-        <i className="fa-solid fa-arrow-right text-xs" />
+        <FaArrowRight className="text-xs" />
       </button>
     </div>
   );
@@ -262,7 +279,7 @@ export default function CreateCatalogWizard() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-brand-bg">
         <div className="flex flex-col items-center gap-3 text-brand-muted">
-          <i className="fa-solid fa-spinner fa-spin text-2xl text-brand-accent" />
+          <FaSpinner className="text-2xl text-brand-accent animate-spin" />
           <p className="text-sm font-semibold">Loading…</p>
         </div>
       </div>
@@ -383,7 +400,7 @@ export default function CreateCatalogWizard() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
           <Link href="/" className="flex items-center gap-2 text-lg font-black tracking-tight text-brand-text">
             <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-accent">
-              <i className="fa-solid fa-layer-group text-xs text-white" />
+              <FaLayerGroup className="text-xs text-white" />
             </span>
             Instant Catalog
           </Link>
@@ -392,7 +409,7 @@ export default function CreateCatalogWizard() {
             className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-muted transition-colors hover:text-brand-text"
           >
             Exit
-            <i className="fa-solid fa-xmark text-xs" />
+            <FaXmark className="text-xs" />
           </Link>
         </div>
       </header>
@@ -404,7 +421,7 @@ export default function CreateCatalogWizard() {
         {step === 1 && (
           <WizardCard>
             <div className="inline-flex items-center gap-2 rounded-full border border-brand-green/30 bg-brand-green-light px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-brand-green">
-              <i className="fa-solid fa-circle-check" />
+              <FaCircleCheck />
               Account verified
             </div>
             <h1 className="mt-4 text-2xl font-black tracking-tight sm:text-3xl">Tell us about your catalog</h1>
@@ -466,14 +483,14 @@ export default function CreateCatalogWizard() {
                 actually easy to read, not skimmed past. */}
             <div className="mt-6 rounded-2xl border border-brand-border bg-white p-5 sm:p-6">
               <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-brand-accent">
-                <i className="fa-solid fa-clipboard-list" />
+                <FaClipboardList />
                 File Requirements — Read Before Uploading
               </div>
 
               <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
                 <div>
                   <p className="flex items-center gap-2 text-sm font-bold text-brand-text">
-                    <i className="fa-solid fa-file-excel text-brand-green" />
+                    <FaFileExcel className="text-brand-green" />
                     Your Excel File
                   </p>
                   <ul className="mt-2.5 space-y-2 text-sm text-brand-text/80">
@@ -505,7 +522,7 @@ export default function CreateCatalogWizard() {
 
                 <div>
                   <p className="flex items-center gap-2 text-sm font-bold text-brand-text">
-                    <i className="fa-solid fa-images text-brand-accent" />
+                    <FaImages className="text-brand-accent" />
                     Product Images
                   </p>
                   <ul className="mt-2.5 space-y-2 text-sm text-brand-text/80">
@@ -536,7 +553,7 @@ export default function CreateCatalogWizard() {
                 className="group flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-brand-border bg-brand-bg/60 px-6 py-10 text-center transition-colors hover:border-brand-accent hover:bg-brand-accent-light/40"
               >
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-accent-light text-brand-accent">
-                  <i className="fa-solid fa-file-excel text-lg" />
+                  <FaFileExcel className="text-lg" />
                 </div>
                 <p className="mt-3 text-sm font-bold text-brand-text">
                   {excelFile ? excelFile.name : 'Drag & drop your Excel file'}
@@ -566,7 +583,7 @@ export default function CreateCatalogWizard() {
                 className="group flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-brand-border bg-brand-bg/60 px-6 py-10 text-center transition-colors hover:border-brand-accent hover:bg-brand-accent-light/40"
               >
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-accent-light text-brand-accent">
-                  <i className="fa-solid fa-images text-lg" />
+                  <FaImages className="text-lg" />
                 </div>
                 <p className="mt-3 text-sm font-bold text-brand-text">
                   {imagesZip ? imagesZip.name : 'Product images (optional)'}
@@ -693,7 +710,7 @@ export default function CreateCatalogWizard() {
                   {parseResult.dataPreview.map((row, idx) => (
                     <div key={idx} className="overflow-hidden rounded-xl border border-brand-border bg-white shadow-sm">
                       <div className="flex aspect-square items-center justify-center bg-brand-accent-light text-brand-accent">
-                        <i className="fa-solid fa-image text-2xl opacity-50" />
+                        <FaImage className="text-2xl opacity-50" />
                       </div>
                       <div className="p-3">
                         <p className="truncate text-xs font-bold text-brand-text">
@@ -711,9 +728,11 @@ export default function CreateCatalogWizard() {
             )}
 
             <div className="mt-6 flex items-start gap-3 rounded-xl border border-brand-border bg-white p-4 text-xs text-brand-text/80">
-              <i
-                className={`fa-solid mt-0.5 ${willBeCapped ? 'fa-triangle-exclamation text-brand-yellow' : 'fa-circle-check text-brand-green'}`}
-              />
+              {willBeCapped ? (
+                <FaTriangleExclamation className="mt-0.5 text-brand-yellow" />
+              ) : (
+                <FaCircleCheck className="mt-0.5 text-brand-green" />
+              )}
               <span>
                 {willBeCapped
                   ? `The free plan is limited to ${FREE_PRODUCT_LIMIT} products in a catalog, so we'll create your catalog with the first ${FREE_PRODUCT_LIMIT} products automatically. You can upgrade anytime later.`
@@ -739,7 +758,7 @@ export default function CreateCatalogWizard() {
           <WizardCard>
             <div className="text-center">
               <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand-green-light text-brand-green">
-                <i className="fa-solid fa-check text-2xl" />
+                <FaCheck className="text-2xl" />
               </div>
               <h1 className="mt-5 text-2xl font-black tracking-tight sm:text-3xl">Your catalog is live! 🎉</h1>
               <p className="mt-2 text-sm text-brand-muted">
@@ -755,7 +774,7 @@ export default function CreateCatalogWizard() {
                   onClick={handleCopyLink}
                   className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-xs font-bold text-brand-accent shadow-sm hover:bg-brand-accent-light"
                 >
-                  <i className="fa-solid fa-copy text-[11px]" /> Copy
+                  <FaCopy className="text-[11px]" /> Copy
                 </button>
               </div>
 
@@ -766,7 +785,7 @@ export default function CreateCatalogWizard() {
 
               {createResult.planLimit && (
                 <div className="mt-6 flex items-start gap-3 rounded-xl border border-brand-yellow/30 bg-brand-yellow-light p-4 text-left text-xs text-brand-yellow">
-                  <i className="fa-solid fa-triangle-exclamation mt-0.5" />
+                  <FaTriangleExclamation className="mt-0.5" />
                   <span>
                     Only {createResult.planLimit.imported} of your {createResult.planLimit.totalValidRows} products
                     were imported — the Free plan is capped at {createResult.planLimit.limit}. Upgrade anytime from
@@ -811,7 +830,7 @@ export default function CreateCatalogWizard() {
                   rel="noreferrer"
                   className="inline-flex items-center justify-center gap-2 rounded-2xl border border-brand-border bg-white px-6 py-3 text-sm font-bold text-brand-text shadow-sm transition-colors hover:bg-brand-bg"
                 >
-                  <i className="fa-solid fa-arrow-up-right-from-square text-xs" />
+                  <FaArrowUpRightFromSquare className="text-xs" />
                   View Live Catalog
                 </a>
                 <Link
@@ -819,7 +838,7 @@ export default function CreateCatalogWizard() {
                   className="inline-flex items-center justify-center gap-2 rounded-2xl bg-brand-accent px-6 py-3 text-sm font-bold uppercase tracking-wider text-white shadow-lg shadow-brand-accent/25 transition-all hover:bg-indigo-700"
                 >
                   Go to Catalog List
-                  <i className="fa-solid fa-arrow-right text-xs" />
+                  <FaArrowRight className="text-xs" />
                 </Link>
               </div>
             </div>

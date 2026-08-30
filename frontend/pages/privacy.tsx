@@ -8,7 +8,7 @@ import Layout from '@/components/Layout';
 // are in use (currently: Razorpay for payments, Brevo for email).
 export default function Privacy() {
   return (
-    <Layout title="Privacy Policy">
+    <Layout title="Privacy Policy" description="How Instant Catalog collects, uses, and protects your data.">
       <div className="mx-auto max-w-3xl">
         <h1 className="text-2xl font-bold text-gray-900">Privacy Policy</h1>
         <p className="mt-1 text-sm text-gray-500">Last updated: August 2026</p>

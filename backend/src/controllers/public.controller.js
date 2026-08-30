@@ -129,6 +129,29 @@ exports.getCatalogOgImage = asyncHandler(async (req, res) => {
   res.send(parsed.buffer);
 });
 
+// Same reasoning as getCatalogOgImage above, for an individual product's
+// own photo — a product detail page's most natural share image is that
+// product, not the catalog's banner.
+exports.getProductOgImage = asyncHandler(async (req, res) => {
+  const { catalogSlug, productSlug } = req.params;
+  const catalog = await Catalog.findOne({ slug: catalogSlug.toLowerCase() });
+  if (!catalog) {
+    throw new AppError('Catalog not found', 404);
+  }
+
+  const product = await Product.findOne({ slug: productSlug.toLowerCase(), catalogIds: catalog._id }).select(
+    'images'
+  );
+  const parsed = parseDataUrl(product?.images?.[0]);
+  if (!parsed) {
+    throw new AppError('No share image available', 404);
+  }
+
+  res.setHeader('Cache-Control', 'public, max-age=3600');
+  res.setHeader('Content-Type', parsed.mimeType);
+  res.send(parsed.buffer);
+});
+
 // White-label routing — the frontend's middleware.ts calls this only for
 // a vendor domain's root path (no /public/... in the URL) and for
 // internal routes it needs to redirect away from, to find out which
@@ -191,6 +214,21 @@ exports.getPublicPlanPrice = asyncHandler(async (req, res) => {
     success: true,
     india: { amount: pricing.indiaPriceInr, currency: 'INR' },
     international: { amount: pricing.internationalPriceUsd, currency: 'USD' },
+  });
+});
+
+// Every public catalog's slug + last-updated date, for sitemap.xml
+// (pages/sitemap.xml.tsx) to build a <url> entry per catalog. No auth —
+// same reasoning as every other route in this file: these are already
+// publicly reachable pages, this just lists them for crawlers. There's
+// no draft/private concept on Catalog (see the model) — every catalog
+// that exists is already publicly viewable at /public/:slug today, so
+// "every catalog" is exactly the right scope here, not a subset.
+exports.getSitemapCatalogs = asyncHandler(async (req, res) => {
+  const catalogs = await Catalog.find({}).select('slug updatedAt').sort({ updatedAt: -1 });
+  res.json({
+    success: true,
+    catalogs: catalogs.map((c) => ({ slug: c.slug, updatedAt: c.updatedAt })),
   });
 });
 

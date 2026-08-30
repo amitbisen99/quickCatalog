@@ -7,7 +7,7 @@ import Layout from '@/components/Layout';
 // model changes.
 export default function Terms() {
   return (
-    <Layout title="Terms of Service">
+    <Layout title="Terms of Service" description="The terms and conditions for using Instant Catalog to build and share digital product catalogs.">
       <div className="mx-auto max-w-3xl">
         <h1 className="text-2xl font-bold text-gray-900">Terms of Service</h1>
         <p className="mt-1 text-sm text-gray-500">Last updated: August 2026</p>

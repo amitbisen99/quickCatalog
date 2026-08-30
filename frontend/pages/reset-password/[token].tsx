@@ -46,7 +46,7 @@ export default function ResetPassword() {
   }
 
   return (
-    <Layout title="Reset password">
+    <Layout title="Reset password" description="Choose a new password for your Instant Catalog account." noindex>
       <div className="mx-auto max-w-md">
         <h1 className="text-2xl font-bold text-gray-900">Reset password</h1>
 

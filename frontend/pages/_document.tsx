@@ -4,6 +4,13 @@ export default function Document() {
   return (
     <Html lang="en">
       <Head>
+        {/* Deliberately NOT here — a viewport tag placed in _document.tsx
+            (the Document-phase Head, not next/head) doesn't dedupe against
+            Next's own auto-injected default "width=device-width" viewport
+            tag, so both end up in the HTML and the browser uses whichever
+            renders first (Next's default, without initial-scale). Set on
+            every page instead, via Seo.tsx's next/head <Head>, which Next
+            does correctly recognize as an override. */}
         <link rel="manifest" href="/manifest.json" />
         {/* ?v=2 cache-busts the icon itself — browsers cache favicons far
             more aggressively than normal assets and often ignore standard
@@ -16,14 +23,6 @@ export default function Document() {
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Instant Catalog" />
-        {/* Icons for the marketing homepage (pages/index.tsx) — CSS-only kit,
-            no JS-based SVG replacement, so it doesn't fight React's DOM. */}
-        <link
-          rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-          crossOrigin="anonymous"
-          referrerPolicy="no-referrer"
-        />
       </Head>
       <body>
         <Main />

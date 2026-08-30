@@ -143,6 +143,7 @@ export default function DashboardLayout({ title, children }: Props) {
     <div className="min-h-screen bg-gray-50">
       <Head>
         <title>{title ? `${title} | Instant Catalog` : 'Instant Catalog'}</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
       <div className="flex min-h-screen">

@@ -188,7 +188,12 @@ export default function ModernGridDetail({ catalog, vendor, categories, product 
             Free
           </>
         ) : (
-          'Powered by Instant Catalog'
+          <>
+            Powered by{' '}
+            <Link href="/" target="_blank" className="underline hover:text-primary-700">
+              Instant Catalog
+            </Link>
+          </>
         )}
       </footer>
 

@@ -90,7 +90,7 @@ export default function Signup() {
   }
 
   return (
-    <Layout title="Sign up">
+    <Layout title="Sign up" description="Create your free Instant Catalog account and turn your product Excel sheet into a shareable digital catalog." noindex>
       <div className="mx-auto max-w-md">
         <h1 className="text-2xl font-bold text-gray-900">Create your account</h1>
         <p className="mt-1 text-sm text-gray-600">Start building your catalog in minutes.</p>

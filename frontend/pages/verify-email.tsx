@@ -98,7 +98,7 @@ export default function VerifyEmail() {
   }
 
   return (
-    <Layout title="Verify your email">
+    <Layout title="Verify your email" description="Verify your email address to finish setting up your Instant Catalog account." noindex>
       <div className="mx-auto max-w-md">
         <h1 className="text-2xl font-bold text-gray-900">Verify your email</h1>
         <p className="mt-1 text-sm text-gray-600">

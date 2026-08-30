@@ -44,7 +44,7 @@ export default function Login() {
   }
 
   return (
-    <Layout title="Log in">
+    <Layout title="Log in" description="Log in to your Instant Catalog account to manage your catalogs and products." noindex>
       <div className="mx-auto max-w-md">
         <h1 className="text-2xl font-bold text-gray-900">Log in</h1>
         <p className="mt-1 text-sm text-gray-600">Welcome back to Instant Catalog.</p>

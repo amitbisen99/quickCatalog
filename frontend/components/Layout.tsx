@@ -1,8 +1,11 @@
 import { ReactNode, useState } from 'react';
-import Head from 'next/head';
+import Link from 'next/link';
+import Seo from '@/components/Seo';
 
 interface LayoutProps {
   title?: string;
+  description?: string;
+  noindex?: boolean;
   children: ReactNode;
 }
 
@@ -11,14 +14,17 @@ interface LayoutProps {
  * public sections wrap this with their own nav (added in later phases)
  * rather than duplicating the header/footer chrome.
  */
-export default function Layout({ title, children }: LayoutProps) {
+export default function Layout({ title, description, noindex, children }: LayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const fullTitle = title ? `${title} | Instant Catalog` : 'Instant Catalog';
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">
-      <Head>
-        <title>{title ? `${title} | Instant Catalog` : 'Instant Catalog'}</title>
-      </Head>
+      <Seo
+        title={fullTitle}
+        description={description || 'Instant Catalog — the digital catalog builder for modern businesses that want to sell smarter.'}
+        noindex={noindex}
+      />
 
       <header className="border-b border-gray-200 bg-white">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
@@ -61,7 +67,13 @@ export default function Layout({ title, children }: LayoutProps) {
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6">{children}</main>
 
       <footer className="border-t border-gray-200 bg-white py-6 text-center text-sm text-gray-500">
-        © {new Date().getFullYear()} Instant Catalog. All rights reserved.
+        <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+          <Link href="/about" className="hover:text-primary-700">About</Link>
+          <Link href="/contact" className="hover:text-primary-700">Contact</Link>
+          <Link href="/privacy" className="hover:text-primary-700">Privacy Policy</Link>
+          <Link href="/terms" className="hover:text-primary-700">Terms of Service</Link>
+        </nav>
+        <p className="mt-3">© {new Date().getFullYear()} Instant Catalog. All rights reserved.</p>
       </footer>
     </div>
   );

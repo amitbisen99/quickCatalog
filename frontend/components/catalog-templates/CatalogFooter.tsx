@@ -30,7 +30,12 @@ export default function CatalogFooter({ vendorName, mobileNo, countryCode, subsc
             Free
           </p>
         ) : (
-          <p className="mt-2 text-xs text-gray-400">Powered by Instant Catalog</p>
+          <p className="mt-2 text-xs text-gray-400">
+            Powered by{' '}
+            <Link href="/" target="_blank" className="underline hover:text-primary-700">
+              Instant Catalog
+            </Link>
+          </p>
         )}
       </div>
     </footer>
