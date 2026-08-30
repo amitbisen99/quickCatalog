@@ -827,12 +827,15 @@ export default function Home() {
                   </div>
                   <h4 className="text-2xl font-black text-white">Premium</h4>
                 </div>
-                <div className="flex items-baseline gap-1 mb-8">
+                <div className="flex items-baseline gap-1.5 mb-8">
                   {premiumPrice ? (
-                    <span className="text-white" style={{ fontWeight: 800, fontSize: '44px' }}>
-                      {currencySymbol(premiumPrice.currency)}
-                      {premiumPrice.amount}
-                    </span>
+                    <>
+                      <span className="text-white" style={{ fontWeight: 800, fontSize: '44px' }}>
+                        {currencySymbol(premiumPrice.currency)}
+                        {premiumPrice.amount}
+                      </span>
+                      <span className="text-white/70 text-sm font-semibold">Per Year</span>
+                    </>
                   ) : (
                     <span className="text-white/40" style={{ fontWeight: 800, fontSize: '44px' }}>···</span>
                   )}
@@ -946,8 +949,8 @@ export default function Home() {
               </a>
               <p className="text-white/40 max-w-xs text-sm leading-relaxed">The digital catalog builder for modern businesses that want to sell smarter.</p>
               <div className="flex items-center gap-4 mt-6">
-                <a href="#" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/20 transition-all"><i className="fa-brands fa-instagram text-xs"></i></a>
-                <a href="#" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/20 transition-all"><i className="fa-brands fa-facebook-f text-xs"></i></a>
+                <a href="https://www.instagram.com/amitbisen1608" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/20 transition-all"><i className="fa-brands fa-instagram text-xs"></i></a>
+                <a href="https://www.facebook.com/profile.php?id=61593785046838" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/20 transition-all"><i className="fa-brands fa-facebook-f text-xs"></i></a>
               </div>
             </div>
             <div className="space-y-5">
