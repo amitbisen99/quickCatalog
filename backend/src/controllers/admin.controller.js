@@ -7,6 +7,7 @@ const Category = require('../models/Category');
 const Specification = require('../models/Specification');
 const Enquiry = require('../models/Enquiry');
 const SupportTicket = require('../models/SupportTicket');
+const Payment = require('../models/Payment');
 const toSafeUser = require('../utils/toSafeUser');
 const toSupportTicketResponse = require('../utils/toSupportTicketResponse');
 const asyncHandler = require('../utils/asyncHandler');
@@ -35,6 +36,34 @@ function toUserSummary(user) {
 /** Same escape used by product.controller.js's buildSearchFilter — plain text, no regex injection. */
 function escapeRegex(text) {
   return String(text).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/** Shared by the payments list and detail views — vendorId is always
+    populated by the caller, so `vendor` is real vendor data, not just an id. */
+function toPaymentResponse(payment) {
+  const vendor = payment.vendorId && typeof payment.vendorId === 'object' ? payment.vendorId : null;
+  return {
+    id: payment._id,
+    vendor: vendor
+      ? {
+          id: vendor._id,
+          businessName: vendor.businessName,
+          email: vendor.email,
+          mobileNo: vendor.mobileNo,
+          countryCode: vendor.countryCode,
+          subscriptionType: vendor.subscriptionType,
+          subscriptionExpiresAt: vendor.subscriptionExpiresAt,
+        }
+      : { id: payment.vendorId },
+    razorpayOrderId: payment.razorpayOrderId,
+    razorpayPaymentId: payment.razorpayPaymentId,
+    razorpaySignature: payment.razorpaySignature,
+    amount: payment.amount,
+    currency: payment.currency,
+    status: payment.status,
+    createdAt: payment.createdAt,
+    updatedAt: payment.updatedAt,
+  };
 }
 
 function buildUserQuery(req) {
@@ -313,4 +342,53 @@ exports.updateDomainRequest = asyncHandler(async (req, res) => {
   await vendor.save();
 
   res.json({ success: true, message: 'Domain request updated' });
+});
+
+// One row per Razorpay order a vendor started — 'created' (never
+// completed, could be abandoned or still in progress), 'paid'
+// (verified success), or 'failed' (signature verification failed).
+// These are the only statuses this integration can produce today: it's
+// a client-driven checkout + signature-verify flow, not Razorpay
+// webhooks, so gateway-side states like refunded/disputed aren't
+// captured — adding those would mean a separate webhook endpoint.
+exports.getPayments = asyncHandler(async (req, res) => {
+  const query = {};
+  if (['created', 'paid', 'failed'].includes(req.query.status)) {
+    query.status = req.query.status;
+  }
+
+  const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+  const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || DEFAULT_LIMIT, 1), MAX_LIMIT);
+
+  const [payments, total] = await Promise.all([
+    Payment.find(query)
+      .populate('vendorId', 'businessName email mobileNo countryCode subscriptionType subscriptionExpiresAt')
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit),
+    Payment.countDocuments(query),
+  ]);
+
+  res.json({
+    success: true,
+    payments: payments.map(toPaymentResponse),
+    total,
+    page,
+    pages: Math.max(Math.ceil(total / limit), 1),
+  });
+});
+
+exports.getPaymentById = asyncHandler(async (req, res) => {
+  const { paymentId } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(paymentId)) {
+    throw new AppError('Payment not found', 404);
+  }
+  const payment = await Payment.findById(paymentId).populate(
+    'vendorId',
+    'businessName email mobileNo countryCode subscriptionType subscriptionExpiresAt currency'
+  );
+  if (!payment) {
+    throw new AppError('Payment not found', 404);
+  }
+  res.json({ success: true, payment: toPaymentResponse(payment) });
 });

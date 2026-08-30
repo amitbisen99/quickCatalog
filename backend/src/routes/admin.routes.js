@@ -39,6 +39,8 @@ router.put(
   adminController.updateDomainRequest
 );
 router.get('/dashboard/stats', adminController.getDashboardStats);
+router.get('/payments', adminController.getPayments);
+router.get('/payments/:paymentId', adminController.getPaymentById);
 router.get('/plan-pricing', adminController.getPlanPricing);
 router.put('/plan-pricing', updatePlanPricingValidators, validate, adminController.updatePlanPricing);
 

@@ -7,6 +7,11 @@ const { sendPaymentSuccessEmail } = require('../services/email.service');
 const asyncHandler = require('../utils/asyncHandler');
 const AppError = require('../utils/AppError');
 
+// One-time order, not a recurring Razorpay subscription — a paid plan is
+// simply active for this many days from purchase (or from the current
+// expiry, if renewed early) and needs paying again after that.
+const PAID_PLAN_DURATION_DAYS = 365;
+
 // What the "Upgrade to Paid" UI shows before the vendor even clicks —
 // resolved server-side from their currency so the frontend never has to
 // duplicate the India/international pricing logic.
@@ -94,7 +99,19 @@ exports.verifyRazorpayPayment = asyncHandler(async (req, res) => {
   if (!user) {
     throw new AppError('User not found', 404);
   }
+
+  // Renewing before the current term ends extends from that expiry, not
+  // from today — otherwise paying early would just throw away whatever
+  // time was left. A first purchase (or renewing after it already
+  // lapsed) starts the new term from now.
+  const now = new Date();
+  const base =
+    user.subscriptionExpiresAt && user.subscriptionExpiresAt > now ? user.subscriptionExpiresAt : now;
+  const expiresAt = new Date(base);
+  expiresAt.setUTCDate(expiresAt.getUTCDate() + PAID_PLAN_DURATION_DAYS);
+
   user.subscriptionType = 'paid';
+  user.subscriptionExpiresAt = expiresAt;
   await user.save();
 
   // Best-effort — the upgrade itself is already committed at this point,
