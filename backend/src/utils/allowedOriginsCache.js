@@ -10,7 +10,9 @@
 const User = require('../models/User');
 
 const REFRESH_INTERVAL_MS = 60 * 1000;
-const APP_BASE_DOMAIN = process.env.APP_BASE_DOMAIN;
+// Trailing slash stripped defensively — see utils/clientUrl.js for why
+// this matters for a value that gets built into an Origin string below.
+const APP_BASE_DOMAIN = (process.env.APP_BASE_DOMAIN || '').replace(/\/+$/, '') || undefined;
 
 let cachedOrigins = new Set();
 

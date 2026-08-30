@@ -1,3 +1,5 @@
+const { CLIENT_URL } = require('../utils/clientUrl');
+
 const BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email';
 
 /**
@@ -127,7 +129,7 @@ function sendWelcomeEmail(email, businessName) {
       <p>Hi ${businessName || 'there'},</p>
       <p>Your Instant Catalog account is verified and ready to go.</p>
       <p>Log in to your dashboard to build your first catalog, add products, and start sharing a link with your customers.</p>
-      <p><a href="${process.env.CLIENT_URL}/login">Log in to Instant Catalog</a></p>
+      <p><a href="${CLIENT_URL}/login">Log in to Instant Catalog</a></p>
     `,
   });
 }
@@ -142,7 +144,7 @@ function sendPaymentSuccessEmail(email, { amount, currency }) {
     htmlContent: `
       <p>Thanks for upgrading!</p>
       <p>We've received your payment of ${currency} ${majorAmount} and your account is now on the <strong>Paid plan</strong> — unlimited catalogs and products, plus custom domain support.</p>
-      <p><a href="${process.env.CLIENT_URL}/dashboard/settings">View your subscription</a></p>
+      <p><a href="${CLIENT_URL}/dashboard/settings">View your subscription</a></p>
     `,
   });
 }

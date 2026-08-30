@@ -2,10 +2,8 @@ import type { GetServerSideProps } from 'next';
 import { absoluteApiUrl } from '@/utils/api';
 import { getCatalogTemplate } from '@/components/catalog-templates/registry';
 import { useTrackVisit } from '@/utils/analytics';
-import Seo from '@/components/Seo';
+import Seo, { SITE_URL as APP_URL } from '@/components/Seo';
 import type { CatalogPageData } from '@/types/publicCatalog';
-
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3010';
 
 interface Props {
   data: CatalogPageData | null;

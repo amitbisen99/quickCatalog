@@ -1,6 +1,8 @@
 import type { AuthUser } from '@/context/AuthContext';
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3010';
+// Stripped of any trailing slash — production's NEXT_PUBLIC_APP_URL is set
+// with one, which otherwise doubles up into ".app//public/slug" below.
+const APP_URL = (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3010').replace(/\/+$/, '');
 const APP_BASE_DOMAIN = (() => {
   try {
     return new URL(APP_URL).hostname;

@@ -4,7 +4,10 @@ import { CodeIcon, CopyIcon } from '@/components/icons';
 import { useAuth } from '@/context/AuthContext';
 import { getCatalogPublicUrl } from '@/utils/catalogUrl';
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3010';
+// Trailing slash stripped — a NEXT_PUBLIC_APP_URL set with one would
+// otherwise double up into "instantcatalog.app//widget.js" in the
+// embed snippet every vendor copies below.
+const APP_URL = (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3010').replace(/\/+$/, '');
 const DEFAULT_COLOR = '#232153'; // primary-700 — matches the app's own buttons
 
 const POSITIONS = [

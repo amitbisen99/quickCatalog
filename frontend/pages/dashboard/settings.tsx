@@ -32,7 +32,10 @@ interface CatalogSummary {
   slug: string;
 }
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3010';
+// Trailing slash stripped — a NEXT_PUBLIC_APP_URL set with one would
+// otherwise double up wherever this concatenates against a leading-slash
+// path below.
+const APP_URL = (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3010').replace(/\/+$/, '');
 // The bare domain the app is deployed on — used to build the preview of
 // what a requested subdomain will look like (`{value}.{APP_BASE_DOMAIN}`).
 // Falls back to parsing it out of APP_URL so this doesn't need its own

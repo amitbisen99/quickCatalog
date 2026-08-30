@@ -7,6 +7,7 @@ const Specification = require('../models/Specification');
 const User = require('../models/User');
 const slugify = require('../utils/slugify');
 const generateQrCodeDataUrl = require('../utils/qrCode');
+const { CLIENT_URL } = require('../utils/clientUrl');
 const { parseWorkbook } = require('../utils/excelParser');
 const { normalizeProductRow } = require('../utils/normalizeProductRow');
 const readImagesZip = require('../utils/readImagesZip');
@@ -75,7 +76,7 @@ async function createCatalogRecord(user, name, description, template) {
   }
 
   const slug = await generateUniqueSlug(name);
-  const qrCode = await generateQrCodeDataUrl(`${process.env.CLIENT_URL}/public/${slug}`);
+  const qrCode = await generateQrCodeDataUrl(`${CLIENT_URL}/public/${slug}`);
 
   return Catalog.create({
     vendorId: user._id,

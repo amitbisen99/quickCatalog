@@ -1,7 +1,10 @@
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 
-const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3010';
+// Stripped of any trailing slash — production's NEXT_PUBLIC_APP_URL is
+// set with one, which otherwise doubles up into "instantcatalog.app//about"
+// everywhere this gets concatenated with a leading-slash path.
+const SITE_URL = (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3010').replace(/\/+$/, '');
 const DEFAULT_OG_IMAGE = `${SITE_URL}/og-default.png`;
 
 interface Props {

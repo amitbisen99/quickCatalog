@@ -21,7 +21,11 @@ const app = express();
 // real client IP from X-Forwarded-For.
 app.set('trust proxy', 1);
 
-const staticAllowedOrigins = [process.env.CLIENT_URL, process.env.ADMIN_URL].filter(Boolean);
+// Trailing slash stripped on both — a real browser Origin header never
+// has one, so an unstripped env value here would just never match.
+const staticAllowedOrigins = [process.env.CLIENT_URL, process.env.ADMIN_URL]
+  .filter(Boolean)
+  .map((url) => url.replace(/\/+$/, ''));
 
 app.use(
   cors({

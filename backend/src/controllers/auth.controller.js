@@ -5,6 +5,7 @@ const { sendOtpEmail, sendPasswordResetEmail, sendWelcomeEmail } = require('../s
 const asyncHandler = require('../utils/asyncHandler');
 const AppError = require('../utils/AppError');
 const toSafeUser = require('../utils/toSafeUser');
+const { CLIENT_URL } = require('../utils/clientUrl');
 const {
   generateAccessToken,
   accessCookieOptions,
@@ -181,7 +182,7 @@ exports.forgotPassword = asyncHandler(async (req, res) => {
   await user.setResetToken(resetToken, RESET_TOKEN_TTL_HOURS);
   await user.save();
 
-  const resetLink = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
+  const resetLink = `${CLIENT_URL}/reset-password/${resetToken}`;
   const emailResult = await sendPasswordResetEmail(email, resetLink);
 
   res.json({

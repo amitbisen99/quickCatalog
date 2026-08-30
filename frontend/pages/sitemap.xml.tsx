@@ -1,7 +1,6 @@
 import type { GetServerSideProps } from 'next';
 import { absoluteApiUrl } from '@/utils/api';
-
-const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3010';
+import { SITE_URL } from '@/components/Seo';
 
 // Static marketing pages worth listing — dashboard/admin/auth pages are
 // deliberately excluded (private, transactional, or noindex'd).

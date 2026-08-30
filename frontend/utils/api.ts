@@ -16,7 +16,10 @@ export const API_URL =
 // ambiguity. Resolves against NEXT_PUBLIC_APP_URL when API_URL isn't
 // already absolute.
 export function absoluteApiUrl(path: string): string {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3010';
+  // Trailing slash stripped — a NEXT_PUBLIC_APP_URL set with one would
+  // otherwise double up wherever this concatenates against API_URL/path,
+  // both of which start with their own leading slash.
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3010').replace(/\/+$/, '');
   const base = API_URL.startsWith('http') ? API_URL : `${appUrl}${API_URL}`;
   return `${base}${path}`;
 }
