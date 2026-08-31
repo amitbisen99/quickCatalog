@@ -576,8 +576,8 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
                   className="w-full h-auto max-h-80 object-cover"
                   src="/screenshots/builder.webp"
                   alt="Catalog builder interface"
-                  width={1366}
-                  height={599}
+                  width={1001}
+                  height={440}
                 />
               </div>
             </div>
@@ -602,8 +602,8 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
                   className="w-full h-auto max-h-80 object-cover"
                   src="/screenshots/branding.webp"
                   alt="Custom domain settings"
-                  width={1100}
-                  height={379}
+                  width={1001}
+                  height={440}
                 />
               </div>
             </div>
@@ -628,8 +628,8 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
                   className="w-full h-auto max-h-80 object-cover"
                   src="/screenshots/embed.webp"
                   alt="Embeddable Visit Catalog button"
-                  width={1100}
-                  height={517}
+                  width={1001}
+                  height={440}
                 />
               </div>
             </div>
@@ -680,8 +680,8 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
                   className="w-full h-auto max-h-80 object-cover"
                   src="/screenshots/analytics.webp"
                   alt="Enquiry dashboard"
-                  width={1366}
-                  height={599}
+                  width={1001}
+                  height={440}
                 />
               </div>
             </div>
