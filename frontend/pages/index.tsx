@@ -654,8 +654,8 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
                   className="w-full h-auto max-h-80 object-cover"
                   src="/screenshots/sharing.webp"
                   alt="Catalog sharing via link and QR code"
-                  width={1200}
-                  height={556}
+                  width={1001}
+                  height={440}
                 />
               </div>
             </div>
