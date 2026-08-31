@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import Link from 'next/link';
 import AdminLayout from '@/components/AdminLayout';
 import withAdminAuth from '@/components/withAdminAuth';
 import Alert from '@/components/Alert';
@@ -18,14 +19,27 @@ interface DomainRequest {
   createdAt: string;
 }
 
+interface ApprovedDomain {
+  vendorId: string;
+  vendorBusinessName: string;
+  vendorEmail: string;
+  subdomain?: string;
+  customDomain?: string;
+  approvedAt: string;
+}
+
 function DomainRequests() {
   const [requests, setRequests] = useState<DomainRequest[] | null>(null);
+  const [approved, setApproved] = useState<ApprovedDomain[] | null>(null);
   const [error, setError] = useState('');
   const [actioningKey, setActioningKey] = useState('');
 
   const loadRequests = useCallback(() => {
-    apiFetch<{ requests: DomainRequest[] }>('/admin/domain-requests')
-      .then((res) => setRequests(res.requests))
+    apiFetch<{ requests: DomainRequest[]; approved: ApprovedDomain[] }>('/admin/domain-requests')
+      .then((res) => {
+        setRequests(res.requests);
+        setApproved(res.approved);
+      })
       .catch((err) => setError(err instanceof ApiError ? err.message : 'Could not load domain requests.'));
   }, []);
 
@@ -130,6 +144,72 @@ function DomainRequests() {
                       </tr>
                     );
                   });
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      <div className="mt-10">
+        <h2 className="text-xl font-bold text-gray-900">Approved Domains</h2>
+        <p className="mt-1 text-sm text-gray-500">
+          Every subdomain/custom domain currently marked live
+          {approved && approved.length > 0 && (
+            <>
+              {' — '}
+              {approved.filter((d) => d.subdomain).length} subdomain
+              {approved.filter((d) => d.subdomain).length === 1 ? '' : 's'},{' '}
+              {approved.filter((d) => d.customDomain).length} custom domain
+              {approved.filter((d) => d.customDomain).length === 1 ? '' : 's'}
+            </>
+          )}
+          .
+        </p>
+      </div>
+
+      <div className="mt-4 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+        {approved === null ? (
+          <p className="p-6 text-sm text-gray-500">Loading…</p>
+        ) : approved.length === 0 ? (
+          <div className="p-10 text-center">
+            <p className="text-sm font-medium text-gray-900">No approved domains yet</p>
+            <p className="mt-1 text-sm text-gray-500">Domains you mark live above will show up here.</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="border-b border-gray-200 bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+                <tr>
+                  <th className="px-4 py-3 font-medium">Vendor</th>
+                  <th className="px-4 py-3 font-medium">Domain</th>
+                  <th className="px-4 py-3 font-medium">Type</th>
+                  <th className="px-4 py-3 font-medium">Approved</th>
+                  <th className="px-4 py-3 font-medium">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {approved.flatMap((dom) => {
+                  const rows: { value: string; label: string }[] = [];
+                  if (dom.subdomain) rows.push({ value: dom.subdomain, label: 'Subdomain' });
+                  if (dom.customDomain) rows.push({ value: dom.customDomain, label: 'Custom domain' });
+
+                  return rows.map((row) => (
+                    <tr key={`${dom.vendorId}:${row.label}`}>
+                      <td className="px-4 py-3">
+                        <p className="font-medium text-gray-900">{dom.vendorBusinessName}</p>
+                        <p className="text-xs text-gray-500">{dom.vendorEmail}</p>
+                      </td>
+                      <td className="px-4 py-3 font-medium text-gray-900">{row.value}</td>
+                      <td className="px-4 py-3 text-gray-500">{row.label}</td>
+                      <td className="px-4 py-3 text-gray-500">{new Date(dom.approvedAt).toLocaleDateString()}</td>
+                      <td className="px-4 py-3">
+                        <Link href={`/admin/vendors/${dom.vendorId}`} className="text-primary-700 hover:text-primary-800">
+                          View vendor
+                        </Link>
+                      </td>
+                    </tr>
+                  ));
                 })}
               </tbody>
             </table>

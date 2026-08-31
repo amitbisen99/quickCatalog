@@ -19,6 +19,10 @@ interface Vendor {
   currency?: string;
   subscriptionType: string;
   subscriptionExpiresAt?: string;
+  subdomain?: string;
+  subdomainStatus?: 'pending' | 'active' | 'failed';
+  customDomain?: string;
+  customDomainStatus?: 'pending' | 'active' | 'failed';
   status: string;
   createdAt: string;
 }
@@ -33,6 +37,18 @@ const STATUS_LABEL: Record<string, string> = {
   verified: 'Active',
   inactive: 'Inactive',
   unverified: 'Unverified',
+};
+
+const DOMAIN_STATUS_BADGE: Record<string, string> = {
+  active: 'bg-green-100 text-green-700',
+  pending: 'bg-amber-100 text-amber-700',
+  failed: 'bg-red-100 text-red-700',
+};
+
+const DOMAIN_STATUS_LABEL: Record<string, string> = {
+  active: 'Live',
+  pending: 'Pending',
+  failed: 'Failed',
 };
 
 function VendorDetail() {
@@ -191,6 +207,40 @@ function VendorDetail() {
           <div>
             <dt className="text-xs font-semibold uppercase tracking-wide text-gray-400">Joined</dt>
             <dd className="mt-1 text-sm text-gray-900">{new Date(vendor.createdAt).toLocaleDateString()}</dd>
+          </div>
+          <div>
+            <dt className="text-xs font-semibold uppercase tracking-wide text-gray-400">Subdomain</dt>
+            <dd className="mt-1 text-sm text-gray-900">
+              {vendor.subdomain ? (
+                <span className="flex items-center gap-2">
+                  {vendor.subdomain}
+                  {vendor.subdomainStatus && (
+                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${DOMAIN_STATUS_BADGE[vendor.subdomainStatus]}`}>
+                      {DOMAIN_STATUS_LABEL[vendor.subdomainStatus]}
+                    </span>
+                  )}
+                </span>
+              ) : (
+                '—'
+              )}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs font-semibold uppercase tracking-wide text-gray-400">Custom Domain</dt>
+            <dd className="mt-1 text-sm text-gray-900">
+              {vendor.customDomain ? (
+                <span className="flex items-center gap-2">
+                  {vendor.customDomain}
+                  {vendor.customDomainStatus && (
+                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${DOMAIN_STATUS_BADGE[vendor.customDomainStatus]}`}>
+                      {DOMAIN_STATUS_LABEL[vendor.customDomainStatus]}
+                    </span>
+                  )}
+                </span>
+              ) : (
+                '—'
+              )}
+            </dd>
           </div>
         </dl>
       </div>

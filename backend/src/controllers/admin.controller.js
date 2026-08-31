@@ -301,6 +301,25 @@ function toDomainRequestResponse(vendor) {
   };
 }
 
+// Same shape as toDomainRequestResponse, filtered to 'active' instead of
+// 'pending' — a marked-live domain used to just vanish from this whole
+// page with no record of it anywhere, so the admin had no way to answer
+// "how many custom domains are live right now?" without going vendor by
+// vendor. No dedicated "approved at" timestamp exists on User, so
+// updatedAt is reused here too — same imprecision toDomainRequestResponse
+// already accepts for "requested at" (any save touches it, not just a
+// status change), good enough for an admin-visibility list.
+function toApprovedDomainResponse(vendor) {
+  return {
+    vendorId: vendor._id,
+    vendorBusinessName: vendor.businessName,
+    vendorEmail: vendor.email,
+    subdomain: vendor.subdomainStatus === 'active' ? vendor.subdomain : undefined,
+    customDomain: vendor.customDomainStatus === 'active' ? vendor.customDomain : undefined,
+    approvedAt: vendor.updatedAt,
+  };
+}
+
 // This host has no domain-provisioning API — every white-label
 // subdomain/custom-domain request has to be set up by hand in hPanel
 // (+ the vendor's own DNS, for custom domains). This is that manual
@@ -309,11 +328,18 @@ function toDomainRequestResponse(vendor) {
 // it resolves. Vendor-scoped (not per-catalog) — one white-label domain
 // covers every catalog that vendor owns.
 exports.getDomainRequests = asyncHandler(async (req, res) => {
-  const vendors = await User.find({
-    $or: [{ subdomainStatus: 'pending' }, { customDomainStatus: 'pending' }],
-  }).sort({ updatedAt: 1 });
+  const [pendingVendors, approvedVendors] = await Promise.all([
+    User.find({ $or: [{ subdomainStatus: 'pending' }, { customDomainStatus: 'pending' }] }).sort({
+      updatedAt: 1,
+    }),
+    User.find({ $or: [{ subdomainStatus: 'active' }, { customDomainStatus: 'active' }] }).sort({ updatedAt: -1 }),
+  ]);
 
-  res.json({ success: true, requests: vendors.map(toDomainRequestResponse) });
+  res.json({
+    success: true,
+    requests: pendingVendors.map(toDomainRequestResponse),
+    approved: approvedVendors.map(toApprovedDomainResponse),
+  });
 });
 
 exports.updateDomainRequest = asyncHandler(async (req, res) => {
