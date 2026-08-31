@@ -59,12 +59,12 @@ import {
 type FeatureTabId = 'builder' | 'branding' | 'embed' | 'sharing' | 'analytics' | 'pwa';
 
 const FEATURE_TABS: { id: FeatureTabId; label: string; icon: IconType }[] = [
+  { id: 'pwa', label: 'Mobile Ready App', icon: FaMobileScreen },
   { id: 'builder', label: 'Builder', icon: FaPenRuler },
   { id: 'branding', label: 'Your Own Branding', icon: FaGlobe },
   { id: 'embed', label: 'Add to Your Website', icon: FaCode },
   { id: 'sharing', label: 'Sharing', icon: FaShareNodes },
   { id: 'analytics', label: 'Analytics', icon: FaChartLine },
-  { id: 'pwa', label: 'PWA', icon: FaMobileScreen },
 ];
 
 const PROBLEMS: { icon: IconType; label: string }[] = [
@@ -184,7 +184,7 @@ export const getServerSideProps: GetServerSideProps<HomeProps> = async () => {
 
 export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<FeatureTabId>('builder');
+  const [activeTab, setActiveTab] = useState<FeatureTabId>('pwa');
   const [activeWho, setActiveWho] = useState<WhoItsForId>('manufacturers');
   const activeWhoItem = WHO_ITS_FOR.find((item) => item.id === activeWho) ?? WHO_ITS_FOR[0];
   const [ctaEmail, setCtaEmail] = useState('');
@@ -892,7 +892,7 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="py-28 px-6 bg-brand-bg">
+      <section id="pricing" className="py-28 px-6 bg-white">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <span className="inline-block px-4 py-1.5 rounded-full bg-brand-accent-light text-brand-accent text-xs font-bold uppercase tracking-widest mb-4">Pricing</span>
@@ -1001,7 +1001,7 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
       </section>
 
       {/* CTA / Register Section */}
-      <section className="py-28 px-6 bg-white">
+      <section className="py-28 px-6 bg-brand-bg">
         <div className="max-w-5xl mx-auto">
           <div className="relative rounded-[3rem] overflow-hidden">
             <div className="absolute inset-0">
