@@ -382,8 +382,8 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
                 className="w-full h-auto max-h-[460px] object-cover"
                 src="/screenshots/hero.webp"
                 alt="Instant Catalog dashboard interface"
-                width={956}
-                height={504}
+                width={1132}
+                height={512}
                 priority
               />
             </div>
