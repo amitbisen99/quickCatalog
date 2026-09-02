@@ -21,3 +21,7 @@ exports.updateDomainRequestValidators = [
   body('type').isIn(['subdomain', 'customDomain']).withMessage('Invalid domain type'),
   body('status').isIn(['active', 'failed']).withMessage('Invalid status'),
 ];
+
+exports.updateCatalogPreviewLeadStatusValidators = [
+  body('status').isIn(['new', 'contacted', 'delivered', 'closed']).withMessage('Invalid status'),
+];

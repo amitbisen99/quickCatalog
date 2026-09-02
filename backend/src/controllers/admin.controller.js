@@ -8,6 +8,7 @@ const Specification = require('../models/Specification');
 const Enquiry = require('../models/Enquiry');
 const SupportTicket = require('../models/SupportTicket');
 const Payment = require('../models/Payment');
+const CatalogPreviewLead = require('../models/CatalogPreviewLead');
 const toSafeUser = require('../utils/toSafeUser');
 const toSupportTicketResponse = require('../utils/toSupportTicketResponse');
 const asyncHandler = require('../utils/asyncHandler');
@@ -417,4 +418,75 @@ exports.getPaymentById = asyncHandler(async (req, res) => {
     throw new AppError('Payment not found', 404);
   }
   res.json({ success: true, payment: toPaymentResponse(payment) });
+});
+
+// excelFileData deliberately excluded from the list row — it's a base64
+// data URL that can run into several MB per lead, wasteful to ship for
+// every row in a paginated table. Only the detail response includes it.
+function toCatalogPreviewLeadSummary(lead) {
+  return {
+    id: lead._id,
+    fullName: lead.fullName,
+    email: lead.email,
+    whatsappNo: lead.whatsappNo,
+    industry: lead.industry,
+    numberOfProducts: lead.numberOfProducts,
+    excelFileName: lead.excelFileName,
+    status: lead.status,
+    createdAt: lead.createdAt,
+  };
+}
+
+exports.getCatalogPreviewLeads = asyncHandler(async (req, res) => {
+  const query = {};
+  if (['new', 'contacted', 'delivered', 'closed'].includes(req.query.status)) {
+    query.status = req.query.status;
+  }
+
+  const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+  const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || DEFAULT_LIMIT, 1), MAX_LIMIT);
+
+  const [leads, total] = await Promise.all([
+    CatalogPreviewLead.find(query)
+      .select('-excelFileData')
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit),
+    CatalogPreviewLead.countDocuments(query),
+  ]);
+
+  res.json({
+    success: true,
+    leads: leads.map(toCatalogPreviewLeadSummary),
+    total,
+    page,
+    pages: Math.max(Math.ceil(total / limit), 1),
+  });
+});
+
+exports.getCatalogPreviewLeadById = asyncHandler(async (req, res) => {
+  const { leadId } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(leadId)) {
+    throw new AppError('Lead not found', 404);
+  }
+  const lead = await CatalogPreviewLead.findById(leadId);
+  if (!lead) {
+    throw new AppError('Lead not found', 404);
+  }
+  res.json({
+    success: true,
+    lead: { ...toCatalogPreviewLeadSummary(lead), excelFileData: lead.excelFileData },
+  });
+});
+
+exports.updateCatalogPreviewLeadStatus = asyncHandler(async (req, res) => {
+  const { leadId } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(leadId)) {
+    throw new AppError('Lead not found', 404);
+  }
+  const lead = await CatalogPreviewLead.findByIdAndUpdate(leadId, { status: req.body.status }, { new: true });
+  if (!lead) {
+    throw new AppError('Lead not found', 404);
+  }
+  res.json({ success: true, lead: toCatalogPreviewLeadSummary(lead) });
 });

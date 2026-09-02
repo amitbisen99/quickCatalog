@@ -8,13 +8,19 @@ const BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email';
  * console instead of failing the whole request — lets auth flows be
  * exercised end-to-end without a Brevo account.
  */
-async function sendEmail({ to, subject, htmlContent }) {
+// attachments: optional [{ name, content }], content being base64 (no
+// "data:...;base64," prefix) — only used by the catalog-preview lead
+// notification today, to hand the admin the vendor's Excel directly.
+async function sendEmail({ to, subject, htmlContent, attachments }) {
   const apiKey = process.env.BREVO_API_KEY;
 
   if (!apiKey) {
     console.log('\n[DEV EMAIL] BREVO_API_KEY not set — logging instead of sending.');
     console.log(`[DEV EMAIL] To: ${to} | Subject: ${subject}`);
     console.log(`[DEV EMAIL] ${htmlContent.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()}\n`);
+    if (attachments?.length) {
+      console.log(`[DEV EMAIL] Attachments: ${attachments.map((a) => a.name).join(', ')}\n`);
+    }
     return { sent: false, reason: 'no-api-key' };
   }
 
@@ -33,6 +39,7 @@ async function sendEmail({ to, subject, htmlContent }) {
       to: [{ email: to }],
       subject,
       htmlContent,
+      ...(attachments?.length ? { attachment: attachments } : {}),
     }),
   });
 
@@ -149,6 +156,49 @@ function sendPaymentSuccessEmail(email, { amount, currency }) {
   });
 }
 
+// Sent to the admin inbox the moment someone submits the "Free Catalog
+// Preview" landing page — includes the Excel they attached so it's
+// actionable straight from the inbox, without needing to open the admin
+// panel first.
+function sendCatalogPreviewLeadNotificationEmail(lead) {
+  const adminEmail = process.env.ADMIN_EMAIL;
+  if (!adminEmail) return Promise.resolve({ sent: false, reason: 'no-admin-email' });
+
+  // lead.excelFileData is a "data:<mime>;base64,<content>" URL — Brevo's
+  // attachment content wants just the base64 part.
+  const base64Content = lead.excelFileData.split(',')[1] || '';
+
+  return sendEmail({
+    to: adminEmail,
+    subject: `New catalog preview request — ${lead.fullName}`,
+    htmlContent: `
+      <p>New free catalog preview request from the website:</p>
+      <p><strong>${lead.fullName}</strong><br/>
+      Email: ${lead.email}<br/>
+      WhatsApp: ${lead.whatsappNo}<br/>
+      Industry: ${lead.industry}<br/>
+      Products: ~${lead.numberOfProducts}</p>
+      <p>Their product Excel is attached (${lead.excelFileName}).</p>
+      <p><a href="${CLIENT_URL}/admin/catalog-preview-leads/${lead._id}">View this lead in the admin panel</a></p>
+    `,
+    attachments: [{ name: lead.excelFileName, content: base64Content }],
+  });
+}
+
+// Sent to the person who submitted the form, confirming we received it.
+function sendCatalogPreviewLeadConfirmationEmail(lead) {
+  return sendEmail({
+    to: lead.email,
+    subject: 'We received your product list — Instant Catalog',
+    htmlContent: `
+      <p>Hi ${lead.fullName},</p>
+      <p>Thanks for sending your product list! Our team is building your free catalog preview now.</p>
+      <p>You'll get a live, shareable link and QR code sent to your WhatsApp (${lead.whatsappNo}) within 24 hours.</p>
+      <p>In the meantime, feel free to take a look at a <a href="${CLIENT_URL}/public/home-living-collection">sample catalog</a>, or <a href="${CLIENT_URL}/signup">create your free account</a> and start building right away.</p>
+    `,
+  });
+}
+
 module.exports = {
   sendEmail,
   sendOtpEmail,
@@ -158,4 +208,6 @@ module.exports = {
   sendSupportTicketReplyEmail,
   sendWelcomeEmail,
   sendPaymentSuccessEmail,
+  sendCatalogPreviewLeadNotificationEmail,
+  sendCatalogPreviewLeadConfirmationEmail,
 };

@@ -8,6 +8,7 @@ const {
   replyToTicketValidators,
   updatePlanPricingValidators,
   updateDomainRequestValidators,
+  updateCatalogPreviewLeadStatusValidators,
 } = require('../validators/admin.validators');
 
 const router = express.Router();
@@ -43,5 +44,13 @@ router.get('/payments', adminController.getPayments);
 router.get('/payments/:paymentId', adminController.getPaymentById);
 router.get('/plan-pricing', adminController.getPlanPricing);
 router.put('/plan-pricing', updatePlanPricingValidators, validate, adminController.updatePlanPricing);
+router.get('/catalog-preview-leads', adminController.getCatalogPreviewLeads);
+router.get('/catalog-preview-leads/:leadId', adminController.getCatalogPreviewLeadById);
+router.put(
+  '/catalog-preview-leads/:leadId/status',
+  updateCatalogPreviewLeadStatusValidators,
+  validate,
+  adminController.updateCatalogPreviewLeadStatus
+);
 
 module.exports = router;

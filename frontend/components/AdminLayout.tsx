@@ -10,6 +10,7 @@ import {
   CreditCardIcon,
   ListIcon,
   ShareIcon,
+  MailIcon,
   LogoutIcon,
   MenuIcon,
   XIcon,
@@ -24,6 +25,7 @@ const NAV_ITEMS = [
   { label: 'Vendors', href: '/admin/vendors', icon: UserIcon },
   { label: 'Domain Requests', href: '/admin/domain-requests', icon: ShareIcon },
   { label: 'Support Tickets', href: '/admin/support-tickets', icon: HelpIcon },
+  { label: 'Catalog Preview Leads', href: '/admin/catalog-preview-leads', icon: MailIcon },
   { label: 'Payments', href: '/admin/payments', icon: ListIcon },
   { label: 'Plan Pricing', href: '/admin/plan-pricing', icon: CreditCardIcon },
 ];
