@@ -24,7 +24,7 @@ const MAX_EXCEL_SIZE = 10 * 1024 * 1024; // 10MB — matches backend's excelUplo
 const HOW_IT_WORKS = [
   'Send us your product Excel sheet or price list.',
   'Our team formats and designs your digital catalog preview.',
-  'Get a live, shareable link & QR code delivered to your WhatsApp in 24 hours.',
+  "We'll contact you on WhatsApp/Email when your preview is ready.",
   "Subscribe when you're ready to publish.",
 ];
 
@@ -115,8 +115,8 @@ export default function CatalogPreview() {
   return (
     <div className="min-h-screen bg-white font-sans text-brand-text antialiased">
       <Seo
-        title="Free Catalog Preview — Instant Catalog"
-        description="Send us your product Excel and we'll build you a free, shareable digital catalog preview with a live link and QR code — delivered to your WhatsApp within 24 hours."
+        title="Convert Your Excel to a Sales-Ready Digital Catalog — in Minutes"
+        description="Stop losing buyers to messy PDFs and outdated price lists. Send us your Excel product list today, and our team will turn it into an interactive, mobile-ready digital catalog — completely free of charge."
       />
 
       {/* Minimal top bar — just the logo, no distracting nav on a
@@ -132,7 +132,7 @@ export default function CatalogPreview() {
 
       <div className="grid md:min-h-[calc(100vh-73px)] md:grid-cols-2">
         {/* Left — pitch */}
-        <div className="relative flex items-center overflow-hidden bg-[radial-gradient(130%_130%_at_15%_10%,_#DFFA66_0%,_#B8F000_55%,_#93C400_100%)] px-6 py-16 md:px-14 md:py-20">
+        <div className="relative flex items-start overflow-hidden bg-[radial-gradient(130%_130%_at_15%_10%,_#DFFA66_0%,_#B8F000_55%,_#93C400_100%)] px-6 py-16 md:px-14 md:py-20">
           <div className="pointer-events-none absolute top-0 right-0 h-64 w-64 -translate-y-1/3 translate-x-1/4 rounded-full bg-black/5"></div>
           <div className="pointer-events-none absolute bottom-0 left-0 h-48 w-48 translate-y-1/3 -translate-x-1/4 rounded-full bg-black/5"></div>
 
@@ -189,7 +189,7 @@ export default function CatalogPreview() {
         </div>
 
         {/* Right — lead capture form */}
-        <div className="flex items-center bg-brand-bg px-6 py-16 md:px-14 md:py-20">
+        <div className="flex items-start bg-brand-bg px-6 py-16 md:px-14 md:py-20">
           <div className="mx-auto w-full max-w-lg rounded-3xl border border-brand-border bg-white p-8 shadow-xl shadow-brand-accent/5 md:p-10">
             {submitted ? (
               <div className="py-6 text-center">
