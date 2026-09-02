@@ -137,27 +137,27 @@ export default function CatalogPreview() {
           <div className="pointer-events-none absolute bottom-0 left-0 h-48 w-48 translate-y-1/3 -translate-x-1/4 rounded-full bg-black/5"></div>
 
           <div className="relative z-10 mx-auto w-full max-w-lg">
-            <h1 className="text-3xl font-black leading-tight tracking-tighter text-brand-text md:text-4xl">
+            <h1 className="text-3xl font-black leading-tight tracking-tighter text-white md:text-4xl">
               Send Us Your Product Excel — We&apos;ll Build Your Digital Catalog For Free.
             </h1>
-            <p className="mt-5 text-base leading-relaxed text-brand-text/70">
+            <p className="mt-5 text-base leading-relaxed text-white/90">
               Still sending outdated PDFs or spending hours sending product photos one by one on WhatsApp? Send us
               your Excel product list and our team will create a free catalog preview using your actual products.
             </p>
 
-            <p className="mt-8 text-sm font-bold uppercase tracking-widest text-brand-text/60">👇 Here&apos;s how it works</p>
+            <p className="mt-8 text-sm font-bold uppercase tracking-widest text-white/80">👇 Here&apos;s how it works</p>
             <div className="mt-4 space-y-2.5">
               {HOW_IT_WORKS.map((step, i) => (
-                <div key={step} className="flex items-start gap-3.5 rounded-2xl bg-white/40 px-4 py-3.5 ring-1 ring-black/5">
-                  <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-brand-text/15 text-xs font-bold text-brand-text">
+                <div key={step} className="flex items-start gap-3.5 rounded-2xl bg-black/20 px-4 py-3.5 ring-1 ring-white/10">
+                  <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-white/20 text-xs font-bold text-white">
                     {i + 1}
                   </span>
-                  <span className="pt-0.5 text-sm leading-snug text-brand-text">{step}</span>
+                  <span className="pt-0.5 text-sm leading-snug text-white">{step}</span>
                 </div>
               ))}
             </div>
 
-            <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-semibold uppercase tracking-widest text-brand-text/70">
+            <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-semibold uppercase tracking-widest text-white/90">
               <span className="flex items-center gap-2">
                 <FaCheck /> No Design Skills Needed
               </span>
@@ -166,28 +166,24 @@ export default function CatalogPreview() {
               </span>
             </div>
 
-            <div className="mt-10 border-t border-black/10 pt-8 text-center md:text-left">
-              <p className="text-sm text-brand-text/70">Don&apos;t have your Excel ready?</p>
+            <div className="mt-10 rounded-2xl bg-black/20 p-6 text-center ring-1 ring-white/15 md:text-left">
+              <p className="text-lg font-bold text-white">Don&apos;t have your Excel ready?</p>
               <Link
                 href="/public/home-living-collection"
                 target="_blank"
-                className="mt-1 inline-flex items-center gap-1.5 text-sm font-bold text-brand-text underline underline-offset-4 hover:text-brand-text/80"
+                className="mt-1.5 inline-flex items-center gap-1.5 text-sm font-bold text-white underline underline-offset-4 hover:text-white/80"
               >
                 See a sample catalog <FaArrowRight className="text-xs" />
               </Link>
 
-              <div className="my-5 flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-brand-text/40">
-                <span className="h-px flex-1 bg-black/10"></span>
-                OR
-                <span className="h-px flex-1 bg-black/10"></span>
+              <div className="mt-5">
+                <Link
+                  href="/signup"
+                  className="inline-flex items-center gap-2 rounded-xl bg-brand-text px-6 py-3 text-sm font-bold uppercase tracking-wider text-white shadow-lg transition-all hover:bg-brand-text/90"
+                >
+                  Create My Account Free
+                </Link>
               </div>
-
-              <Link
-                href="/signup"
-                className="inline-flex items-center gap-2 rounded-xl bg-brand-text px-6 py-3 text-sm font-bold uppercase tracking-wider text-white shadow-lg transition-all hover:bg-brand-text/90"
-              >
-                Create My Account Free
-              </Link>
             </div>
           </div>
         </div>
