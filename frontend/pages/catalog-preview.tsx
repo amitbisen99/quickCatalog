@@ -1,6 +1,7 @@
 import { ChangeEvent, FormEvent, useState } from 'react';
 import Link from 'next/link';
 import Seo, { SITE_URL } from '@/components/Seo';
+import Modal from '@/components/Modal';
 import { apiFetch, ApiError } from '@/utils/api';
 import { INDUSTRIES } from '@/utils/constants';
 import {
@@ -57,6 +58,7 @@ export default function CatalogPreview() {
   const [formError, setFormError] = useState('');
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [privacyModalOpen, setPrivacyModalOpen] = useState(false);
 
   function updateField(field: keyof FormState, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -270,6 +272,16 @@ export default function CatalogPreview() {
                     </label>
                     <input id="excelFile" type="file" accept=".xlsx,.xls" onChange={handleFileChange} className="hidden" />
                     {fileError && <p className="mt-1.5 text-xs text-red-600">{fileError}</p>}
+                    <p className="mt-2 text-xs text-brand-muted">
+                      🔒 Private preview · 10–20 products is enough · No confidential data required.{' '}
+                      <button
+                        type="button"
+                        onClick={() => setPrivacyModalOpen(true)}
+                        className="font-medium text-blue-600 underline underline-offset-2 hover:text-blue-700"
+                      >
+                        Read more
+                      </button>
+                    </p>
                   </FormField>
 
                   <FormField label="Industry">
@@ -317,6 +329,20 @@ export default function CatalogPreview() {
           </div>
         </div>
       </div>
+
+      <Modal isOpen={privacyModalOpen} onClose={() => setPrivacyModalOpen(false)} title="🔒 Your Product Data Stays in Your Control">
+        <div className="space-y-3 text-sm text-gray-600">
+          <p>
+            We use your uploaded product information only to create your private catalog preview. Your preview
+            isn&apos;t published publicly, and we don&apos;t sell or share your product data for unrelated purposes.
+          </p>
+          <p>
+            You don&apos;t need to upload your entire Excel. Start with just 10–20 products. You can also remove
+            prices, supplier costs, margins or any other confidential information you&apos;re not comfortable
+            sharing.
+          </p>
+        </div>
+      </Modal>
     </div>
   );
 }
