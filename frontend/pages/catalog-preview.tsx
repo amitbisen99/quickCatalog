@@ -1,6 +1,6 @@
 import { ChangeEvent, FormEvent, useState } from 'react';
 import Link from 'next/link';
-import Seo from '@/components/Seo';
+import Seo, { SITE_URL } from '@/components/Seo';
 import { apiFetch, ApiError } from '@/utils/api';
 import { INDUSTRIES } from '@/utils/constants';
 import {
@@ -117,6 +117,7 @@ export default function CatalogPreview() {
       <Seo
         title="Convert Your Excel to a Sales-Ready Digital Catalog — in Minutes"
         description="Stop losing buyers to messy PDFs and outdated price lists. Send us your Excel product list today, and our team will turn it into an interactive, mobile-ready digital catalog — completely free of charge."
+        image={`${SITE_URL}/images/catalog-preview-og.jpg`}
       />
 
       {/* Minimal top bar — just the logo, no distracting nav on a
