@@ -31,9 +31,13 @@ exports.getCategories = asyncHandler(async (req, res) => {
   const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
   const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || DEFAULT_LIMIT, 1), MAX_LIMIT);
 
+  // Newest first — this branch is only ever hit by the Category Master
+  // page (dashboard/categories/index.tsx passes `page`), where a vendor
+  // wants to see what they just added at the top. The unpaginated branch
+  // above stays alphabetical since that one feeds dropdowns/pickers.
   const [categories, total] = await Promise.all([
     Category.find({ vendorId: req.user.id })
-      .sort({ name: 1 })
+      .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit),
     Category.countDocuments({ vendorId: req.user.id }),
