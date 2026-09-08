@@ -584,8 +584,10 @@ function Settings() {
                     <ExclamationTriangleIcon className="h-3.5 w-3.5" /> Setup failed — contact support
                   </p>
                 ) : (
-                  <p className="mt-1 flex items-center gap-1 text-xs text-amber-600">
-                    <ExclamationTriangleIcon className="h-3.5 w-3.5" /> Pending — we&apos;re setting this up
+                  <p className="mt-1.5 flex items-start gap-1.5 text-xs text-amber-600">
+                    <ExclamationTriangleIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                    We&apos;ve received your request successfully. We&apos;ll set up your subdomain and send a
+                    confirmation to your registered email address shortly. Thank You!
                   </p>
                 )}
               </div>
@@ -636,10 +638,20 @@ function Settings() {
                     <ExclamationTriangleIcon className="h-3.5 w-3.5" /> Setup failed — contact support
                   </p>
                 ) : (
-                  <p className="mt-1 flex items-center gap-1 text-xs text-amber-600">
-                    <ExclamationTriangleIcon className="h-3.5 w-3.5" /> Pending — we&apos;re setting this up
+                  <p className="mt-1.5 flex items-start gap-1.5 text-xs text-amber-600">
+                    <ExclamationTriangleIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                    We&apos;ve received your request successfully. We&apos;ll set up your custom domain and send a
+                    confirmation to your registered email address shortly, along with complete instructions on how
+                    to update your DNS records. Thank You!
                   </p>
                 )}
+                <button
+                  type="button"
+                  onClick={() => setDomainHelpModalOpen(true)}
+                  className="mt-1.5 text-xs font-medium text-primary-700 underline underline-offset-2 hover:text-primary-800"
+                >
+                  How do I do this?
+                </button>
               </div>
               <button
                 onClick={handleRemoveCustomDomain}
