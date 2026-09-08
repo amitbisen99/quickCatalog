@@ -7,6 +7,7 @@ import PasswordInput from '@/components/PasswordInput';
 import PasswordStrengthMeter from '@/components/PasswordStrengthMeter';
 import MobileNumberInput from '@/components/MobileNumberInput';
 import UpgradePlanModal from '@/components/dashboard/UpgradePlanModal';
+import Modal from '@/components/Modal';
 import { FREE_CATALOG_LIMIT, FREE_PRODUCT_LIMIT, isFreePlan } from '@/utils/planLimit';
 import { useAuth, AuthUser } from '@/context/AuthContext';
 import { apiFetch, ApiError } from '@/utils/api';
@@ -110,6 +111,7 @@ function Settings() {
   const [savingPrimaryCatalog, setSavingPrimaryCatalog] = useState(false);
   const [catalogs, setCatalogs] = useState<CatalogSummary[]>([]);
   const [domainUpgradeModalOpen, setDomainUpgradeModalOpen] = useState(false);
+  const [domainHelpModalOpen, setDomainHelpModalOpen] = useState(false);
 
   useEffect(() => {
     apiFetch<{ user: AuthUser }>('/users/profile').then((res) => {
@@ -664,7 +666,14 @@ function Settings() {
                 </button>
               </div>
               <p className="mt-1 text-xs text-gray-400">
-                Point a CNAME (or A record for a root domain) at our hosting — we&apos;ll confirm once it&apos;s set up.
+                Point a CNAME (or A record for a root domain) at our hosting — we&apos;ll confirm once it&apos;s set up.{' '}
+                <button
+                  type="button"
+                  onClick={() => setDomainHelpModalOpen(true)}
+                  className="font-medium text-primary-700 underline underline-offset-2 hover:text-primary-800"
+                >
+                  How do I do this?
+                </button>
               </p>
               {customDomainError && <p className="mt-2 text-xs text-red-600">{customDomainError}</p>}
             </form>
@@ -767,6 +776,101 @@ function Settings() {
       </section>
 
       <UpgradePlanModal isOpen={upgradeModalOpen} onClose={() => setUpgradeModalOpen(false)} reason="generic" />
+
+      <Modal isOpen={domainHelpModalOpen} onClose={() => setDomainHelpModalOpen(false)} title="Setting Up Your Custom Domain">
+        <div className="space-y-5 text-sm text-gray-600">
+          <p>
+            Add one DNS record with your domain provider (GoDaddy, Namecheap, Hostinger, Cloudflare, etc.). Which
+            record you need depends on the kind of domain you&apos;re connecting.
+          </p>
+
+          <div>
+            <h3 className="text-sm font-semibold text-gray-900">
+              Subdomain (e.g. catalog.yourbrand.com) → use a CNAME record
+            </h3>
+            <p className="mt-1">Use this if your domain has anything before the main domain name.</p>
+            <dl className="mt-2 space-y-1 rounded-lg bg-gray-50 p-3 font-mono text-xs text-gray-700">
+              <div>
+                <dt className="inline text-gray-400">Type: </dt>
+                <dd className="inline">CNAME</dd>
+              </div>
+              <div>
+                <dt className="inline text-gray-400">Host/Name: </dt>
+                <dd className="inline">catalog (just the subdomain part)</dd>
+              </div>
+              <div>
+                <dt className="inline text-gray-400">Value/Target: </dt>
+                <dd className="inline">instantcatalog.app</dd>
+              </div>
+              <div>
+                <dt className="inline text-gray-400">TTL: </dt>
+                <dd className="inline">Automatic (or 3600)</dd>
+              </div>
+            </dl>
+          </div>
+
+          <div>
+            <h3 className="text-sm font-semibold text-gray-900">
+              Root/apex domain (e.g. yourbrand.com) → use an A record
+            </h3>
+            <p className="mt-1">
+              Use this for the bare domain with nothing in front of it. DNS doesn&apos;t allow a CNAME at the root
+              — it also needs to carry other records like MX for email — so root domains point directly at a
+              server&apos;s IP address instead.
+            </p>
+            <dl className="mt-2 space-y-1 rounded-lg bg-gray-50 p-3 font-mono text-xs text-gray-700">
+              <div>
+                <dt className="inline text-gray-400">Type: </dt>
+                <dd className="inline">A</dd>
+              </div>
+              <div>
+                <dt className="inline text-gray-400">Host/Name: </dt>
+                <dd className="inline">@ (or leave blank)</dd>
+              </div>
+              <div>
+                <dt className="inline text-gray-400">Value: </dt>
+                <dd className="inline">217.21.90.46</dd>
+              </div>
+              <div>
+                <dt className="inline text-gray-400">TTL: </dt>
+                <dd className="inline">Automatic (or 3600)</dd>
+              </div>
+            </dl>
+          </div>
+
+          <div>
+            <h3 className="text-sm font-semibold text-gray-900">
+              Want both yourbrand.com and www.yourbrand.com to work?
+            </h3>
+            <p className="mt-1">
+              Add the A record above for the root, then add a second record: Type CNAME, Host/Name{' '}
+              <code className="rounded bg-gray-100 px-1 py-0.5 text-xs">www</code>, Value{' '}
+              <code className="rounded bg-gray-100 px-1 py-0.5 text-xs">instantcatalog.app</code>.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="text-sm font-semibold text-gray-900">After you&apos;ve added the record</h3>
+            <ol className="mt-1 list-decimal space-y-1 pl-4">
+              <li>Enter your domain above and click Connect.</li>
+              <li>
+                It&apos;ll show as Pending — DNS changes can take a few minutes up to 24–48 hours to fully
+                propagate, though it&apos;s usually much faster.
+              </li>
+              <li>
+                Our team confirms it resolves and finishes setup on our end (SSL, routing). Once done, it shows
+                Live.
+              </li>
+            </ol>
+          </div>
+
+          <p className="rounded-lg bg-amber-50 p-3 text-xs text-amber-800">
+            <strong>Cloudflare users:</strong> set the record&apos;s proxy status to &ldquo;DNS only&rdquo; (grey
+            cloud), not &ldquo;Proxied&rdquo; (orange cloud) — a proxied record blocks our SSL setup from
+            completing.
+          </p>
+        </div>
+      </Modal>
     </DashboardLayout>
   );
 }
