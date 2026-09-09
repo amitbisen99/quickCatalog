@@ -37,6 +37,27 @@ body {
   color: #6b6891;
 }
 
+/* /home2 color-experiment page only (pages/home2.tsx) — #C7FF01 swap-in
+   for the classes above. #C7FF01 is very light, so the active tab's
+   text goes dark instead of white to stay readable. */
+.home2-text-gradient {
+  background: linear-gradient(135deg, #C7FF01 0%, #4D6600 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.home2-hero-grid-bg {
+  background-image: linear-gradient(rgba(138, 168, 0, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(138, 168, 0, 0.08) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.home2-feature-tab-active {
+  background: #C7FF01;
+  color: #1a1833;
+}
+
 /* Keeps every <h1> on every page at its original size after the +2px
    site-wide font-size bump in tailwind.config.js — a class-based scale
    override can't distinguish "this text-3xl is a page's <h1>" from

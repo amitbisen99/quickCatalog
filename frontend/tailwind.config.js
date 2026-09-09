@@ -52,6 +52,17 @@ module.exports = {
         'brand-green-light': '#d1fae5',
         'brand-yellow': '#d97706',
         'brand-yellow-light': '#fef3c7',
+        // /home2 experiment only — a #C7FF01 swap-in for brand-accent
+        // above, scoped to pages/home2.tsx so pages/index.tsx (and its
+        // brand-accent) are untouched. #C7FF01 itself is very light/high
+        // luminance, so it's only used for fills/borders/shadows/gradients;
+        // anywhere brand-accent was used as on-white *text* needs a darker
+        // shade of the same hue to stay readable (accent-text below) —
+        // same contrast problem solved for the lime catalog-preview page.
+        'home2-accent': '#C7FF01',
+        'home2-accent-light': '#F5FFDA',
+        'home2-accent-dark': '#8FB800',
+        'home2-accent-text': '#4D6600',
       },
       letterSpacing: {
         // Default Tailwind value is -0.05em — only pages/index.tsx uses
