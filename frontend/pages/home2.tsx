@@ -303,7 +303,7 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
             <Link href="/login" className="hidden text-sm font-semibold text-brand-muted transition-colors hover:text-brand-text md:block px-4 py-2">
               Log In
             </Link>
-            <Link href="/signup" className="hidden md:inline-block bg-home2-accent text-home2-accent-text px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-all shadow-md shadow-home2-accent/30">
+            <Link href="/signup" className="hidden md:inline-block border border-black bg-home2-accent text-home2-accent-text px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-all shadow-md shadow-home2-accent/30">
               Start Free
             </Link>
             <button
@@ -369,7 +369,7 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
                 required
                 className="flex-1 rounded-2xl border border-brand-border bg-white px-5 py-4 text-sm text-brand-text placeholder-brand-muted/70 shadow-sm focus:outline-none focus:ring-2 focus:ring-home2-accent/30"
               />
-              <button type="submit" className="bg-home2-accent text-home2-accent-text px-8 py-4 rounded-2xl font-bold uppercase tracking-wider text-sm hover:opacity-90 transition-all shadow-xl shadow-home2-accent/25 whitespace-nowrap">
+              <button type="submit" className="border border-black bg-home2-accent text-home2-accent-text px-8 py-4 rounded-2xl font-bold uppercase tracking-wider text-sm hover:opacity-90 transition-all shadow-xl shadow-home2-accent/25 whitespace-nowrap">
                 Create First Catalog Free
               </button>
             </form>
@@ -826,7 +826,7 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
               <Link
                 href={`/public/${activeWhoItem.catalogSlug}`}
                 target="_blank"
-                className="inline-flex items-center gap-2 rounded-xl bg-home2-accent px-6 py-3 text-sm font-bold uppercase tracking-wide text-home2-accent-text transition-all hover:opacity-90"
+                className="inline-flex items-center gap-2 rounded-xl border border-black bg-home2-accent px-6 py-3 text-sm font-bold uppercase tracking-wide text-home2-accent-text transition-all hover:opacity-90"
               >
                 View Sample Catalog
                 <FaArrowRight className="text-xs" />
@@ -931,7 +931,7 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
                 <CheckItem>Add to Your Website (Embed Code)</CheckItem>
                 <CheckItem>Install as an App (PWA) &amp; PDF Download</CheckItem>
               </ul>
-              <Link href="/signup" className="w-full py-4 rounded-2xl border-2 border-brand-border font-bold text-sm uppercase tracking-widest text-center transition-all duration-300 hover:border-home2-accent hover:bg-home2-accent hover:text-home2-accent-text hover:shadow-lg hover:shadow-home2-accent/30">
+              <Link href="/signup" className="w-full py-4 rounded-2xl border-2 border-brand-border font-bold text-sm uppercase tracking-widest text-center transition-all duration-300 hover:border-black hover:bg-home2-accent hover:text-home2-accent-text hover:shadow-lg hover:shadow-home2-accent/30">
                 Launch 1 Free Catalog Now
               </Link>
             </div>
@@ -1002,7 +1002,7 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
                     <span>Everything in free plan</span>
                   </li>
                 </ul>
-                <Link href="/signup" className="w-full py-4 rounded-2xl bg-white text-home2-accent-text font-bold text-sm uppercase tracking-widest text-center transition-all duration-300 block shadow-lg hover:bg-home2-accent hover:text-brand-text hover:shadow-xl hover:shadow-black/20">
+                <Link href="/signup" className="w-full py-4 rounded-2xl border border-transparent bg-white text-home2-accent-text font-bold text-sm uppercase tracking-widest text-center transition-all duration-300 block shadow-lg hover:border-black hover:bg-home2-accent hover:text-brand-text hover:shadow-xl hover:shadow-black/20">
                   Unlock Premium Features
                 </Link>
               </div>
@@ -1031,7 +1031,7 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
                   placeholder="Enter your business email..."
                   className="flex-1 bg-transparent border-none text-brand-text placeholder-brand-muted/70 px-5 py-3.5 focus:outline-none text-sm"
                 />
-                <button type="submit" className="bg-home2-accent text-home2-accent-text px-8 py-3.5 rounded-xl font-bold uppercase tracking-wider text-xs hover:opacity-90 transition-all shadow-xl whitespace-nowrap">
+                <button type="submit" className="border border-black bg-home2-accent text-home2-accent-text px-8 py-3.5 rounded-xl font-bold uppercase tracking-wider text-xs hover:opacity-90 transition-all shadow-xl whitespace-nowrap">
                   Get Free Catalog
                 </button>
               </form>
