@@ -2,10 +2,6 @@ import Link from 'next/link';
 import Layout from '@/components/Layout';
 import { InstagramIcon, FacebookIcon } from '@/components/icons';
 
-// No public support inbox exists yet — real channels only: the
-// in-dashboard Support ticket system (existing vendors) and social
-// media (everyone else). Update this if/when a support email address
-// is set up.
 export default function Contact() {
   return (
     <Layout title="Contact Us" description="Get in touch with the Instant Catalog team.">
@@ -31,8 +27,11 @@ export default function Contact() {
           <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
             <h2 className="text-base font-semibold text-gray-900">Everyone else</h2>
             <p className="mt-2 text-sm text-gray-600">
-              Questions before signing up, feedback, or anything else — reach us on social media and we&apos;ll get
-              back to you.
+              Questions before signing up, feedback, or anything else — reach us at{' '}
+              <a href="mailto:admin@instantcatalog.app" className="font-medium text-primary-700 hover:text-primary-800">
+                admin@instantcatalog.app
+              </a>{' '}
+              and we&apos;ll get back to you.
             </p>
             <div className="mt-4 flex items-center gap-3">
               <a

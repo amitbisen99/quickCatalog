@@ -4,7 +4,7 @@ import { SITE_URL } from '@/components/Seo';
 
 // Static marketing pages worth listing — dashboard/admin/auth pages are
 // deliberately excluded (private, transactional, or noindex'd).
-const STATIC_PATHS = ['', '/about', '/contact', '/privacy', '/terms', '/catalog-preview'];
+const STATIC_PATHS = ['', '/about', '/contact', '/privacy', '/terms', '/cancellation-refund', '/catalog-preview'];
 
 function escapeXml(value: string): string {
   return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');

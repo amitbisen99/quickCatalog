@@ -72,6 +72,7 @@ export default function Layout({ title, description, noindex, children }: Layout
           <Link href="/contact" className="hover:text-primary-700">Contact</Link>
           <Link href="/privacy" className="hover:text-primary-700">Privacy Policy</Link>
           <Link href="/terms" className="hover:text-primary-700">Terms of Service</Link>
+          <Link href="/cancellation-refund" className="hover:text-primary-700">Cancellation &amp; Refund</Link>
         </nav>
         <p className="mt-3">© {new Date().getFullYear()} Instant Catalog. All rights reserved.</p>
       </footer>

@@ -1082,6 +1082,7 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
               <ul className="space-y-3 text-sm text-white/50">
                 <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
                 <li><Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
+                <li><Link href="/cancellation-refund" className="hover:text-white transition-colors">Cancellation &amp; Refund</Link></li>
               </ul>
             </div>
           </div>
