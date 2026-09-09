@@ -12,14 +12,17 @@ function UserGuide() {
         Short videos covering everything from your first catalog to sharing it with buyers — in English or Hindi.
       </p>
 
-      <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2">
+      {/* One bar per row (~1050x100px each) instead of a thumbnail grid —
+          easier to scan a list of 8 topics top to bottom than to hunt
+          across two columns. */}
+      <div className="mt-8 mx-auto max-w-[1050px] space-y-4">
         {USER_GUIDE_TOPICS.map((topic) => (
           <Link
             key={topic.slug}
             href={`/dashboard/user-guide/${topic.slug}`}
-            className="group overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+            className="group flex items-center gap-4 rounded-2xl border border-gray-200 bg-white p-3 shadow-sm transition-shadow hover:shadow-md"
           >
-            <div className="relative aspect-video w-full overflow-hidden bg-gray-100">
+            <div className="relative h-20 w-36 shrink-0 overflow-hidden rounded-lg bg-gray-100">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={youtubeThumbnailUrl(topic.video.en)}
@@ -27,14 +30,14 @@ function UserGuide() {
                 className="h-full w-full object-cover"
               />
               <div className="absolute inset-0 flex items-center justify-center bg-black/20 transition-colors group-hover:bg-black/30">
-                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 text-primary-700 shadow-lg transition-transform group-hover:scale-105">
-                  <PlayIcon className="ml-1 h-6 w-6" />
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-primary-700 shadow-lg transition-transform group-hover:scale-105">
+                  <PlayIcon className="ml-0.5 h-3.5 w-3.5" />
                 </span>
               </div>
             </div>
-            <div className="p-4">
-              <h2 className="text-sm font-semibold text-gray-900">{topic.title}</h2>
-              <p className="mt-1 text-xs leading-relaxed text-gray-500">{topic.description}</p>
+            <div className="min-w-0 flex-1">
+              <h2 className="truncate text-sm font-semibold text-gray-900">{topic.title}</h2>
+              <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-gray-500">{topic.description}</p>
             </div>
           </Link>
         ))}
