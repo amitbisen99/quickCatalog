@@ -51,10 +51,19 @@ import {
   FaXmark,
 } from 'react-icons/fa6';
 
-// Marketing homepage. Styling for this page only lives in
-// tailwind.config.js (brand-* colors, float keyframe) and
-// styles/globals.css (.text-gradient, .hero-grid-bg, .feature-tab-*) —
-// none of it is used by the vendor dashboard or auth pages.
+// Marketing homepage — #C7FF01 brand refresh (formerly pages/home2.tsx,
+// promoted here; the pre-refresh version is archived at pages/home-old.tsx).
+// Styling for this page only lives in tailwind.config.js (the home2-accent*
+// tokens — kept under that name rather than renamed to brand-accent, since
+// brand-accent/-light are still used at their original indigo value by
+// catalog-preview.tsx and create-catalog/index.tsx) and styles/globals.css
+// (.home2-text-gradient, .home2-hero-grid-bg, .home2-feature-tab-active).
+// #C7FF01 is very light/high-luminance, so it only appears as a
+// fill/border/shadow/gradient color — anywhere it would sit under on-white
+// *text* (links, icon badges, button labels) uses home2-accent-text
+// (#4D6600, a dark olive shade of the same hue) instead, and anywhere text
+// sat on a solid accent-colored fill it uses dark text
+// (brand-text/home2-accent-text) rather than white.
 
 type FeatureTabId = 'builder' | 'branding' | 'embed' | 'sharing' | 'analytics' | 'pwa';
 
@@ -271,28 +280,28 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
 
       {/* Navigation */}
       <nav className="fixed top-5 left-1/2 z-50 w-[92%] max-w-7xl -translate-x-1/2">
-        <div className="flex items-center justify-between rounded-full border border-brand-border bg-white/90 px-6 py-3 shadow-lg shadow-brand-accent/5 backdrop-blur-xl">
+        <div className="flex items-center justify-between rounded-full border border-brand-border bg-white/90 px-6 py-3 shadow-lg shadow-home2-accent/5 backdrop-blur-xl">
           <div className="flex items-center gap-8">
             <Link href="/" className="text-xl font-black tracking-tight flex items-center gap-2 text-brand-text">
-              <span className="w-7 h-7 bg-brand-accent rounded-lg flex items-center justify-center">
-                <FaLayerGroup className="text-white text-xs" />
+              <span className="w-7 h-7 bg-home2-accent rounded-lg flex items-center justify-center">
+                <FaLayerGroup className="text-home2-accent-text text-xs" />
               </span>
               Instant Catalog
             </Link>
             <div className="hidden md:flex items-center gap-7 text-sm font-semibold text-brand-muted">
-              <a href="#problem-solution" className="hover:text-brand-accent transition-colors">Problem &amp; Solution</a>
-              <a href="#features" className="hover:text-brand-accent transition-colors">Features</a>
-              <a href="#benefits" className="hover:text-brand-accent transition-colors">Benefits</a>
-              <a href="#who" className="hover:text-brand-accent transition-colors">Who It&apos;s For</a>
-              <a href="#comparison" className="hover:text-brand-accent transition-colors">Comparison</a>
-              <a href="#pricing" className="hover:text-brand-accent transition-colors">Pricing</a>
+              <a href="#problem-solution" className="hover:text-home2-accent-text transition-colors">Problem &amp; Solution</a>
+              <a href="#features" className="hover:text-home2-accent-text transition-colors">Features</a>
+              <a href="#benefits" className="hover:text-home2-accent-text transition-colors">Benefits</a>
+              <a href="#who" className="hover:text-home2-accent-text transition-colors">Who It&apos;s For</a>
+              <a href="#comparison" className="hover:text-home2-accent-text transition-colors">Comparison</a>
+              <a href="#pricing" className="hover:text-home2-accent-text transition-colors">Pricing</a>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <Link href="/login" className="hidden text-sm font-semibold text-brand-muted transition-colors hover:text-brand-text md:block px-4 py-2">
               Log In
             </Link>
-            <Link href="/signup" className="hidden md:inline-block bg-brand-accent text-white px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-indigo-700 transition-all shadow-md shadow-brand-accent/30">
+            <Link href="/signup" className="hidden md:inline-block border border-black bg-home2-accent text-home2-accent-text px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-[#a3cc10] hover:text-brand-text transition-all shadow-md shadow-home2-accent/30">
               Start Free
             </Link>
             <button
@@ -308,7 +317,7 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
         </div>
 
         {mobileNavOpen && (
-          <div className="mt-2 flex flex-col gap-1 rounded-2xl border border-brand-border bg-white/95 p-4 shadow-lg shadow-brand-accent/5 backdrop-blur-xl md:hidden">
+          <div className="mt-2 flex flex-col gap-1 rounded-2xl border border-brand-border bg-white/95 p-4 shadow-lg shadow-home2-accent/5 backdrop-blur-xl md:hidden">
             <a href="#problem-solution" onClick={() => setMobileNavOpen(false)} className="rounded-lg px-3 py-2.5 text-sm font-semibold text-brand-muted hover:bg-brand-border/40 hover:text-brand-text">
               Problem &amp; Solution
             </a>
@@ -335,8 +344,8 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
       </nav>
 
       {/* Hero Section */}
-      <header className="relative min-h-[820px] flex items-center pt-36 pb-20 px-6 overflow-hidden hero-grid-bg">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-gradient-to-b from-brand-accent/10 to-transparent rounded-full blur-3xl pointer-events-none"></div>
+      <header className="relative min-h-[820px] flex items-center pt-36 pb-20 px-6 overflow-hidden home2-hero-grid-bg">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-gradient-to-b from-home2-accent/10 to-transparent rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute -top-20 -right-20 w-72 h-72 bg-brand-magenta/8 rounded-full blur-3xl pointer-events-none"></div>
 
         <div className="max-w-7xl mx-auto w-full relative z-10">
@@ -344,7 +353,7 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter leading-[1.1]">
               Turn your product Excel into{' '}
               <br />
-              <span className="text-gradient">interactive sales catalog</span>—that close deals.
+              <span className="home2-text-gradient">interactive sales catalog</span>—that close deals.
             </h1>
             <p className="text-lg md:text-xl text-brand-muted max-w-2xl mx-auto leading-relaxed">
               Stop sending outdated PDFs and messy photo attachments. Upload your Excel file, choose a mobile-ready layout, and capture inbound buyer inquiries in under 10 minutes.
@@ -356,9 +365,9 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
                 onChange={(e) => setCtaEmail(e.target.value)}
                 placeholder="Enter your email"
                 required
-                className="flex-1 rounded-2xl border border-brand-border bg-white px-5 py-4 text-sm text-brand-text placeholder-brand-muted/70 shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-accent/30"
+                className="flex-1 rounded-2xl border border-brand-border bg-white px-5 py-4 text-sm text-brand-text placeholder-brand-muted/70 shadow-sm focus:outline-none focus:ring-2 focus:ring-home2-accent/30"
               />
-              <button type="submit" className="bg-brand-accent text-white px-8 py-4 rounded-2xl font-bold uppercase tracking-wider text-sm hover:bg-indigo-700 transition-all shadow-xl shadow-brand-accent/25 whitespace-nowrap">
+              <button type="submit" className="border border-black bg-home2-accent text-home2-accent-text px-8 py-4 rounded-2xl font-bold uppercase tracking-wider text-sm hover:bg-[#a3cc10] hover:text-brand-text transition-all shadow-xl shadow-home2-accent/25 whitespace-nowrap">
                 Create First Catalog Free
               </button>
             </form>
@@ -366,7 +375,7 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
               <Link
                 href="/public/home-living-collection"
                 target="_blank"
-                className="text-sm font-semibold text-brand-muted underline underline-offset-4 hover:text-brand-accent transition-colors"
+                className="text-sm font-semibold text-brand-muted underline underline-offset-4 hover:text-home2-accent-text transition-colors"
               >
                 View Sample Catalog
               </Link>
@@ -376,8 +385,8 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
 
           {/* Hero Image */}
           <div className="mt-16 relative max-w-5xl mx-auto">
-            <div className="absolute -inset-4 bg-gradient-to-r from-brand-accent/20 via-brand-magenta/10 to-brand-accent/20 rounded-[3rem] blur-2xl opacity-60"></div>
-            <div className="relative rounded-[2rem] overflow-hidden border border-brand-border shadow-2xl shadow-brand-accent/10 bg-white">
+            <div className="absolute -inset-4 bg-gradient-to-r from-home2-accent/20 via-brand-magenta/10 to-home2-accent/20 rounded-[3rem] blur-2xl opacity-60"></div>
+            <div className="relative rounded-[2rem] overflow-hidden border border-brand-border shadow-2xl shadow-home2-accent/10 bg-white">
               <Image
                 className="w-full h-auto max-h-[460px] object-cover"
                 src="/screenshots/hero.webp"
@@ -398,7 +407,7 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
               </div>
             </div>
             <div className="absolute -bottom-5 -right-4 bg-white border border-brand-border px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3" style={{ animation: 'float 4s ease-in-out infinite 2s' }}>
-              <div className="w-9 h-9 rounded-full bg-brand-accent-light flex items-center justify-center text-brand-accent">
+              <div className="w-9 h-9 rounded-full bg-home2-accent-light flex items-center justify-center text-home2-accent-text">
                 <FaUsers className="text-sm" />
               </div>
               <div>
@@ -416,7 +425,7 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
           <div className="flex flex-col items-center gap-y-8 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-x-24">
             {TRUST_STATS.map((stat) => (
               <div key={stat.label} className="flex items-center gap-4">
-                <span className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl bg-brand-accent-light text-brand-accent">
+                <span className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl bg-home2-accent-light text-home2-accent-text">
                   <stat.icon className="text-2xl" />
                 </span>
                 <div>
@@ -433,13 +442,13 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
       <section id="problem-solution" className="py-28 px-6 bg-brand-bg">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-accent-light text-brand-accent text-xs font-bold uppercase tracking-widest mb-4">
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-home2-accent-light text-home2-accent-text text-xs font-bold uppercase tracking-widest mb-4">
               <FaCircleInfo className="text-[10px]" />
               Problem &amp; Solution
             </span>
             <h2 className="text-4xl md:text-5xl font-black tracking-tighter mb-5">
               Still Doing It the Old Way?<br />
-              <span className="text-gradient">Instant Catalog</span> Fixes That.
+              <span className="home2-text-gradient">Instant Catalog</span> Fixes That.
             </h2>
             <p className="text-brand-muted max-w-xl mx-auto">
               See how businesses replace messy, manual catalog work with one simple system.
@@ -472,31 +481,31 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
             </div>
 
             {/* The Solution */}
-            <div className="relative flex flex-col overflow-hidden rounded-3xl p-8 shadow-2xl shadow-brand-accent/20 bg-[radial-gradient(130%_130%_at_15%_10%,_#8b7cf6_0%,_#6d5ef0_50%,_#4f46e5_100%)]">
-              <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
-              <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/4 pointer-events-none"></div>
+            <div className="relative flex flex-col overflow-hidden rounded-3xl p-8 shadow-2xl shadow-home2-accent/20 bg-[radial-gradient(130%_130%_at_15%_10%,_#E8FF8A_0%,_#C7FF01_55%,_#8FB800_100%)]">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-black/5 rounded-full -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
+              <div className="absolute bottom-0 left-0 w-32 h-32 bg-black/5 rounded-full translate-y-1/2 -translate-x-1/4 pointer-events-none"></div>
               <div className="relative z-10 flex-1">
                 <div className="flex items-center gap-3 mb-6">
-                  <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-white/15 text-white">
+                  <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-black/10 text-brand-text">
                     <FaLightbulb />
                   </span>
                   <div>
-                    <h3 className="text-xl font-black tracking-tight text-white">The Solution</h3>
-                    <p className="text-xs text-white/70">Four simple steps</p>
+                    <h3 className="text-xl font-black tracking-tight text-brand-text">The Solution</h3>
+                    <p className="text-xs text-brand-text/70">Four simple steps</p>
                   </div>
                 </div>
                 <div className="space-y-2.5">
                   {SOLUTION_STEPS.map((step) => (
                     <div
                       key={step.title}
-                      className="flex items-center gap-3.5 rounded-2xl bg-white/10 px-4 py-3.5 ring-1 ring-white/10 transition-colors hover:bg-white/15"
+                      className="flex items-center gap-3.5 rounded-2xl bg-black/5 px-4 py-3.5 ring-1 ring-black/5 transition-colors hover:bg-black/10"
                     >
-                      <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-white/15 text-white">
+                      <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-black/10 text-brand-text">
                         <step.icon className="text-sm" />
                       </span>
                       <div className="min-w-0">
-                        <p className="text-sm font-bold text-white">{step.title}</p>
-                        <p className="text-xs leading-snug text-white/70">{step.body}</p>
+                        <p className="text-sm font-bold text-brand-text">{step.title}</p>
+                        <p className="text-xs leading-snug text-brand-text/70">{step.body}</p>
                       </div>
                     </div>
                   ))}
@@ -504,7 +513,7 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
               </div>
               <Link
                 href="/signup"
-                className="relative z-10 mt-8 flex w-full items-center justify-center gap-2 rounded-2xl bg-white py-3.5 text-center text-sm font-bold uppercase tracking-widest text-brand-accent shadow-lg transition-all hover:bg-indigo-50"
+                className="relative z-10 mt-8 flex w-full items-center justify-center gap-2 rounded-2xl bg-white py-3.5 text-center text-sm font-bold uppercase tracking-widest text-home2-accent-text shadow-lg transition-all hover:bg-home2-accent-light"
               >
                 Start Building Free
                 <FaArrowRight className="text-xs" />
@@ -535,8 +544,8 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
       <section id="features" className="py-28 px-6 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <span className="inline-block px-4 py-1.5 rounded-full bg-brand-accent-light text-brand-accent text-xs font-bold uppercase tracking-widest mb-4">Features</span>
-            <h2 className="text-3xl md:text-4xl font-black tracking-tighter mb-5">Everything You Need to <span className="text-gradient">Sell Digitally</span></h2>
+            <span className="inline-block px-4 py-1.5 rounded-full bg-home2-accent-light text-home2-accent-text text-xs font-bold uppercase tracking-widest mb-4">Features</span>
+            <h2 className="text-3xl md:text-4xl font-black tracking-tighter mb-5">Everything You Need to <span className="home2-text-gradient">Sell Digitally</span></h2>
             <p className="text-brand-muted max-w-xl mx-auto">Powerful tools designed for speed, simplicity, and impact.</p>
           </div>
 
@@ -547,7 +556,7 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${
-                  activeTab === tab.id ? 'feature-tab-active' : 'feature-tab-inactive border border-brand-border'
+                  activeTab === tab.id ? 'home2-feature-tab-active' : 'feature-tab-inactive border border-brand-border'
                 }`}
               >
                 <tab.icon className="mr-2 inline" />
@@ -560,7 +569,7 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
           {activeTab === 'builder' && (
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div className="space-y-6">
-                <div className="w-14 h-14 rounded-2xl bg-brand-accent-light flex items-center justify-center text-brand-accent text-xl">
+                <div className="w-14 h-14 rounded-2xl bg-home2-accent-light flex items-center justify-center text-home2-accent-text text-xl">
                   <FaPenRuler />
                 </div>
                 <h3 className="text-3xl font-black tracking-tight">Simple Catalog Builder</h3>
@@ -571,7 +580,7 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
                   <CheckItem>Custom logo, banner &amp; currency</CheckItem>
                 </ul>
               </div>
-              <div className="rounded-3xl overflow-hidden border border-brand-border shadow-xl shadow-brand-accent/5 bg-brand-bg">
+              <div className="rounded-3xl overflow-hidden border border-brand-border shadow-xl shadow-home2-accent/5 bg-brand-bg">
                 <Image
                   className="w-full h-auto max-h-80 object-cover"
                   src="/screenshots/builder.webp"
@@ -690,7 +699,7 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
           {activeTab === 'pwa' && (
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div className="space-y-6">
-                <div className="w-14 h-14 rounded-2xl bg-brand-accent-light flex items-center justify-center text-brand-accent text-xl">
+                <div className="w-14 h-14 rounded-2xl bg-home2-accent-light flex items-center justify-center text-home2-accent-text text-xl">
                   <FaMobileScreen />
                 </div>
                 <h3 className="text-3xl font-black tracking-tight">App-Like Experience with PWA</h3>
@@ -720,13 +729,13 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <span className="inline-block px-4 py-1.5 rounded-full bg-brand-magenta-light text-brand-magenta text-xs font-bold uppercase tracking-widest mb-4">Why Instant Catalog</span>
-            <h2 className="text-3xl md:text-4xl font-black tracking-tighter mb-5">Turn Casual Product List Into <span className="text-gradient">Active Inquiries &amp; Sales</span></h2>
+            <h2 className="text-3xl md:text-4xl font-black tracking-tighter mb-5">Turn Casual Product List Into <span className="home2-text-gradient">Active Inquiries &amp; Sales</span></h2>
             <p className="text-brand-muted max-w-xl mx-auto">Real outcomes for real businesses — not just features, but results.</p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="bg-white rounded-3xl p-8 border border-brand-border hover:shadow-xl hover:shadow-brand-accent/5 hover:-translate-y-1 transition-all duration-300 group">
-              <div className="w-12 h-12 rounded-2xl bg-brand-accent-light flex items-center justify-center text-brand-accent mb-6 group-hover:scale-110 transition-transform">
+            <div className="bg-white rounded-3xl p-8 border border-brand-border hover:shadow-xl hover:shadow-home2-accent/5 hover:-translate-y-1 transition-all duration-300 group">
+              <div className="w-12 h-12 rounded-2xl bg-home2-accent-light flex items-center justify-center text-home2-accent-text mb-6 group-hover:scale-110 transition-transform">
                 <FaGaugeHigh className="text-lg" />
               </div>
               <h3 className="text-xl font-bold mb-3">Launch in Minutes</h3>
@@ -757,20 +766,20 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
               <p className="text-brand-muted text-sm leading-relaxed">Interactive product pages with an enquiry cart, image galleries, and video support keep visitors engaged and turn browsers into buyers.</p>
             </div>
 
-            <div className="bg-white rounded-3xl p-8 border border-brand-border hover:shadow-xl hover:shadow-brand-accent/5 hover:-translate-y-1 transition-all duration-300 group">
-              <div className="w-12 h-12 rounded-2xl bg-brand-accent-light flex items-center justify-center text-brand-accent mb-6 group-hover:scale-110 transition-transform">
+            <div className="bg-white rounded-3xl p-8 border border-brand-border hover:shadow-xl hover:shadow-home2-accent/5 hover:-translate-y-1 transition-all duration-300 group">
+              <div className="w-12 h-12 rounded-2xl bg-home2-accent-light flex items-center justify-center text-home2-accent-text mb-6 group-hover:scale-110 transition-transform">
                 <FaShieldHalved className="text-lg" />
               </div>
               <h3 className="text-xl font-bold mb-3">Built for Multiple Catalogs</h3>
               <p className="text-brand-muted text-sm leading-relaxed">Run separate catalogs for different product lines or customer segments, each with its own template, link, and QR code.</p>
             </div>
 
-            <div className="bg-gradient-to-br from-brand-accent to-indigo-700 rounded-3xl p-8 hover:-translate-y-1 transition-all duration-300 group">
-              <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform">
+            <div className="bg-gradient-to-br from-home2-accent to-home2-accent-dark rounded-3xl p-8 hover:-translate-y-1 transition-all duration-300 group">
+              <div className="w-12 h-12 rounded-2xl bg-black/10 flex items-center justify-center text-brand-text mb-6 group-hover:scale-110 transition-transform">
                 <FaInfinity className="text-lg" />
               </div>
-              <h3 className="text-xl font-bold mb-3 text-white">Always Up-to-Date</h3>
-              <p className="text-white/80 text-sm leading-relaxed">One update and every link instantly reflects your changes. No reprinting, no resending, no outdated files floating around.</p>
+              <h3 className="text-xl font-bold mb-3 text-brand-text">Always Up-to-Date</h3>
+              <p className="text-brand-text/80 text-sm leading-relaxed">One update and every link instantly reflects your changes. No reprinting, no resending, no outdated files floating around.</p>
             </div>
           </div>
         </div>
@@ -781,7 +790,7 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <span className="inline-block px-4 py-1.5 rounded-full bg-brand-green-light text-brand-green text-xs font-bold uppercase tracking-widest mb-4">Who It&apos;s For</span>
-            <h2 className="text-3xl md:text-4xl font-black tracking-tighter mb-5">Made for Every Business That <span className="text-gradient">Sells Products</span></h2>
+            <h2 className="text-3xl md:text-4xl font-black tracking-tighter mb-5">Made for Every Business That <span className="home2-text-gradient">Sells Products</span></h2>
             <p className="text-brand-muted max-w-xl mx-auto">From solo entrepreneurs to large distributors — Instant Catalog adapts to your workflow.</p>
           </div>
 
@@ -798,7 +807,7 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
                     onClick={() => setActiveWho(item.id)}
                     className={`border-l-2 px-4 py-3 text-left text-sm font-semibold transition-colors ${
                       active
-                        ? 'border-brand-accent text-brand-accent'
+                        ? 'border-home2-accent text-home2-accent-text'
                         : 'border-transparent text-brand-muted hover:border-brand-border hover:text-brand-text'
                     }`}
                   >
@@ -815,7 +824,7 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
               <Link
                 href={`/public/${activeWhoItem.catalogSlug}`}
                 target="_blank"
-                className="inline-flex items-center gap-2 rounded-xl bg-brand-accent px-6 py-3 text-sm font-bold uppercase tracking-wide text-white transition-all hover:bg-indigo-700"
+                className="inline-flex items-center gap-2 rounded-xl border border-black bg-home2-accent px-6 py-3 text-sm font-bold uppercase tracking-wide text-home2-accent-text transition-all hover:bg-[#a3cc10] hover:text-brand-text"
               >
                 View Sample Catalog
                 <FaArrowRight className="text-xs" />
@@ -832,7 +841,7 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
                 { icon: FaSeedling, label: 'Agriculture & Organic' },
               ].map(({ icon: Icon, label }) => (
                 <span key={label} className="px-4 py-2 rounded-full bg-white border border-brand-border text-sm font-medium text-brand-text flex items-center gap-2">
-                  <Icon className="text-brand-accent text-xs" />
+                  <Icon className="text-home2-accent-text text-xs" />
                   {label}
                 </span>
               ))}
@@ -845,8 +854,8 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
       <section id="comparison" className="py-28 px-6 bg-brand-bg">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
-            <span className="inline-block px-4 py-1.5 rounded-full bg-brand-accent-light text-brand-accent text-xs font-bold uppercase tracking-widest mb-4">Comparison</span>
-            <h2 className="text-3xl md:text-4xl font-black tracking-tighter mb-5">Instant Catalog vs. <span className="text-gradient">The Alternatives</span></h2>
+            <span className="inline-block px-4 py-1.5 rounded-full bg-home2-accent-light text-home2-accent-text text-xs font-bold uppercase tracking-widest mb-4">Comparison</span>
+            <h2 className="text-3xl md:text-4xl font-black tracking-tighter mb-5">Instant Catalog vs. <span className="home2-text-gradient">The Alternatives</span></h2>
             <p className="text-brand-muted max-w-2xl mx-auto">
               Static PDFs frustrate buyers. E-commerce sites take weeks to build. Instant Catalog gives you the
               perfect balance of speed, interaction, and simplicity.
@@ -867,7 +876,7 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
                     <th className="w-1/4 bg-white px-6 py-5 text-center text-sm font-bold text-brand-muted">
                       <FaCartShopping className="mr-1.5 text-brand-muted" /> Traditional E-commerce
                     </th>
-                    <th className="w-1/4 bg-brand-accent px-6 py-5 text-center text-sm font-bold text-white">
+                    <th className="w-1/4 bg-home2-accent px-6 py-5 text-center text-sm font-bold text-home2-accent-text">
                       <FaBolt className="mr-1.5" /> Instant Catalog
                     </th>
                   </tr>
@@ -878,7 +887,7 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
                       <td className="px-6 py-5 text-sm font-semibold text-brand-text">{row.feature}</td>
                       <td className="px-6 py-5 text-center text-sm text-brand-muted">{row.pdf}</td>
                       <td className="px-6 py-5 text-center text-sm text-brand-muted">{row.ecommerce}</td>
-                      <td className="bg-brand-accent-light/50 px-6 py-5 text-center text-sm font-semibold text-brand-accent">
+                      <td className="bg-home2-accent-light/50 px-6 py-5 text-center text-sm font-semibold text-home2-accent-text">
                         <FaCircleCheck className="mr-1.5" />
                         {row.instantCatalog}
                       </td>
@@ -895,8 +904,8 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
       <section id="pricing" className="py-28 px-6 bg-white">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
-            <span className="inline-block px-4 py-1.5 rounded-full bg-brand-accent-light text-brand-accent text-xs font-bold uppercase tracking-widest mb-4">Pricing</span>
-            <h2 className="text-3xl md:text-4xl font-black tracking-tighter mb-5">Simple Pricing. <span className="text-gradient">Powerful Features</span></h2>
+            <span className="inline-block px-4 py-1.5 rounded-full bg-home2-accent-light text-home2-accent-text text-xs font-bold uppercase tracking-widest mb-4">Pricing</span>
+            <h2 className="text-3xl md:text-4xl font-black tracking-tighter mb-5">Simple Pricing. <span className="home2-text-gradient">Powerful Features</span></h2>
             <p className="text-brand-muted max-w-lg mx-auto">Two straightforward plans. Cancel anytime.</p>
           </div>
 
@@ -920,33 +929,33 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
                 <CheckItem>Add to Your Website (Embed Code)</CheckItem>
                 <CheckItem>Install as an App (PWA) &amp; PDF Download</CheckItem>
               </ul>
-              <Link href="/signup" className="w-full py-4 rounded-2xl border-2 border-brand-border font-bold text-sm uppercase tracking-widest text-center transition-all duration-300 hover:border-brand-accent hover:bg-brand-accent hover:text-white hover:shadow-lg hover:shadow-brand-accent/30">
+              <Link href="/signup" className="w-full py-4 rounded-2xl border-2 border-brand-border font-bold text-sm uppercase tracking-widest text-center transition-all duration-300 hover:border-black hover:bg-[#a3cc10] hover:text-brand-text hover:shadow-lg hover:shadow-home2-accent/30">
                 Launch 1 Free Catalog Now
               </Link>
             </div>
 
             {/* Premium Plan */}
-            <div className="rounded-[2rem] p-9 flex flex-col shadow-2xl shadow-brand-accent/20 relative overflow-hidden bg-[radial-gradient(130%_130%_at_15%_10%,_#8b7cf6_0%,_#6d5ef0_50%,_#4f46e5_100%)]">
-              <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/4"></div>
-              <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/4"></div>
+            <div className="rounded-[2rem] p-9 flex flex-col shadow-2xl shadow-home2-accent/20 relative overflow-hidden bg-[radial-gradient(130%_130%_at_15%_10%,_#E8FF8A_0%,_#C7FF01_55%,_#8FB800_100%)]">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-black/5 rounded-full -translate-y-1/2 translate-x-1/4"></div>
+              <div className="absolute bottom-0 left-0 w-32 h-32 bg-black/5 rounded-full translate-y-1/2 -translate-x-1/4"></div>
               <div className="relative z-10 flex flex-1 flex-col">
                 <div className="flex items-center gap-3 mb-5">
-                  <div className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center text-white flex-shrink-0">
+                  <div className="w-11 h-11 rounded-xl bg-black/10 flex items-center justify-center text-brand-text flex-shrink-0">
                     <FaRocket />
                   </div>
-                  <h3 className="text-2xl font-black text-white">Premium</h3>
+                  <h3 className="text-2xl font-black text-brand-text">Premium</h3>
                 </div>
                 <div className="flex items-baseline gap-1.5 mb-8">
                   {premiumPrice ? (
                     <>
-                      <span className="text-white" style={{ fontWeight: 800, fontSize: '44px' }}>
+                      <span className="text-brand-text" style={{ fontWeight: 800, fontSize: '44px' }}>
                         {currencySymbol(premiumPrice.currency)}
                         {premiumPrice.amount}
                       </span>
-                      <span className="text-white/70 text-sm font-semibold">Per Year</span>
+                      <span className="text-brand-text/70 text-sm font-semibold">Per Year</span>
                     </>
                   ) : (
-                    <span className="text-white/40" style={{ fontWeight: 800, fontSize: '44px' }}>···</span>
+                    <span className="text-brand-text/40" style={{ fontWeight: 800, fontSize: '44px' }}>···</span>
                   )}
                 </div>
                 {/* Free Setup Help is the one line most likely to convert a
@@ -956,7 +965,7 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
                     carries the full pitch as a hover tooltip so the headline
                     itself can stay short and scannable. */}
                 <div className="mb-5 flex items-center gap-3 rounded-2xl border border-black/10 bg-white p-4">
-                  <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-brand-accent-light text-brand-accent">
+                  <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-home2-accent-light text-home2-accent-text">
                     <FaHeadset />
                   </span>
                   <p className="flex-1 font-bold text-brand-text" style={{ fontSize: 'calc(0.875rem + 4px)' }}>
@@ -970,28 +979,28 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
                   </span>
                 </div>
                 <ul className="space-y-4 mb-10 flex-1">
-                  <li className="flex items-start gap-3 text-sm text-white">
-                    <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-white flex-shrink-0 mt-0.5"><FaCheck className="text-[9px]" /></span>
+                  <li className="flex items-start gap-3 text-sm text-brand-text">
+                    <span className="w-5 h-5 rounded-full bg-black/10 flex items-center justify-center text-brand-text flex-shrink-0 mt-0.5"><FaCheck className="text-[9px]" /></span>
                     <span>Unlimited catalogs</span>
                   </li>
-                  <li className="flex items-start gap-3 text-sm text-white">
-                    <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-white flex-shrink-0 mt-0.5"><FaCheck className="text-[9px]" /></span>
+                  <li className="flex items-start gap-3 text-sm text-brand-text">
+                    <span className="w-5 h-5 rounded-full bg-black/10 flex items-center justify-center text-brand-text flex-shrink-0 mt-0.5"><FaCheck className="text-[9px]" /></span>
                     <span>Unlimited products</span>
                   </li>
-                  <li className="flex items-start gap-3 text-sm text-white">
-                    <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-white flex-shrink-0 mt-0.5"><FaCheck className="text-[9px]" /></span>
+                  <li className="flex items-start gap-3 text-sm text-brand-text">
+                    <span className="w-5 h-5 rounded-full bg-black/10 flex items-center justify-center text-brand-text flex-shrink-0 mt-0.5"><FaCheck className="text-[9px]" /></span>
                     <span>Your Own Branding</span>
                   </li>
-                  <li className="flex items-start gap-3 text-sm text-white">
-                    <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-white flex-shrink-0 mt-0.5"><FaCheck className="text-[9px]" /></span>
+                  <li className="flex items-start gap-3 text-sm text-brand-text">
+                    <span className="w-5 h-5 rounded-full bg-black/10 flex items-center justify-center text-brand-text flex-shrink-0 mt-0.5"><FaCheck className="text-[9px]" /></span>
                     <span>Priority support</span>
                   </li>
-                  <li className="flex items-start gap-3 text-sm text-white">
-                    <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-white flex-shrink-0 mt-0.5"><FaCheck className="text-[9px]" /></span>
+                  <li className="flex items-start gap-3 text-sm text-brand-text">
+                    <span className="w-5 h-5 rounded-full bg-black/10 flex items-center justify-center text-brand-text flex-shrink-0 mt-0.5"><FaCheck className="text-[9px]" /></span>
                     <span>Everything in free plan</span>
                   </li>
                 </ul>
-                <Link href="/signup" className="w-full py-4 rounded-2xl bg-white text-brand-accent font-bold text-sm uppercase tracking-widest text-center transition-all duration-300 block shadow-lg hover:bg-brand-accent hover:text-white hover:shadow-xl hover:shadow-black/20">
+                <Link href="/signup" className="w-full py-4 rounded-2xl border border-transparent bg-white text-home2-accent-text font-bold text-sm uppercase tracking-widest text-center transition-all duration-300 block shadow-lg hover:border-black hover:bg-[#a3cc10] hover:text-brand-text hover:shadow-xl hover:shadow-black/20">
                   Unlock Premium Features
                 </Link>
               </div>
@@ -1008,33 +1017,33 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <Image className="object-cover" src="/images/cta-gradient-bg.webp" alt="" fill sizes="100vw" />
             </div>
-            <div className="absolute inset-0 bg-brand-accent/80 backdrop-blur-sm"></div>
+            <div className="absolute inset-0 bg-home2-accent/80 backdrop-blur-sm"></div>
             <div className="relative z-10 text-center py-24 px-8 space-y-8">
-              <h2 className="text-5xl md:text-6xl font-black tracking-tighter text-white leading-tight">Turn Your Product Range<br />Into a Sales Tool - Free</h2>
-              <p className="text-white/80 text-lg max-w-lg mx-auto">Join businesses already using Instant Catalog to sell smarter and reach more customers.</p>
-              <form onSubmit={handleCtaSubmit} className="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto bg-white/15 p-2.5 rounded-2xl backdrop-blur-xl border border-white/20">
+              <h2 className="text-5xl md:text-6xl font-black tracking-tighter text-brand-text leading-tight">Turn Your Product Range<br />Into a Sales Tool - Free</h2>
+              <p className="text-brand-text/80 text-lg max-w-lg mx-auto">Join businesses already using Instant Catalog to sell smarter and reach more customers.</p>
+              <form onSubmit={handleCtaSubmit} className="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto bg-white p-2.5 rounded-2xl shadow-xl border border-black/5">
                 <input
                   type="email"
                   value={ctaEmail}
                   onChange={(e) => setCtaEmail(e.target.value)}
                   placeholder="Enter your business email..."
-                  className="flex-1 bg-transparent border-none text-white placeholder-white/50 px-5 py-3.5 focus:outline-none text-sm"
+                  className="flex-1 bg-transparent border-none text-brand-text placeholder-brand-muted/70 px-5 py-3.5 focus:outline-none text-sm"
                 />
-                <button type="submit" className="bg-white text-brand-accent px-8 py-3.5 rounded-xl font-bold uppercase tracking-wider text-xs hover:bg-indigo-50 transition-all shadow-xl whitespace-nowrap">
+                <button type="submit" className="border border-black bg-home2-accent text-home2-accent-text px-8 py-3.5 rounded-xl font-bold uppercase tracking-wider text-xs hover:bg-[#a3cc10] hover:text-brand-text transition-all shadow-xl whitespace-nowrap">
                   Get Free Catalog
                 </button>
               </form>
-              <div className="flex items-center justify-center gap-8 text-xs font-semibold uppercase tracking-widest text-white/60">
+              <div className="flex items-center justify-center gap-8 text-xs font-semibold uppercase tracking-widest text-brand-text/60">
                 <div className="flex items-center gap-2">
                   <FaCheck />
                   Free Forever Plan
                 </div>
-                <div className="w-1 h-1 bg-white/30 rounded-full"></div>
+                <div className="w-1 h-1 bg-brand-text/30 rounded-full"></div>
                 <div className="flex items-center gap-2">
                   <FaCheck />
                   No Credit Card
                 </div>
-                <div className="w-1 h-1 bg-white/30 rounded-full hidden sm:block"></div>
+                <div className="w-1 h-1 bg-brand-text/30 rounded-full hidden sm:block"></div>
                 <div className="hidden sm:flex items-center gap-2">
                   <FaCheck />
                   Setup in Minutes
@@ -1051,8 +1060,8 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-12 mb-16">
             <div className="col-span-2 lg:col-span-2">
               <Link href="/" className="text-2xl font-black tracking-tight flex items-center gap-2 text-white mb-5">
-                <span className="w-8 h-8 bg-brand-accent rounded-lg flex items-center justify-center">
-                  <FaLayerGroup className="text-white text-sm" />
+                <span className="w-8 h-8 bg-home2-accent rounded-lg flex items-center justify-center">
+                  <FaLayerGroup className="text-home2-accent-text text-sm" />
                 </span>
                 Instant Catalog
               </Link>
