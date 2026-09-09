@@ -26,7 +26,6 @@ import {
   FaGlobe,
   FaHandPointer,
   FaHeadset,
-  FaHeart,
   FaHourglassHalf,
   FaInbox,
   FaInfinity,
@@ -1095,11 +1094,8 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
               </ul>
             </div>
           </div>
-          <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="pt-8 border-t border-white/10 flex justify-center items-center">
             <p className="text-white/30 text-xs">© {new Date().getFullYear()} Instant Catalog. All rights reserved.</p>
-            <p className="text-white/20 text-xs">
-              Crafted with <FaHeart className="text-brand-magenta/60 mx-1" /> for businesses that want to grow.
-            </p>
           </div>
         </div>
       </footer>
