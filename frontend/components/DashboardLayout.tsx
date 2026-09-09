@@ -20,6 +20,7 @@ import {
   LayoutIcon,
   DotsIcon,
   XIcon,
+  BookOpenIcon,
 } from '@/components/icons';
 
 // Full nav, used as-is by the desktop sidebar.
@@ -45,6 +46,7 @@ const NAV_GROUPS: { label: string | null; items: { label: string; href: string; 
   {
     label: null,
     items: [
+      { label: 'User Guide', href: '/dashboard/user-guide', icon: BookOpenIcon },
       { label: 'Support', href: '/dashboard/support', icon: HelpIcon },
       { label: 'Settings', href: '/dashboard/settings', icon: SlidersIcon },
     ],
@@ -79,6 +81,7 @@ const MORE_GROUPS: { label: string | null; items: { label: string; href: string;
   {
     label: null,
     items: [
+      { label: 'User Guide', href: '/dashboard/user-guide', icon: BookOpenIcon },
       { label: 'Support', href: '/dashboard/support', icon: HelpIcon },
       { label: 'Settings', href: '/dashboard/settings', icon: SlidersIcon },
     ],

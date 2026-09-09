@@ -432,3 +432,20 @@ export function CodeIcon(props: IconProps) {
     </svg>
   );
 }
+
+export function PlayIcon(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+      <path d="M8 5.14v13.72a1 1 0 0 0 1.5.87l11-6.86a1 1 0 0 0 0-1.74l-11-6.86A1 1 0 0 0 8 5.14Z" />
+    </svg>
+  );
+}
+
+export function BookOpenIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M12 6.5c-1.5-1.2-3.6-1.8-6.5-1.8-.6 0-1 .45-1 1v11.5c0 .55.45 1 1 1 2.9 0 5 .6 6.5 1.8 1.5-1.2 3.6-1.8 6.5-1.8.55 0 1-.45 1-1V5.7c0-.55-.4-1-1-1-2.9 0-5 .6-6.5 1.8Z" />
+      <path d="M12 6.5v13" />
+    </svg>
+  );
+}
