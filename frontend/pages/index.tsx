@@ -388,10 +388,10 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
             <div className="relative rounded-[2rem] overflow-hidden border border-brand-border shadow-2xl shadow-home2-accent/10 bg-white">
               <Image
                 className="w-full h-auto max-h-[460px] object-cover"
-                src="/screenshots/hero.webp"
+                src="/screenshots/hero.jpg"
                 alt="Instant Catalog dashboard interface"
-                width={1132}
-                height={512}
+                width={1018}
+                height={440}
                 priority
               />
             </div>
