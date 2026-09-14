@@ -168,16 +168,26 @@ function sendCatalogPreviewLeadNotificationEmail(lead) {
   // attachment content wants just the base64 part.
   const base64Content = lead.excelFileData.split(',')[1] || '';
 
+  // industry/numberOfProducts are only ever collected on the public
+  // landing-page form — a vendor-dashboard submission has neither, so
+  // both lines are omitted rather than printing "undefined".
+  const industryLine = lead.industry ? `Industry: ${lead.industry}<br/>` : '';
+  const productsLine = lead.numberOfProducts ? `Products: ~${lead.numberOfProducts}<br/>` : '';
+  const sourceLine =
+    lead.source === 'vendor_dashboard'
+      ? `<p>Source: existing vendor account — <a href="${CLIENT_URL}/admin/vendors/${lead.vendorId}">view account</a></p>`
+      : '<p>Source: public "Free Catalog Preview" landing page</p>';
+
   return sendEmail({
     to: adminEmail,
     subject: `New catalog preview request — ${lead.fullName}`,
     htmlContent: `
-      <p>New free catalog preview request from the website:</p>
+      <p>New free catalog preview request:</p>
       <p><strong>${lead.fullName}</strong><br/>
       Email: ${lead.email}<br/>
       WhatsApp: ${lead.whatsappNo}<br/>
-      Industry: ${lead.industry}<br/>
-      Products: ~${lead.numberOfProducts}</p>
+      ${industryLine}${productsLine}</p>
+      ${sourceLine}
       <p>Their product Excel is attached (${lead.excelFileName}).</p>
       <p><a href="${CLIENT_URL}/admin/catalog-preview-leads/${lead._id}">View this lead in the admin panel</a></p>
     `,
@@ -187,6 +197,7 @@ function sendCatalogPreviewLeadNotificationEmail(lead) {
 
 // Sent to the person who submitted the form, confirming we received it.
 function sendCatalogPreviewLeadConfirmationEmail(lead) {
+  const isVendor = lead.source === 'vendor_dashboard';
   return sendEmail({
     to: lead.email,
     subject: 'We received your product list — Instant Catalog',
@@ -194,7 +205,11 @@ function sendCatalogPreviewLeadConfirmationEmail(lead) {
       <p>Hi ${lead.fullName},</p>
       <p>Thanks for sending your product list! Our team is building your free catalog preview now.</p>
       <p>You'll get a live, shareable link and QR code sent to your WhatsApp (${lead.whatsappNo}) within 24 hours.</p>
-      <p>In the meantime, feel free to take a look at a <a href="${CLIENT_URL}/public/home-living-collection">sample catalog</a>, or <a href="${CLIENT_URL}/signup">create your free account</a> and start building right away.</p>
+      ${
+        isVendor
+          ? `<p>Once it's ready, you can subscribe from your <a href="${CLIENT_URL}/dashboard">dashboard</a> to publish it live.</p>`
+          : `<p>In the meantime, feel free to take a look at a <a href="${CLIENT_URL}/public/home-living-collection">sample catalog</a>, or <a href="${CLIENT_URL}/signup">create your free account</a> and start building right away.</p>`
+      }
     `,
   });
 }

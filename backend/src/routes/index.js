@@ -11,6 +11,7 @@ const analyticsRoutes = require('./analytics.routes');
 const supportRoutes = require('./support.routes');
 const paymentRoutes = require('./payment.routes');
 const uploadRoutes = require('./upload.routes');
+const catalogPreviewLeadRoutes = require('./catalogPreviewLead.routes');
 const publicRoutes = require('./public.routes');
 const adminAuthRoutes = require('./adminAuth.routes');
 const adminRoutes = require('./admin.routes');
@@ -28,6 +29,9 @@ router.use('/analytics', analyticsRoutes);
 router.use('/support-tickets', supportRoutes);
 router.use('/payments', paymentRoutes);
 router.use('/upload', uploadRoutes);
+// Vendor-authenticated "We'll Do It For You" upload — distinct from the
+// anonymous /public/catalog-preview-leads below, same underlying model.
+router.use('/catalog-preview-leads', catalogPreviewLeadRoutes);
 router.use('/public', publicRoutes);
 // Must be mounted before '/admin' below — admin.routes.js gates every
 // route in it behind authenticateAdmin, and since '/admin' is a prefix

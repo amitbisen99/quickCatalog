@@ -426,6 +426,8 @@ exports.getPaymentById = asyncHandler(async (req, res) => {
 function toCatalogPreviewLeadSummary(lead) {
   return {
     id: lead._id,
+    source: lead.source,
+    vendorId: lead.vendorId,
     fullName: lead.fullName,
     email: lead.email,
     whatsappNo: lead.whatsappNo,

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import StatCard from '@/components/dashboard/StatCard';
+import SetupHelpCard from '@/components/dashboard/SetupHelpCard';
 import withAuth from '@/components/withAuth';
 import { useAuth, AuthUser } from '@/context/AuthContext';
 import { apiFetch } from '@/utils/api';
@@ -76,6 +77,12 @@ function Dashboard() {
         <StatCard label="Enquiries" value={enquiriesThisMonth} hint="This month" icon={MailIcon} accent="green" />
         <StatCard label="Views" value={viewsThisMonth} hint="This month" icon={ChartBarIcon} accent="gray" />
       </div>
+
+      {user?.subscriptionType !== 'paid' && (
+        <div className="mt-6">
+          <SetupHelpCard />
+        </div>
+      )}
 
       <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
         <p className="text-sm text-gray-500">Subscription</p>

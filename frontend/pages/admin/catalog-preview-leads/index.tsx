@@ -5,10 +5,18 @@ import withAdminAuth from '@/components/withAdminAuth';
 import Alert from '@/components/Alert';
 import { EyeIcon } from '@/components/icons';
 import { apiFetch, ApiError } from '@/utils/api';
-import { LEAD_STATUS_STYLES, LEAD_STATUS_LABEL, CatalogPreviewLeadStatus } from '@/utils/catalogPreviewLead';
+import {
+  LEAD_STATUS_STYLES,
+  LEAD_STATUS_LABEL,
+  LEAD_SOURCE_LABEL,
+  CatalogPreviewLeadStatus,
+  CatalogPreviewLeadSource,
+} from '@/utils/catalogPreviewLead';
 
 interface LeadSummary {
   id: string;
+  source?: CatalogPreviewLeadSource;
+  vendorId?: string;
   fullName: string;
   email: string;
   whatsappNo: string;
@@ -49,7 +57,8 @@ function CatalogPreviewLeads() {
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Catalog Preview Leads</h1>
         <p className="mt-1 text-sm text-gray-500">
-          Everyone who submitted their product Excel on the &ldquo;Free Catalog Preview&rdquo; landing page.
+          Everyone who submitted their product Excel — either on the public &ldquo;Free Catalog Preview&rdquo;
+          landing page, or from the &ldquo;We&apos;ll Do It For You&rdquo; card on a vendor&apos;s dashboard.
         </p>
       </div>
 
@@ -91,6 +100,7 @@ function CatalogPreviewLeads() {
                 <tr>
                   <th className="px-4 py-3 font-medium">Name</th>
                   <th className="px-4 py-3 font-medium">Contact</th>
+                  <th className="px-4 py-3 font-medium">Source</th>
                   <th className="px-4 py-3 font-medium">Industry</th>
                   <th className="px-4 py-3 font-medium">Products</th>
                   <th className="px-4 py-3 font-medium">Status</th>
@@ -106,8 +116,17 @@ function CatalogPreviewLeads() {
                       <p className="text-gray-900">{lead.email}</p>
                       <p className="text-xs text-gray-500">{lead.whatsappNo}</p>
                     </td>
-                    <td className="px-4 py-3 text-gray-600">{lead.industry}</td>
-                    <td className="px-4 py-3 text-gray-600">{lead.numberOfProducts}</td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                          lead.source === 'vendor_dashboard' ? 'bg-purple-50 text-purple-700' : 'bg-gray-100 text-gray-600'
+                        }`}
+                      >
+                        {LEAD_SOURCE_LABEL[lead.source || 'landing_page']}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-gray-600">{lead.industry || '—'}</td>
+                    <td className="px-4 py-3 text-gray-600">{lead.numberOfProducts ?? '—'}</td>
                     <td className="px-4 py-3">
                       <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${LEAD_STATUS_STYLES[lead.status]}`}>
                         {LEAD_STATUS_LABEL[lead.status]}

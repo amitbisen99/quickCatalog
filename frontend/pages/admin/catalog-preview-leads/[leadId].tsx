@@ -6,10 +6,18 @@ import withAdminAuth from '@/components/withAdminAuth';
 import Alert from '@/components/Alert';
 import { DownloadIcon } from '@/components/icons';
 import { apiFetch, ApiError } from '@/utils/api';
-import { LEAD_STATUS_STYLES, LEAD_STATUS_LABEL, CatalogPreviewLeadStatus } from '@/utils/catalogPreviewLead';
+import {
+  LEAD_STATUS_STYLES,
+  LEAD_STATUS_LABEL,
+  LEAD_SOURCE_LABEL,
+  CatalogPreviewLeadStatus,
+  CatalogPreviewLeadSource,
+} from '@/utils/catalogPreviewLead';
 
 interface LeadDetail {
   id: string;
+  source?: CatalogPreviewLeadSource;
+  vendorId?: string;
   fullName: string;
   email: string;
   whatsappNo: string;
@@ -97,6 +105,21 @@ function LeadDetailPage() {
             </div>
 
             <dl className="mt-6 grid grid-cols-1 gap-6 border-t border-gray-100 pt-6 sm:grid-cols-2">
+              <Field
+                label="Source"
+                value={
+                  lead.source === 'vendor_dashboard' && lead.vendorId ? (
+                    <>
+                      {LEAD_SOURCE_LABEL.vendor_dashboard} —{' '}
+                      <Link href={`/admin/vendors/${lead.vendorId}`} className="text-primary-700 hover:underline">
+                        View vendor account
+                      </Link>
+                    </>
+                  ) : (
+                    LEAD_SOURCE_LABEL[lead.source || 'landing_page']
+                  )
+                }
+              />
               <Field label="Email" value={lead.email} />
               <Field label="WhatsApp Number" value={lead.whatsappNo} />
               <Field label="Industry" value={lead.industry} />

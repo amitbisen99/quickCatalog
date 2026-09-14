@@ -1,4 +1,14 @@
 export type CatalogPreviewLeadStatus = 'new' | 'contacted' | 'delivered' | 'closed';
+export type CatalogPreviewLeadSource = 'landing_page' | 'vendor_dashboard';
+
+// Matches backend/src/models/CatalogPreviewLead.js's source enum. Older
+// leads saved before this field existed come back as undefined — treated
+// as 'landing_page' (the only source that existed then) wherever this is
+// looked up.
+export const LEAD_SOURCE_LABEL: Record<CatalogPreviewLeadSource, string> = {
+  landing_page: 'Landing Page',
+  vendor_dashboard: 'Vendor Dashboard',
+};
 
 // Shared between the admin catalog-preview-leads list and detail pages
 // so the two never drift on styling/labels for the same status value.
