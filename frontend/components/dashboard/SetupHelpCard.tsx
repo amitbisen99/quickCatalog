@@ -80,11 +80,12 @@ export default function SetupHelpCard() {
             Send us your product Excel file and our team will set it up, format it, and publish your first catalog
             for you — free.
           </p>
+          <ul className="mt-3 space-y-1 text-sm text-gray-600">
+            <li>📊 Send your existing Excel/price list — no reformatting needed</li>
+            <li>🎨 We build, categorize, and publish your catalog for you</li>
+            <li>⏱️ Ready within 24 hours</li>
+          </ul>
         </div>
-      </div>
-
-      <div className="mt-4">
-        <Alert variant="info">Free setup assistance. Subscription required to publish your catalog.</Alert>
       </div>
 
       {lastUploadedName && (
@@ -92,7 +93,7 @@ export default function SetupHelpCard() {
           <CheckCircleIcon className="mt-0.5 h-5 w-5 shrink-0 text-green-600" />
           <p className="text-sm text-green-800">
             <strong>{lastUploadedName}</strong> was sent to our team. We&apos;ll reach out on your WhatsApp/email
-            within 24 hours. Need to send an updated sheet? Just upload it below.
+            within 24 hours.
           </p>
         </div>
       )}
@@ -141,6 +142,9 @@ export default function SetupHelpCard() {
               Read more
             </button>
           </p>
+          <div className="mt-3">
+            <Alert variant="info">Free setup assistance. Subscription required to publish your catalog.</Alert>
+          </div>
         </div>
 
         <button
