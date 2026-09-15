@@ -124,6 +124,16 @@ export function HelpIcon(props: IconProps) {
   );
 }
 
+export function InfoIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 11v5" />
+      <circle cx="12" cy="7.5" r="0.9" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
 export function SlidersIcon(props: IconProps) {
   return (
     <svg {...base} {...props}>
