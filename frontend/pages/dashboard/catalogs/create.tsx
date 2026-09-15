@@ -376,7 +376,7 @@ function CreateCatalogWizard() {
               Download
             </span>
           </a>
-          <p className="mt-2 text-center text-xs font-medium text-gray-500">
+          <p className="mt-2 text-left text-xs font-medium text-blue-800">
             OR you can directly upload your Excel sheet and map the columns
           </p>
 

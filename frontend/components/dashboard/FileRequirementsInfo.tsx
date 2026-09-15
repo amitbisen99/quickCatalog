@@ -12,14 +12,17 @@ export default function FileRequirementsInfo() {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="mt-5 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-gray-500 hover:text-primary-700"
-      >
-        <InfoIcon className="h-4 w-4" />
+      <div className="mt-5 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-gray-500">
+        <InfoIcon className="h-4 w-4 shrink-0" />
         File Requirements — Read Before Uploading
-      </button>
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="font-medium normal-case tracking-normal text-blue-700 underline underline-offset-2 hover:text-blue-800"
+        >
+          Read more
+        </button>
+      </div>
 
       <Modal isOpen={open} onClose={() => setOpen(false)} title="File Requirements" maxWidthClassName="max-w-3xl">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
