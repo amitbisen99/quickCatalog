@@ -77,7 +77,6 @@ function Templates() {
           const usedByCount = catalogs?.filter((c) => c.template === option.id).length || 0;
           return (
             <div key={option.id} className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-              <div className="h-32 bg-gradient-to-br from-primary-900 via-primary-800 to-primary-950" />
               <div className="p-5">
                 <div className="flex items-center justify-between">
                   <h2 className="text-base font-semibold text-gray-900">{option.label}</h2>

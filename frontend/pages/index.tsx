@@ -372,7 +372,7 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
             </form>
             <div className="pt-1">
               <Link
-                href="/public/home-living-collection"
+                href="/public/industrial-hardware-supply"
                 target="_blank"
                 className="text-sm font-semibold text-brand-muted underline underline-offset-4 hover:text-home2-accent-text transition-colors"
               >
