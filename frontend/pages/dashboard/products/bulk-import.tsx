@@ -5,13 +5,13 @@ import withAuth from '@/components/withAuth';
 import Alert from '@/components/Alert';
 import UpgradePlanModal from '@/components/dashboard/UpgradePlanModal';
 import FileRequirementsInfo from '@/components/dashboard/FileRequirementsInfo';
+import ColumnMappingTable from '@/components/dashboard/ColumnMappingTable';
 import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
   ExclamationCircleIcon,
   UploadIcon,
   GridIcon,
-  BoxIcon,
   DownloadIcon,
   SpinnerIcon,
 } from '@/components/icons';
@@ -41,21 +41,6 @@ const STEPS: { id: WizardStep; label: string }[] = [
   { id: 2, label: 'Preview' },
   { id: 3, label: 'Done' },
 ];
-
-const MAPPABLE_FIELD_LABELS: Record<string, string> = {
-  productName: 'Product Name',
-  sku: 'SKU',
-  price: 'Price',
-  description: 'Description',
-  category: 'Category',
-  unit: 'Unit',
-  minimumOrderQuantity: 'Minimum Order Quantity',
-  specifications: 'Specifications',
-  taxPercent: 'Tax %',
-  imageFilename: 'Image Filename',
-  imageUrl: 'Image URL',
-  videoUrl: 'Video URL',
-};
 
 interface ParseResult {
   headers: string[];
@@ -182,8 +167,6 @@ function BulkImportWizard() {
   const [parseResult, setParseResult] = useState<ParseResult | null>(null);
   const [fieldMappings, setFieldMappings] = useState<Record<string, string>>({});
 
-  const [previewTab, setPreviewTab] = useState<'table' | 'visual'>('table');
-
   // How many products the vendor already has — needed to predict whether
   // this import will get capped, since (unlike a brand-new catalog) it's
   // adding to an existing library, not starting from zero. Only free-plan
@@ -228,6 +211,10 @@ function BulkImportWizard() {
   const remainingSlots =
     !isFreePlan(user) || existingProductCount === null ? null : Math.max(FREE_PRODUCT_LIMIT - existingProductCount, 0);
   const willBeCapped = remainingSlots !== null && totalRows > remainingSlots;
+  // The auto-map gate on Step 1 guarantees these are mapped when Preview
+  // first loads, but the vendor can clear either one while correcting
+  // other fields here — re-checked so Continue can't fire without them.
+  const mappingValid = Boolean(fieldMappings.productName && fieldMappings.price);
 
   function handleExcelChange(e: ChangeEvent<HTMLInputElement>) {
     setFileError('');
@@ -265,9 +252,15 @@ function BulkImportWizard() {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
-  function previewValue(row: Record<string, unknown>, field: string, fallback = '—') {
-    const column = fieldMappings[field];
-    return (column && String(row[column] ?? '')) || fallback;
+  function updateFieldMapping(field: string, column: string) {
+    setFieldMappings((prev) => {
+      if (!column) {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      }
+      return { ...prev, [field]: column };
+    });
   }
 
   async function handleUploadContinue() {
@@ -429,98 +422,27 @@ function BulkImportWizard() {
         {/* ---------------- Step 2: Preview & Validate ---------------- */}
         {step === 2 && parseResult && !importing && (
           <WizardCard wide>
-            <h1 className="text-xl font-bold text-gray-900">Review before you import</h1>
+            <h1 className="text-xl font-bold text-gray-900">Map your columns</h1>
             <p className="mt-1 text-sm text-gray-500">
-              Here&apos;s what we found in your file. Nothing is added to your library yet — check it looks right
-              first.
+              Match each field to the right column from your file — we&apos;ll use this mapping to import your
+              products.
             </p>
 
-            <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-start">
-              <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-center sm:w-40 sm:shrink-0">
-                <p className="text-2xl font-bold text-gray-900">{parseResult.totalRows}</p>
-                <p className="mt-0.5 text-[11px] font-bold uppercase tracking-wide text-gray-500">Products Found</p>
-              </div>
-              <div className="flex-1 rounded-lg border border-gray-200 bg-gray-50 p-4">
-                <p className="text-[11px] font-bold uppercase tracking-wide text-gray-500">Columns Detected</p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {Object.entries(fieldMappings).map(([field, column]) => (
-                    <span key={field} className="rounded-full bg-white px-2.5 py-1 text-xs font-medium text-gray-700 shadow-sm">
-                      {MAPPABLE_FIELD_LABELS[field] || field}
-                      <span className="text-gray-400"> → &quot;{column}&quot;</span>
-                    </span>
-                  ))}
-                </div>
-              </div>
+            <div className="mt-5 inline-block rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700">
+              <strong className="font-bold text-gray-900">{parseResult.totalRows}</strong> products found in your
+              file
             </div>
 
-            <div className="mt-5 inline-flex rounded-full border border-gray-200 bg-gray-50 p-1">
-              <button
-                type="button"
-                onClick={() => setPreviewTab('table')}
-                className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-colors ${
-                  previewTab === 'table' ? 'bg-primary-700 text-white' : 'text-gray-500'
-                }`}
-              >
-                Data Table
-              </button>
-              <button
-                type="button"
-                onClick={() => setPreviewTab('visual')}
-                className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-colors ${
-                  previewTab === 'visual' ? 'bg-primary-700 text-white' : 'text-gray-500'
-                }`}
-              >
-                Visual Preview
-              </button>
-            </div>
+            <ColumnMappingTable
+              headers={parseResult.headers}
+              dataPreview={parseResult.dataPreview}
+              fieldMappings={fieldMappings}
+              onChange={updateFieldMapping}
+            />
 
-            {previewTab === 'table' ? (
-              <div className="mt-4 overflow-hidden rounded-lg border border-gray-200">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-sm">
-                    <thead className="border-b border-gray-200 bg-gray-50 text-[11px] font-bold uppercase tracking-wide text-gray-500">
-                      <tr>
-                        <th className="px-4 py-3">Product</th>
-                        <th className="px-4 py-3">Price</th>
-                        <th className="px-4 py-3">Category</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      {parseResult.dataPreview.map((row, idx) => (
-                        <tr key={idx}>
-                          <td className="px-4 py-3 font-medium text-gray-900">{previewValue(row, 'productName')}</td>
-                          <td className="px-4 py-3 text-gray-600">{previewValue(row, 'price')}</td>
-                          <td className="px-4 py-3 text-gray-600">{previewValue(row, 'category')}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-                <p className="border-t border-gray-100 bg-gray-50 px-4 py-2.5 text-xs text-gray-500">
-                  Showing {parseResult.dataPreview.length} of {parseResult.totalRows} rows — full validation happens
-                  when you import.
-                </p>
-              </div>
-            ) : (
-              <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4 sm:p-5">
-                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-                  {parseResult.dataPreview.map((row, idx) => (
-                    <div key={idx} className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
-                      <div className="flex aspect-square items-center justify-center bg-primary-50 text-primary-700">
-                        <BoxIcon className="h-6 w-6 opacity-50" />
-                      </div>
-                      <div className="p-3">
-                        <p className="truncate text-xs font-semibold text-gray-900">
-                          {previewValue(row, 'productName', 'Untitled')}
-                        </p>
-                        <p className="mt-0.5 text-xs text-gray-500">{previewValue(row, 'price')}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <p className="mt-4 text-center text-xs text-gray-500">
-                  Simplified preview — each product&apos;s real image shows once it&apos;s in your library.
-                </p>
+            {!mappingValid && (
+              <div className="mt-3">
+                <Alert variant="error">Product Name and Price must be mapped before you can continue.</Alert>
               </div>
             )}
 
@@ -551,7 +473,7 @@ function BulkImportWizard() {
               onBack={() => goTo(1)}
               onNext={handleImport}
               nextLabel={importing ? 'Importing…' : 'Import Products'}
-              nextDisabled={importing}
+              nextDisabled={importing || !mappingValid}
             />
           </WizardCard>
         )}
