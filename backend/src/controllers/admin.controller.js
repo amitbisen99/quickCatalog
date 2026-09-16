@@ -107,12 +107,27 @@ exports.getUserById = asyncHandler(async (req, res) => {
     throw new AppError('Vendor not found', 404);
   }
 
-  const user = await User.findById(userId);
+  const [user, catalogs] = await Promise.all([
+    User.findById(userId),
+    // Newest first, same ordering as the vendor's own /dashboard/catalogs —
+    // just name/slug/template, not the full catalog document.
+    Catalog.find({ vendorId: userId }).sort({ createdAt: -1 }).select('name slug template createdAt'),
+  ]);
   if (!user) {
     throw new AppError('Vendor not found', 404);
   }
 
-  res.json({ success: true, user: toSafeUser(user) });
+  res.json({
+    success: true,
+    user: toSafeUser(user),
+    catalogs: catalogs.map((c) => ({
+      id: c._id,
+      name: c.name,
+      slug: c.slug,
+      template: c.template,
+      createdAt: c.createdAt,
+    })),
+  });
 });
 
 exports.updateUserStatus = asyncHandler(async (req, res) => {

@@ -4,8 +4,9 @@ import Link from 'next/link';
 import AdminLayout from '@/components/AdminLayout';
 import withAdminAuth from '@/components/withAdminAuth';
 import Alert from '@/components/Alert';
-import { TrashIcon } from '@/components/icons';
+import { TrashIcon, ExternalLinkIcon, GridIcon } from '@/components/icons';
 import { apiFetch, ApiError } from '@/utils/api';
+import { getCatalogPublicUrl } from '@/utils/catalogUrl';
 
 interface Vendor {
   id: string;
@@ -24,6 +25,14 @@ interface Vendor {
   customDomain?: string;
   customDomainStatus?: 'pending' | 'active' | 'failed';
   status: string;
+  createdAt: string;
+}
+
+interface VendorCatalog {
+  id: string;
+  name: string;
+  slug: string;
+  template: string;
   createdAt: string;
 }
 
@@ -56,14 +65,18 @@ function VendorDetail() {
   const userId = typeof router.query.userId === 'string' ? router.query.userId : '';
 
   const [vendor, setVendor] = useState<Vendor | null>(null);
+  const [catalogs, setCatalogs] = useState<VendorCatalog[]>([]);
   const [error, setError] = useState('');
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!userId) return;
-    apiFetch<{ user: Vendor }>(`/admin/users/${userId}`)
-      .then((res) => setVendor(res.user))
+    apiFetch<{ user: Vendor; catalogs: VendorCatalog[] }>(`/admin/users/${userId}`)
+      .then((res) => {
+        setVendor(res.user);
+        setCatalogs(res.catalogs);
+      })
       .catch((err) => setError(err instanceof ApiError ? err.message : 'Could not load this vendor.'));
   }, [userId]);
 
@@ -243,6 +256,44 @@ function VendorDetail() {
             </dd>
           </div>
         </dl>
+      </div>
+
+      <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-gray-900">Catalogs</h2>
+          <span className="rounded-full bg-primary-50 px-2.5 py-0.5 text-xs font-semibold text-primary-700">
+            {catalogs.length}
+          </span>
+        </div>
+
+        {catalogs.length === 0 ? (
+          <p className="mt-3 text-sm text-gray-500">This vendor hasn&apos;t created any catalogs yet.</p>
+        ) : (
+          <ul className="mt-4 divide-y divide-gray-100">
+            {catalogs.map((catalog) => (
+              <li key={catalog.id} className="flex items-center justify-between gap-3 py-3">
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-700">
+                    <GridIcon className="h-4 w-4" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-gray-900">{catalog.name}</p>
+                    <p className="text-xs text-gray-400">Created {new Date(catalog.createdAt).toLocaleDateString()}</p>
+                  </div>
+                </div>
+                <a
+                  href={getCatalogPublicUrl(catalog.slug, vendor)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  <ExternalLinkIcon className="h-3.5 w-3.5" />
+                  View
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </AdminLayout>
   );
