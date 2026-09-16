@@ -3,6 +3,7 @@ require('dotenv').config();
 const app = require('./src/app');
 const connectDB = require('./src/config/db');
 const { startAllowedOriginsRefresh } = require('./src/utils/allowedOriginsCache');
+const { startLifecycleEmails } = require('./src/utils/lifecycleEmails');
 const backfillProductSlugs = require('./src/utils/backfillProductSlugs');
 const backfillUserCountryCode = require('./src/utils/backfillUserCountryCode');
 
@@ -16,6 +17,7 @@ const PORT = process.env.PORT || 5000;
   await backfillProductSlugs();
   await backfillUserCountryCode();
   startAllowedOriginsRefresh();
+  startLifecycleEmails();
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`Instant Catalog API listening on port ${PORT}`);
   });

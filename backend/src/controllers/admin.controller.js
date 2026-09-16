@@ -9,6 +9,7 @@ const Enquiry = require('../models/Enquiry');
 const SupportTicket = require('../models/SupportTicket');
 const Payment = require('../models/Payment');
 const CatalogPreviewLead = require('../models/CatalogPreviewLead');
+const EmailTemplate = require('../models/EmailTemplate');
 const toSafeUser = require('../utils/toSafeUser');
 const toSupportTicketResponse = require('../utils/toSupportTicketResponse');
 const asyncHandler = require('../utils/asyncHandler');
@@ -16,6 +17,7 @@ const AppError = require('../utils/AppError');
 const notImplemented = require('../utils/notImplemented');
 const { sendSupportTicketReplyEmail } = require('../services/email.service');
 const { getPlanPricing } = require('../utils/planPricing');
+const { SEQUENCE_DEFS } = require('../utils/lifecycleEmails');
 
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 100;
@@ -506,4 +508,38 @@ exports.updateCatalogPreviewLeadStatus = asyncHandler(async (req, res) => {
     throw new AppError('Lead not found', 404);
   }
   res.json({ success: true, lead: toCatalogPreviewLeadSummary(lead) });
+});
+
+// Grouped in the same D/A/B/E/C order the send job evaluates them in
+// (SEQUENCE_DEFS) — the admin list page renders them in this order too,
+// so it reads top-to-bottom the same way a vendor actually moves through
+// the funnel.
+exports.getEmailTemplates = asyncHandler(async (req, res) => {
+  const templates = await EmailTemplate.find();
+  const order = SEQUENCE_DEFS.map((def) => def.slug);
+  templates.sort((a, b) => order.indexOf(a.slug) - order.indexOf(b.slug));
+  res.json({
+    success: true,
+    templates: templates.map((t) => ({
+      slug: t.slug,
+      label: t.label,
+      group: t.group,
+      subject: t.subject,
+      body: t.body,
+    })),
+  });
+});
+
+exports.updateEmailTemplate = asyncHandler(async (req, res) => {
+  const { slug } = req.params;
+  const { subject, body } = req.body;
+
+  const template = await EmailTemplate.findOneAndUpdate({ slug }, { subject, body }, { new: true });
+  if (!template) {
+    throw new AppError('Email template not found', 404);
+  }
+  res.json({
+    success: true,
+    template: { slug: template.slug, label: template.label, group: template.group, subject: template.subject, body: template.body },
+  });
 });

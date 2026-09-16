@@ -25,3 +25,8 @@ exports.updateDomainRequestValidators = [
 exports.updateCatalogPreviewLeadStatusValidators = [
   body('status').isIn(['new', 'contacted', 'delivered', 'closed']).withMessage('Invalid status'),
 ];
+
+exports.updateEmailTemplateValidators = [
+  body('subject').trim().isLength({ max: 200 }).withMessage('Subject must be 200 characters or fewer'),
+  body('body').isLength({ max: 20000 }).withMessage('Body is too long'),
+];

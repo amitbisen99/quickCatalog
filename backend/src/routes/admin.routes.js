@@ -9,6 +9,7 @@ const {
   updatePlanPricingValidators,
   updateDomainRequestValidators,
   updateCatalogPreviewLeadStatusValidators,
+  updateEmailTemplateValidators,
 } = require('../validators/admin.validators');
 
 const router = express.Router();
@@ -51,6 +52,13 @@ router.put(
   updateCatalogPreviewLeadStatusValidators,
   validate,
   adminController.updateCatalogPreviewLeadStatus
+);
+router.get('/email-templates', adminController.getEmailTemplates);
+router.put(
+  '/email-templates/:slug',
+  updateEmailTemplateValidators,
+  validate,
+  adminController.updateEmailTemplate
 );
 
 module.exports = router;

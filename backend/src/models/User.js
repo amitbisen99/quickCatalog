@@ -60,6 +60,15 @@ const userSchema = new mongoose.Schema(
     },
     subscriptionExpiresAt: { type: Date },
 
+    // Set once, the moment OTP verification succeeds (see auth.controller's
+    // verifyEmail) — deliberately never backfilled for accounts verified
+    // before this field existed. That's what keeps the lifecycle email
+    // system (utils/lifecycleEmails.js) scoped to new signups only: a
+    // pre-existing verified vendor simply has no verifiedAt to anchor the
+    // "no catalog yet" reminder sequence against, so they're silently
+    // excluded rather than needing an explicit cohort flag.
+    verifiedAt: { type: Date },
+
     // White-label domains — scoped to the vendor, not any one catalog:
     // every catalog they own becomes reachable at
     // `{domain}/public/{slug}` once one of these is active, since the

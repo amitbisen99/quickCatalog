@@ -75,6 +75,9 @@ exports.verifyEmail = asyncHandler(async (req, res) => {
   user.industry = industry;
   user.otpHash = undefined;
   user.otpExpiresAt = undefined;
+  // See User.js's verifiedAt comment — the lifecycle email sequence's
+  // anchor point, deliberately only ever set here.
+  user.verifiedAt = new Date();
   await user.save();
 
   // Log the vendor straight in — verification is the last step of
