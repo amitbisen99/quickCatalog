@@ -1,9 +1,20 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
+import DOMPurify from 'dompurify';
+import 'react-quill/dist/quill.snow.css';
 import AdminLayout from '@/components/AdminLayout';
 import withAdminAuth from '@/components/withAdminAuth';
 import Alert from '@/components/Alert';
-import { ChevronDownIcon, CheckCircleIcon, CodeIcon, MailIcon } from '@/components/icons';
+import { ChevronDownIcon, CheckCircleIcon, MailIcon } from '@/components/icons';
 import { apiFetch, ApiError } from '@/utils/api';
+
+// Same dynamic-import-with-ssr-false pattern as
+// components/dashboard/ProductForm.tsx's description editor — Quill
+// touches `window` at import time, which doesn't exist during Next's
+// server render. Its default "snow" toolbar (header, bold/italic/
+// underline, link, lists) already has a Link button, so there's no
+// separate "insert a link" control to build here.
+const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
 
 interface EmailTemplate {
   slug: string;
@@ -51,11 +62,6 @@ function TemplateRow({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [saved, setSaved] = useState(false);
-  const bodyRef = useRef<HTMLTextAreaElement>(null);
-
-  const [linkFormOpen, setLinkFormOpen] = useState(false);
-  const [linkText, setLinkText] = useState('');
-  const [linkUrl, setLinkUrl] = useState('');
 
   const [testEmail, setTestEmail] = useState('');
   const [sendingTest, setSendingTest] = useState(false);
@@ -71,7 +77,7 @@ function TemplateRow({
     try {
       const res = await apiFetch<{ template: EmailTemplate }>(`/admin/email-templates/${template.slug}`, {
         method: 'PUT',
-        body: { subject, body },
+        body: { subject, body: DOMPurify.sanitize(body) },
       });
       onSaved(res.template);
       setSaved(true);
@@ -83,33 +89,6 @@ function TemplateRow({
     }
   }
 
-  // Inserts <a href="URL">text</a> at the cursor position (or at the end,
-  // if the textarea never had focus) rather than just appending — the
-  // body is a plain textarea, not a rich-text editor, so this is the
-  // simplest way to add a link without hand-writing HTML. The URL itself
-  // can be a merge field too (e.g. {{catalogLink}}) — it's just text
-  // dropped into the body, resolved the same as everywhere else in it.
-  function handleInsertLink() {
-    if (!linkUrl.trim()) return;
-    const anchor = `<a href="${linkUrl.trim()}">${linkText.trim() || linkUrl.trim()}</a>`;
-    const el = bodyRef.current;
-    const start = el?.selectionStart ?? body.length;
-    const end = el?.selectionEnd ?? body.length;
-    const next = body.slice(0, start) + anchor + body.slice(end);
-    setBody(next);
-    setLinkText('');
-    setLinkUrl('');
-    setLinkFormOpen(false);
-    // Refocus with the cursor right after the inserted link, same as a
-    // normal editor would leave it — otherwise focus is lost to the
-    // (now-closed) link form and the next keystroke goes nowhere useful.
-    requestAnimationFrame(() => {
-      el?.focus();
-      const cursor = start + anchor.length;
-      el?.setSelectionRange(cursor, cursor);
-    });
-  }
-
   // Sends whatever's currently typed (subject/body), not what's saved —
   // lets an in-progress edit be previewed without saving first.
   async function handleSendTest() {
@@ -119,7 +98,7 @@ function TemplateRow({
     try {
       await apiFetch(`/admin/email-templates/${template.slug}/test`, {
         method: 'POST',
-        body: { to: testEmail, subject, body },
+        body: { to: testEmail, subject, body: DOMPurify.sanitize(body) },
       });
       setTestSent(true);
       setTimeout(() => setTestSent(false), 4000);
@@ -161,61 +140,12 @@ function TemplateRow({
             className="mt-1.5 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-600"
           />
 
-          <div className="mt-4 flex items-center justify-between">
-            <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500">Body</label>
-            <button
-              type="button"
-              onClick={() => setLinkFormOpen((o) => !o)}
-              className="flex items-center gap-1.5 text-xs font-medium text-primary-700 hover:text-primary-800"
-            >
-              <CodeIcon className="h-3.5 w-3.5" />
-              Insert Custom Link
-            </button>
+          <label className="mt-4 block text-xs font-semibold uppercase tracking-wide text-gray-500">Body</label>
+          <div className="mt-1.5 rounded-lg border border-gray-300">
+            <ReactQuill theme="snow" value={body} onChange={setBody} />
           </div>
 
-          {linkFormOpen && (
-            <div className="mt-2 flex flex-wrap items-end gap-2 rounded-lg border border-gray-200 bg-gray-50 p-3">
-              <div className="min-w-[140px] flex-1">
-                <label className="block text-[11px] font-medium text-gray-500">Link text</label>
-                <input
-                  type="text"
-                  value={linkText}
-                  onChange={(e) => setLinkText(e.target.value)}
-                  placeholder="e.g. View your catalog"
-                  className="mt-1 w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm focus:border-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-600"
-                />
-              </div>
-              <div className="min-w-[180px] flex-1">
-                <label className="block text-[11px] font-medium text-gray-500">URL</label>
-                <input
-                  type="text"
-                  value={linkUrl}
-                  onChange={(e) => setLinkUrl(e.target.value)}
-                  placeholder="https://… or {{catalogLink}}"
-                  className="mt-1 w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm focus:border-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-600"
-                />
-              </div>
-              <button
-                type="button"
-                onClick={handleInsertLink}
-                disabled={!linkUrl.trim()}
-                className="rounded-md bg-primary-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-primary-800 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                Insert
-              </button>
-            </div>
-          )}
-
-          <textarea
-            ref={bodyRef}
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-            rows={8}
-            placeholder="Email body (HTML supported)"
-            className="mt-2 w-full rounded-lg border border-gray-300 px-3 py-2 font-mono text-sm focus:border-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-600"
-          />
-
-          <div className="mt-2 flex flex-wrap gap-1.5">
+          <div className="mt-3 flex flex-wrap gap-1.5">
             {MERGE_FIELDS.map((mf) => (
               <span
                 key={mf.tag}
