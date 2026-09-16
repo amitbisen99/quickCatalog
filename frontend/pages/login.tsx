@@ -5,7 +5,12 @@ import Layout from '@/components/Layout';
 import Alert from '@/components/Alert';
 import PasswordInput from '@/components/PasswordInput';
 import { useAuth } from '@/context/AuthContext';
-import { ApiError } from '@/utils/api';
+import { apiFetch, ApiError } from '@/utils/api';
+
+// Exact string auth.controller.js's login() throws for status: 'unverified'
+// — matched on here (this codebase's errors are message-only, no machine
+// code) to decide whether to offer resending the verification code.
+const UNVERIFIED_ERROR_MESSAGE = 'Please verify your email before logging in';
 
 export default function Login() {
   const router = useRouter();
@@ -16,6 +21,8 @@ export default function Login() {
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [resendError, setResendError] = useState('');
 
   // verify-email now logs the vendor straight into the catalog wizard, so
   // this page no longer sits in that path — ?verified=1 only shows up if
@@ -29,9 +36,12 @@ export default function Login() {
     if (user) router.replace('/dashboard');
   }, [user, router]);
 
+  const isUnverifiedError = error === UNVERIFIED_ERROR_MESSAGE;
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError('');
+    setResendError('');
     setLoading(true);
     try {
       await login(email, password, rememberMe);
@@ -40,6 +50,30 @@ export default function Login() {
       setError(err instanceof ApiError ? err.message : 'Something went wrong. Please try again.');
     } finally {
       setLoading(false);
+    }
+  }
+
+  // Same handoff signup.tsx uses after registering: stash the email (and
+  // dev-mode OTP, if Brevo isn't sending) for verify-email.tsx to pick up,
+  // then send them straight there instead of leaving them stuck on a login
+  // form they can never successfully submit.
+  async function handleResend() {
+    setResending(true);
+    setResendError('');
+    try {
+      const result = await apiFetch<{ devOtp?: string }>('/auth/resend-verification', {
+        method: 'POST',
+        body: { email },
+      });
+      sessionStorage.setItem('qc_verify_email', email);
+      if (result.devOtp) {
+        sessionStorage.setItem('qc_dev_otp', result.devOtp);
+      }
+      router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+    } catch (err) {
+      setResendError(err instanceof ApiError ? err.message : 'Could not resend the code. Please try again.');
+    } finally {
+      setResending(false);
     }
   }
 
@@ -56,7 +90,27 @@ export default function Login() {
         )}
         {error && (
           <div className="mt-4">
-            <Alert variant="error">{error}</Alert>
+            <Alert variant="error">
+              {error}
+              {isUnverifiedError && (
+                <>
+                  {' '}
+                  <button
+                    type="button"
+                    onClick={handleResend}
+                    disabled={resending || !email}
+                    className="font-medium underline hover:text-red-900 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {resending ? 'Sending…' : 'Resend verification code'}
+                  </button>
+                </>
+              )}
+            </Alert>
+          </div>
+        )}
+        {resendError && (
+          <div className="mt-2">
+            <Alert variant="error">{resendError}</Alert>
           </div>
         )}
 
