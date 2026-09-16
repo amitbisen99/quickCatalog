@@ -30,3 +30,9 @@ exports.updateEmailTemplateValidators = [
   body('subject').trim().isLength({ max: 200 }).withMessage('Subject must be 200 characters or fewer'),
   body('body').isLength({ max: 20000 }).withMessage('Body is too long'),
 ];
+
+exports.sendTestEmailTemplateValidators = [
+  body('to').trim().isEmail().withMessage('Enter a valid email address'),
+  body('subject').trim().notEmpty().withMessage('Write a subject before sending a test'),
+  body('body').trim().notEmpty().withMessage('Write a body before sending a test'),
+];

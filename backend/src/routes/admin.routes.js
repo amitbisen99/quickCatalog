@@ -10,6 +10,7 @@ const {
   updateDomainRequestValidators,
   updateCatalogPreviewLeadStatusValidators,
   updateEmailTemplateValidators,
+  sendTestEmailTemplateValidators,
 } = require('../validators/admin.validators');
 
 const router = express.Router();
@@ -59,6 +60,12 @@ router.put(
   updateEmailTemplateValidators,
   validate,
   adminController.updateEmailTemplate
+);
+router.post(
+  '/email-templates/:slug/test',
+  sendTestEmailTemplateValidators,
+  validate,
+  adminController.sendTestEmailTemplate
 );
 
 module.exports = router;

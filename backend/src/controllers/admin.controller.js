@@ -15,9 +15,16 @@ const toSupportTicketResponse = require('../utils/toSupportTicketResponse');
 const asyncHandler = require('../utils/asyncHandler');
 const AppError = require('../utils/AppError');
 const notImplemented = require('../utils/notImplemented');
-const { sendSupportTicketReplyEmail } = require('../services/email.service');
+const { sendSupportTicketReplyEmail, sendEmail } = require('../services/email.service');
 const { getPlanPricing } = require('../utils/planPricing');
-const { SEQUENCE_DEFS } = require('../utils/lifecycleEmails');
+const { SEQUENCE_DEFS, renderTemplate } = require('../utils/lifecycleEmails');
+
+// Stand-in vendor/catalog used only to resolve merge fields for a test
+// send — there's no real vendor context to pull from here, and
+// "home-living-collection" is the same sample catalog already used
+// elsewhere on the marketing site (View Sample Catalog links), so it's a
+// real, always-navigable link rather than a dead one.
+const TEST_SEND_SAMPLE_CATALOG = { slug: 'home-living-collection' };
 
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 100;
@@ -542,4 +549,27 @@ exports.updateEmailTemplate = asyncHandler(async (req, res) => {
     success: true,
     template: { slug: template.slug, label: template.label, group: template.group, subject: template.subject, body: template.body },
   });
+});
+
+// Sends whatever's currently in the admin's editor (not what's saved in
+// the DB) — lets them preview an in-progress edit without saving first.
+// Merge fields resolve against a stand-in vendor/catalog since there's no
+// real one to use here.
+exports.sendTestEmailTemplate = asyncHandler(async (req, res) => {
+  const { to, subject, body } = req.body;
+
+  const sampleVendor = { businessName: 'Sample Business', email: to };
+  const renderedSubject = renderTemplate(subject, { vendor: sampleVendor, catalog: TEST_SEND_SAMPLE_CATALOG });
+  const renderedBody = renderTemplate(body, { vendor: sampleVendor, catalog: TEST_SEND_SAMPLE_CATALOG });
+
+  const result = await sendEmail({
+    to,
+    subject: `[TEST] ${renderedSubject}`,
+    htmlContent: renderedBody,
+  });
+  if (!result.sent) {
+    throw new AppError('Could not send the test email — check the server logs for details.', 502);
+  }
+
+  res.json({ success: true, message: 'Test email sent' });
 });
