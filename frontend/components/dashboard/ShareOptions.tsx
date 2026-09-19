@@ -22,6 +22,8 @@ interface Props {
 // each of these has its own web compose URL that opens directly in a
 // browser tab, bypassing the OS entirely. mailto: stays as the last
 // option, for anyone on a real desktop client (Apple Mail, Thunderbird).
+// Web view only (lg and up) — on mobile the plain mailto: tile is kept
+// as it was, since a phone's default mail app handles it fine.
 function emailProviderLinks(subject: string, message: string) {
   const su = encodeURIComponent(subject);
   const body = encodeURIComponent(message);
@@ -100,7 +102,18 @@ export default function ShareOptions({ url, message, subject }: Props) {
         </a>
       ))}
 
-      <div className="relative flex flex-col items-center">
+      {/* Mobile view (below lg — the dashboard's own mobile/desktop
+          breakpoint): the original plain mailto: tile. On a phone,
+          mailto: opens the device's own default mail app, which works
+          fine — the provider dropdown below is only for the web view. */}
+      <a href={emailOptions[3].href} className="flex flex-col items-center gap-1.5 lg:hidden">
+        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-600">
+          <MailIcon className="h-5 w-5" />
+        </span>
+        <span className="text-xs font-medium text-gray-700">Email</span>
+      </a>
+
+      <div className="relative hidden flex-col items-center lg:flex">
         <button type="button" onClick={() => setEmailMenuOpen((open) => !open)} className="flex flex-col items-center gap-1.5">
           <span className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-600">
             <MailIcon className="h-5 w-5" />
