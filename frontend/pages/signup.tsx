@@ -9,6 +9,7 @@ import MobileNumberInput from '@/components/MobileNumberInput';
 import { apiFetch, ApiError } from '@/utils/api';
 import { isPasswordValid, isValidEmail } from '@/utils/validators';
 import { DEFAULT_COUNTRY_CODE } from '@/utils/countries';
+import { getAttribution } from '@/utils/attribution';
 
 interface FieldErrors {
   [field: string]: string;
@@ -63,7 +64,7 @@ export default function Signup() {
     try {
       const result = await apiFetch<{ devOtp?: string }>('/auth/signup', {
         method: 'POST',
-        body: { email, mobileNo, countryCode, password, confirmPassword, acceptedTerms },
+        body: { email, mobileNo, countryCode, password, confirmPassword, acceptedTerms, acquisition: getAttribution() },
       });
 
       sessionStorage.setItem('qc_verify_email', email);

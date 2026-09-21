@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const { DEFAULT_COUNTRY_CODE } = require('../utils/countryCode');
+const { ACQUISITION_CHANNELS } = require('../utils/acquisition');
 
 const SALT_ROUNDS = Number(process.env.BCRYPT_SALT_ROUNDS) || 10;
 
@@ -111,6 +112,21 @@ const userSchema = new mongoose.Schema(
     primaryCatalogId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Catalog',
+    },
+
+    // Where this vendor came from — first-touch, stamped once when the
+    // account is created (see utils/acquisition.js) and never edited after.
+    // Absent on accounts created before tracking existed, which is how the
+    // admin panel tells "Unknown (before tracking)" apart from "Direct".
+    acquisition: {
+      channel: { type: String, enum: ACQUISITION_CHANNELS },
+      source: { type: String },
+      medium: { type: String },
+      campaign: { type: String },
+      content: { type: String },
+      referrer: { type: String },
+      landingPage: { type: String },
+      capturedAt: { type: Date },
     },
 
     otpHash: { type: String, select: false },

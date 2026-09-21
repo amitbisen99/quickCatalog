@@ -5,6 +5,7 @@ const { sendOtpEmail, sendPasswordResetEmail, sendWelcomeEmail } = require('../s
 const asyncHandler = require('../utils/asyncHandler');
 const AppError = require('../utils/AppError');
 const toSafeUser = require('../utils/toSafeUser');
+const { buildAcquisition } = require('../utils/acquisition');
 const { CLIENT_URL } = require('../utils/clientUrl');
 const {
   generateAccessToken,
@@ -37,7 +38,9 @@ exports.signup = asyncHandler(async (req, res) => {
     await user.setOtp(otp, OTP_TTL_MINUTES);
     await user.save();
   } else {
-    user = new User({ email, mobileNo, countryCode, password });
+    // First-touch: only stamped when the account is created. A retry by an
+    // unverified user (branch above) keeps whatever was recorded the first time.
+    user = new User({ email, mobileNo, countryCode, password, acquisition: buildAcquisition(req.body.acquisition) });
     await user.setOtp(otp, OTP_TTL_MINUTES);
     await user.save();
   }

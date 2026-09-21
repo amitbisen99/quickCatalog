@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { catalogFooterUrl } from '@/utils/attribution';
 
 interface Props {
   vendorName: string;
@@ -24,17 +24,17 @@ export default function CatalogFooter({ vendorName, mobileNo, countryCode, subsc
         {isFree ? (
           <p className="mt-2 text-xs text-gray-400">
             Want a digital catalog for your products? Try{' '}
-            <Link href="/" target="_blank" className="underline hover:text-primary-700">
+            <a href={catalogFooterUrl(false)} target="_blank" rel="noopener" className="underline hover:text-primary-700">
               Instant Catalog
-            </Link>{' '}
+            </a>{' '}
             Free
           </p>
         ) : (
           <p className="mt-2 text-xs text-gray-400">
             Powered by{' '}
-            <Link href="/" target="_blank" className="underline hover:text-primary-700">
+            <a href={catalogFooterUrl(true)} target="_blank" rel="noopener" className="underline hover:text-primary-700">
               Instant Catalog
-            </Link>
+            </a>
           </p>
         )}
       </div>

@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
-import Link from 'next/link';
 import DOMPurify from 'dompurify';
 import { MinusIcon, PlusIcon } from '@/components/icons';
 import type { CatalogTemplateDetailProps } from '@/types/publicCatalog';
@@ -8,6 +7,7 @@ import { whatsappLink } from './shared';
 import { useEnquiryCart } from './useEnquiryCart';
 import EnquiryCartWidget from './EnquiryCartWidget';
 import { currencySymbol } from '@/utils/currency';
+import { catalogFooterUrl } from '@/utils/attribution';
 
 export default function ModernGridDetail({ catalog, vendor, categories, product }: CatalogTemplateDetailProps) {
   const router = useRouter();
@@ -182,17 +182,17 @@ export default function ModernGridDetail({ catalog, vendor, categories, product 
         {vendor.subscriptionType !== 'paid' ? (
           <>
             Want a digital catalog for your products? Try{' '}
-            <Link href="/" target="_blank" className="underline hover:text-primary-700">
+            <a href={catalogFooterUrl(false)} target="_blank" rel="noopener" className="underline hover:text-primary-700">
               Instant Catalog
-            </Link>{' '}
+            </a>{' '}
             Free
           </>
         ) : (
           <>
             Powered by{' '}
-            <Link href="/" target="_blank" className="underline hover:text-primary-700">
+            <a href={catalogFooterUrl(true)} target="_blank" rel="noopener" className="underline hover:text-primary-700">
               Instant Catalog
-            </Link>
+            </a>
           </>
         )}
       </footer>

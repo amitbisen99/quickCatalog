@@ -7,6 +7,7 @@ import Alert from '@/components/Alert';
 import { TrashIcon, ExternalLinkIcon, GridIcon } from '@/components/icons';
 import { apiFetch, ApiError } from '@/utils/api';
 import { getCatalogPublicUrl } from '@/utils/catalogUrl';
+import { channelLabel } from '@/utils/attribution';
 
 interface Vendor {
   id: string;
@@ -26,6 +27,17 @@ interface Vendor {
   customDomainStatus?: 'pending' | 'active' | 'failed';
   status: string;
   createdAt: string;
+}
+
+interface Acquisition {
+  channel: string;
+  source?: string;
+  medium?: string;
+  campaign?: string;
+  content?: string;
+  referrer?: string;
+  landingPage?: string;
+  capturedAt?: string;
 }
 
 interface VendorCatalog {
@@ -66,15 +78,17 @@ function VendorDetail() {
 
   const [vendor, setVendor] = useState<Vendor | null>(null);
   const [catalogs, setCatalogs] = useState<VendorCatalog[]>([]);
+  const [acquisition, setAcquisition] = useState<Acquisition | null>(null);
   const [error, setError] = useState('');
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!userId) return;
-    apiFetch<{ user: Vendor; catalogs: VendorCatalog[] }>(`/admin/users/${userId}`)
+    apiFetch<{ user: Vendor; acquisition: Acquisition | null; catalogs: VendorCatalog[] }>(`/admin/users/${userId}`)
       .then((res) => {
         setVendor(res.user);
+        setAcquisition(res.acquisition);
         setCatalogs(res.catalogs);
       })
       .catch((err) => setError(err instanceof ApiError ? err.message : 'Could not load this vendor.'));
@@ -256,6 +270,52 @@ function VendorDetail() {
             </dd>
           </div>
         </dl>
+      </div>
+
+      <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+        <h2 className="text-lg font-semibold text-gray-900">Signup Source</h2>
+        {acquisition ? (
+          <dl className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <div>
+              <dt className="text-xs font-semibold uppercase tracking-wide text-gray-400">Channel</dt>
+              <dd className="mt-1 text-sm text-gray-900">{channelLabel(acquisition.channel)}</dd>
+            </div>
+            <div>
+              <dt className="text-xs font-semibold uppercase tracking-wide text-gray-400">Campaign</dt>
+              <dd className="mt-1 text-sm text-gray-900">{acquisition.campaign || '—'}</dd>
+            </div>
+            <div>
+              <dt className="text-xs font-semibold uppercase tracking-wide text-gray-400">UTM Source / Medium</dt>
+              <dd className="mt-1 text-sm text-gray-900">
+                {acquisition.source || acquisition.medium
+                  ? `${acquisition.source || '—'} / ${acquisition.medium || '—'}`
+                  : '—'}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs font-semibold uppercase tracking-wide text-gray-400">UTM Content</dt>
+              <dd className="mt-1 text-sm text-gray-900">{acquisition.content || '—'}</dd>
+            </div>
+            <div>
+              <dt className="text-xs font-semibold uppercase tracking-wide text-gray-400">Landing Page</dt>
+              <dd className="mt-1 break-all text-sm text-gray-900">{acquisition.landingPage || '—'}</dd>
+            </div>
+            <div>
+              <dt className="text-xs font-semibold uppercase tracking-wide text-gray-400">Referrer</dt>
+              <dd className="mt-1 break-all text-sm text-gray-900">{acquisition.referrer || '—'}</dd>
+            </div>
+            <div>
+              <dt className="text-xs font-semibold uppercase tracking-wide text-gray-400">First Visit</dt>
+              <dd className="mt-1 text-sm text-gray-900">
+                {acquisition.capturedAt ? new Date(acquisition.capturedAt).toLocaleString() : '—'}
+              </dd>
+            </div>
+          </dl>
+        ) : (
+          <p className="mt-3 text-sm text-gray-500">
+            Unknown — this vendor registered before source tracking was added.
+          </p>
+        )}
       </div>
 
       <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">

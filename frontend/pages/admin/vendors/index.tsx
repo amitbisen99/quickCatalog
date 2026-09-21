@@ -5,6 +5,7 @@ import withAdminAuth from '@/components/withAdminAuth';
 import Alert from '@/components/Alert';
 import { EyeIcon, DownloadIcon } from '@/components/icons';
 import { apiFetch, ApiError, API_URL } from '@/utils/api';
+import { CHANNEL_OPTIONS, channelLabel } from '@/utils/attribution';
 
 interface VendorSummary {
   id: string;
@@ -14,6 +15,8 @@ interface VendorSummary {
   countryCode?: string;
   status: string;
   subscriptionType: string;
+  channel?: string;
+  campaign?: string;
 }
 
 interface VendorsResponse {
@@ -27,6 +30,7 @@ function Vendors() {
   const [data, setData] = useState<VendorsResponse | null>(null);
   const [search, setSearch] = useState('');
   const [plan, setPlan] = useState('');
+  const [channel, setChannel] = useState('');
   const [page, setPage] = useState(1);
   const [error, setError] = useState('');
 
@@ -34,12 +38,13 @@ function Vendors() {
     const params = new URLSearchParams();
     if (search) params.set('search', search);
     if (plan) params.set('plan', plan);
+    if (channel) params.set('channel', channel);
     params.set('page', String(page));
 
     apiFetch<{ users: VendorSummary[]; total: number; page: number; pages: number }>(`/admin/users?${params}`)
       .then((res) => setData(res))
       .catch((err) => setError(err instanceof ApiError ? err.message : 'Could not load vendors.'));
-  }, [search, plan, page]);
+  }, [search, plan, channel, page]);
 
   useEffect(loadVendors, [loadVendors]);
 
@@ -47,6 +52,7 @@ function Vendors() {
     const params = new URLSearchParams();
     if (search) params.set('search', search);
     if (plan) params.set('plan', plan);
+    if (channel) params.set('channel', channel);
     return `${API_URL}/admin/users/export?${params}`;
   }
 
@@ -89,6 +95,21 @@ function Vendors() {
           <option value="free">Free</option>
           <option value="paid">Paid</option>
         </select>
+        <select
+          value={channel}
+          onChange={(e) => {
+            setChannel(e.target.value);
+            setPage(1);
+          }}
+          className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-600"
+        >
+          <option value="">All sources</option>
+          {CHANNEL_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
       </div>
 
       {error && (
@@ -113,6 +134,7 @@ function Vendors() {
                   <th className="px-4 py-3 font-medium">Name</th>
                   <th className="px-4 py-3 font-medium">Email</th>
                   <th className="px-4 py-3 font-medium">Mobile</th>
+                  <th className="px-4 py-3 font-medium">Source</th>
                   <th className="px-4 py-3 font-medium">Action</th>
                 </tr>
               </thead>
@@ -123,6 +145,10 @@ function Vendors() {
                     <td className="px-4 py-3 text-gray-600">{vendor.email}</td>
                     <td className="px-4 py-3 text-gray-600">
                       {vendor.countryCode} {vendor.mobileNo}
+                    </td>
+                    <td className="px-4 py-3 text-gray-600">
+                      {channelLabel(vendor.channel)}
+                      {vendor.campaign && <p className="text-xs text-gray-400">{vendor.campaign}</p>}
                     </td>
                     <td className="px-4 py-3">
                       <Link

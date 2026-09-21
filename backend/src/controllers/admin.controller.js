@@ -18,6 +18,7 @@ const notImplemented = require('../utils/notImplemented');
 const { sendSupportTicketReplyEmail, sendEmail } = require('../services/email.service');
 const { getPlanPricing } = require('../utils/planPricing');
 const { SEQUENCE_DEFS, renderTemplate } = require('../utils/lifecycleEmails');
+const { ACQUISITION_CHANNELS, CHANNEL_LABELS } = require('../utils/acquisition');
 
 // Stand-in vendor/catalog used only to resolve merge fields for a test
 // send — there's no real vendor context to pull from here, and
@@ -39,7 +40,25 @@ function toUserSummary(user) {
     countryCode: user.countryCode,
     status: user.status,
     subscriptionType: user.subscriptionType,
+    channel: user.acquisition?.channel,
+    campaign: user.acquisition?.campaign,
     createdAt: user.createdAt,
+  };
+}
+
+/** Full source block for the vendor detail page — null for accounts created before tracking existed. */
+function toAcquisitionResponse(user) {
+  const acquisition = user.acquisition;
+  if (!acquisition?.channel) return null;
+  return {
+    channel: acquisition.channel,
+    source: acquisition.source,
+    medium: acquisition.medium,
+    campaign: acquisition.campaign,
+    content: acquisition.content,
+    referrer: acquisition.referrer,
+    landingPage: acquisition.landingPage,
+    capturedAt: acquisition.capturedAt,
   };
 }
 
@@ -85,6 +104,12 @@ function buildUserQuery(req) {
   if (req.query.plan === 'free' || req.query.plan === 'paid') {
     query.subscriptionType = req.query.plan;
   }
+  if (ACQUISITION_CHANNELS.includes(req.query.channel)) {
+    query['acquisition.channel'] = req.query.channel;
+  } else if (req.query.channel === 'unknown') {
+    // Registered before source tracking existed — no channel was ever stamped.
+    query['acquisition.channel'] = { $exists: false };
+  }
   return query;
 }
 
@@ -129,6 +154,7 @@ exports.getUserById = asyncHandler(async (req, res) => {
   res.json({
     success: true,
     user: toSafeUser(user),
+    acquisition: toAcquisitionResponse(user),
     catalogs: catalogs.map((c) => ({
       id: c._id,
       name: c.name,
@@ -188,15 +214,39 @@ exports.exportUsers = asyncHandler(async (req, res) => {
   const query = buildUserQuery(req);
   const users = await User.find(query).sort({ createdAt: -1 });
 
-  const headers = ['Business Name', 'Email', 'Mobile', 'Status', 'Plan', 'Joined Date'];
-  const rows = users.map((user) => [
-    user.businessName || '',
-    user.email,
-    `${user.countryCode || ''} ${user.mobileNo}`.trim(),
-    user.status,
-    user.subscriptionType,
-    user.createdAt ? user.createdAt.toISOString().slice(0, 10) : '',
-  ]);
+  const headers = [
+    'Business Name',
+    'Email',
+    'Mobile',
+    'Status',
+    'Plan',
+    'Joined Date',
+    'Source Channel',
+    'UTM Source',
+    'UTM Medium',
+    'UTM Campaign',
+    'UTM Content',
+    'Landing Page',
+    'Referrer',
+  ];
+  const rows = users.map((user) => {
+    const acquisition = user.acquisition || {};
+    return [
+      user.businessName || '',
+      user.email,
+      `${user.countryCode || ''} ${user.mobileNo}`.trim(),
+      user.status,
+      user.subscriptionType,
+      user.createdAt ? user.createdAt.toISOString().slice(0, 10) : '',
+      acquisition.channel ? CHANNEL_LABELS[acquisition.channel] : 'Unknown (before tracking)',
+      acquisition.source || '',
+      acquisition.medium || '',
+      acquisition.campaign || '',
+      acquisition.content || '',
+      acquisition.landingPage || '',
+      acquisition.referrer || '',
+    ];
+  });
 
   const workbook = XLSX.utils.book_new();
   const sheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
