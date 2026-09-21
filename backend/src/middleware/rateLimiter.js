@@ -8,10 +8,18 @@ const windowMs = Number(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000;
 // numbers up, since there's no meaningful limit that works for both cases.
 const isProduction = process.env.NODE_ENV === 'production';
 
-// Applied to all /api routes.
+// Applied to all /api routes. This is only a coarse flood guard — login,
+// signup, OTP and the public upload form have the much tighter authLimiter
+// below — so it has to leave room for normal use of the dashboard. That's
+// far more than it looks: adding N existing products to a catalog is N
+// requests, product search fires one per keystroke, and one page load is
+// several calls. At the old 100 per 15 minutes a single vendor doing a bulk
+// action locked themselves out of everything until the window reset.
+// Keyed per IP, so the Next server's own server-rendered fetches for public
+// catalog pages all share one bucket — another reason it needs headroom.
 exports.globalLimiter = rateLimit({
   windowMs,
-  max: Number(process.env.RATE_LIMIT_MAX_REQUESTS) || 100,
+  max: Number(process.env.RATE_LIMIT_MAX_REQUESTS) || 1000,
   standardHeaders: true,
   legacyHeaders: false,
   skip: () => !isProduction,

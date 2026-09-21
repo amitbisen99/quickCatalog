@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
-import DOMPurify from 'dompurify';
 import { MinusIcon, PlusIcon } from '@/components/icons';
 import type { CatalogTemplateDetailProps } from '@/types/publicCatalog';
 import { whatsappLink } from './shared';
 import { useEnquiryCart } from './useEnquiryCart';
 import EnquiryCartWidget from './EnquiryCartWidget';
+import RichDescription from './RichDescription';
 import { currencySymbol } from '@/utils/currency';
 import { catalogFooterUrl } from '@/utils/attribution';
 
@@ -95,10 +95,7 @@ export default function ModernGridDetail({ catalog, vendor, categories, product 
             </p>
 
             {product.description && (
-              <div
-                className="prose prose-sm mt-5 max-w-none text-gray-700"
-                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(product.description) }}
-              />
+              <RichDescription html={product.description} className="prose prose-sm mt-5 max-w-none text-gray-700" />
             )}
 
             {specEntries.length > 0 && (
