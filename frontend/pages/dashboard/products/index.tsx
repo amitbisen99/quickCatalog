@@ -6,7 +6,7 @@ import Alert from '@/components/Alert';
 import BulkPriceModal from '@/components/dashboard/BulkPriceModal';
 import BulkCategoryModal from '@/components/dashboard/BulkCategoryModal';
 import { EyeIcon, PencilIcon, TrashIcon } from '@/components/icons';
-import { apiFetch, ApiError } from '@/utils/api';
+import { apiFetch, errorMessage } from '@/utils/api';
 import { currencySymbol } from '@/utils/currency';
 import { useAuth } from '@/context/AuthContext';
 
@@ -66,12 +66,13 @@ function ProductsLibrary() {
     if (categoryFilter) params.set('categoryId', categoryFilter);
     if (search) params.set('search', search);
 
+    setError('');
     apiFetch<{ products: Product[]; pagination: Pagination }>(`/products?${params}`)
       .then((res) => {
         setProducts(res.products);
         setPagination(res.pagination);
       })
-      .catch((err) => setError(err instanceof ApiError ? err.message : 'Could not load products.'));
+      .catch((err) => setError(errorMessage(err, 'Could not load products.')));
   }, [categoryFilter, search, page]);
 
   useEffect(loadProducts, [loadProducts]);
@@ -130,7 +131,7 @@ function ProductsLibrary() {
       const res = await apiFetch<{ products: Product[] }>(`/products?${params}`);
       setSelected(new Map(res.products.map((p) => [p.id, p])));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Could not select all matching products.');
+      setError(errorMessage(err, 'Could not select all matching products.'));
     } finally {
       setSelectingAll(false);
     }
@@ -170,7 +171,7 @@ function ProductsLibrary() {
       setEditedPrices({});
       loadProducts();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Could not save price changes. Please try again.');
+      setError(errorMessage(err, 'Could not save price changes. Please try again.'));
     } finally {
       setSavingEdits(false);
     }
@@ -188,7 +189,7 @@ function ProductsLibrary() {
       setProducts((prev) => prev?.filter((p) => p.id !== id) || null);
       setPagination((prev) => (prev ? { ...prev, total: Math.max(prev.total - 1, 0) } : prev));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Could not delete product.');
+      setError(errorMessage(err, 'Could not delete product.'));
     }
   }
 
@@ -298,8 +299,15 @@ function ProductsLibrary() {
       )}
 
       <div className="mt-6 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-        {products === null ? (
+        {products === null && !error ? (
           <p className="p-6 text-sm text-gray-500">Loading…</p>
+        ) : products === null ? (
+          <div className="p-10 text-center">
+            <p className="text-sm font-medium text-gray-900">Could not load products</p>
+            <button onClick={loadProducts} className="mt-3 text-sm font-medium text-primary-700 hover:text-primary-800">
+              Try again
+            </button>
+          </div>
         ) : products.length === 0 ? (
           <div className="p-10 text-center">
             <p className="text-sm font-medium text-gray-900">No products yet</p>

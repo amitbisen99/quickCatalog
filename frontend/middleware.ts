@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { API_URL } from '@/utils/api';
+import { API_URL, internalFetch } from '@/utils/api';
 
 // The app's own hostname — any request arriving with this Host header is
 // normal traffic and needs zero white-label handling. Anything else is a
@@ -43,7 +43,7 @@ async function resolvePrimarySlugForHost(hostname: string): Promise<string | nul
 
   let slug: string | null = null;
   try {
-    const res = await fetch(`${API_URL}/public/resolve-domain?host=${encodeURIComponent(hostname)}`);
+    const res = await internalFetch(`${API_URL}/public/resolve-domain?host=${encodeURIComponent(hostname)}`);
     if (res.ok) {
       const data = await res.json();
       slug = data.slug || null;

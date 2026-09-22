@@ -8,7 +8,7 @@ import CreateCatalogModal from '@/components/dashboard/CreateCatalogModal';
 import ShareCatalogModal from '@/components/dashboard/ShareCatalogModal';
 import UpgradePlanModal from '@/components/dashboard/UpgradePlanModal';
 import { CopyIcon, DownloadIcon, EyeIcon, PencilIcon, PlusIcon, ShareIcon, SpinnerIcon, TrashIcon } from '@/components/icons';
-import { apiFetch, ApiError } from '@/utils/api';
+import { apiFetch, errorMessage } from '@/utils/api';
 import { downloadFile } from '@/utils/downloadFile';
 import { getCatalogPublicUrl } from '@/utils/catalogUrl';
 import { useAuth } from '@/context/AuthContext';
@@ -39,9 +39,10 @@ function Catalogs() {
   const [downloadingId, setDownloadingId] = useState('');
 
   function loadCatalogs() {
+    setError('');
     apiFetch<{ catalogs: Catalog[] }>('/catalogs')
       .then((res) => setCatalogs(res.catalogs))
-      .catch((err) => setError(err instanceof ApiError ? err.message : 'Could not load catalogs.'));
+      .catch((err) => setError(errorMessage(err, 'Could not load catalogs.')));
   }
 
   useEffect(loadCatalogs, []);
@@ -63,7 +64,7 @@ function Catalogs() {
       await apiFetch(`/catalogs/${id}`, { method: 'DELETE' });
       setCatalogs((prev) => prev?.filter((c) => c.id !== id) || null);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Could not delete catalog.');
+      setError(errorMessage(err, 'Could not delete catalog.'));
     }
   }
 
@@ -72,7 +73,7 @@ function Catalogs() {
     try {
       await downloadFile(`/catalogs/${id}/pdf`, `${name}.pdf`);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Could not download the PDF. Please try again.');
+      setError(errorMessage(err, 'Could not download the PDF. Please try again.'));
     } finally {
       setDownloadingId('');
     }
@@ -102,8 +103,15 @@ function Catalogs() {
       )}
 
       <div className="mt-6 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-        {catalogs === null ? (
+        {catalogs === null && !error ? (
           <p className="p-6 text-sm text-gray-500">Loading…</p>
+        ) : catalogs === null ? (
+          <div className="p-10 text-center">
+            <p className="text-sm font-medium text-gray-900">Could not load catalogs</p>
+            <button onClick={loadCatalogs} className="mt-3 text-sm font-medium text-primary-700 hover:text-primary-800">
+              Try again
+            </button>
+          </div>
         ) : catalogs.length === 0 ? (
           <div className="p-10 text-center">
             <p className="text-sm font-medium text-gray-900">No catalogs yet</p>

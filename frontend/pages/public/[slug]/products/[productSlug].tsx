@@ -1,5 +1,5 @@
 import type { GetServerSideProps } from 'next';
-import { absoluteApiUrl } from '@/utils/api';
+import { absoluteApiUrl, internalFetch } from '@/utils/api';
 import { getCatalogTemplate } from '@/components/catalog-templates/registry';
 import { useTrackVisit } from '@/utils/analytics';
 import Seo, { SITE_URL as APP_URL } from '@/components/Seo';
@@ -19,7 +19,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({ params }) 
   const slug = typeof params?.slug === 'string' ? params.slug : '';
   const productSlug = typeof params?.productSlug === 'string' ? params.productSlug : '';
   try {
-    const res = await fetch(absoluteApiUrl(`/public/catalog/${slug}/products/${productSlug}`));
+    const res = await internalFetch(absoluteApiUrl(`/public/catalog/${slug}/products/${productSlug}`));
     const body = await res.json().catch(() => ({}));
     if (!res.ok) {
       return { props: { data: null, error: body.message || 'Could not load this product.' } };

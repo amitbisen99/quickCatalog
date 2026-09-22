@@ -24,15 +24,57 @@ export function absoluteApiUrl(path: string): string {
   return `${base}${path}`;
 }
 
+// Shared secret for calls made by THIS Next.js server itself, on its own
+// behalf, to the backend — public catalog pages' getServerSideProps,
+// middleware's domain lookup, the sitemap. Deliberately NOT a NEXT_PUBLIC_
+// var: it must never ship to the browser. The backend uses it to exempt
+// this app's own server-to-server traffic from its per-visitor rate limit
+// (see backend/src/utils/internalRequest.js) — every public catalog view
+// is otherwise one more hit against a single bucket keyed to this server's
+// own IP, shared by every visitor of every vendor's catalog, which is
+// exactly the thing that gets worse as more vendors (and their visitors)
+// join. Unset in an environment with no INTERNAL_API_SECRET configured —
+// those requests just fall back to the ordinary per-IP limit.
+function internalRequestHeaders(): HeadersInit {
+  return process.env.INTERNAL_API_SECRET ? { 'x-internal-secret': process.env.INTERNAL_API_SECRET } : {};
+}
+
+/**
+ * fetch() for this server calling its own backend directly on no one's
+ * behalf in particular — never use this for a request being made for a
+ * specific vendor/visitor from the browser (that's apiFetch, which must
+ * NOT carry this secret).
+ */
+export function internalFetch(url: string, init?: RequestInit): Promise<Response> {
+  return fetch(url, { ...init, headers: { ...init?.headers, ...internalRequestHeaders() } });
+}
+
 export class ApiError extends Error {
   status: number;
   errors?: { field: string; message: string }[];
+  retryAfterSeconds?: number;
 
-  constructor(message: string, status: number, errors?: { field: string; message: string }[]) {
+  constructor(message: string, status: number, errors?: { field: string; message: string }[], retryAfterSeconds?: number) {
     super(message);
     this.status = status;
     this.errors = errors;
+    this.retryAfterSeconds = retryAfterSeconds;
   }
+}
+
+/**
+ * Formats a caught error for display — an ApiError's own message (with how
+ * long to wait appended, for a 429) if it is one, the given fallback
+ * otherwise. Small helper so every page's `catch` block doesn't repeat the
+ * same `err instanceof ApiError ? err.message : '...'` check.
+ */
+export function errorMessage(err: unknown, fallback: string): string {
+  if (!(err instanceof ApiError)) return fallback;
+  if (err.retryAfterSeconds) {
+    const wait = err.retryAfterSeconds >= 60 ? `${Math.ceil(err.retryAfterSeconds / 60)} min` : `${err.retryAfterSeconds}s`;
+    return `${err.message} Try again in ${wait}.`;
+  }
+  return err.message;
 }
 
 interface RequestOptions {
@@ -83,12 +125,17 @@ export async function apiFetch<T = unknown>(path: string, options: RequestOption
     if (refreshed) {
       const retry = await rawFetch(path, options);
       if (retry.response.ok) return retry.data as T;
-      throw new ApiError(retry.data.message || 'Something went wrong', retry.response.status, retry.data.errors);
+      throw new ApiError(
+        retry.data.message || 'Something went wrong',
+        retry.response.status,
+        retry.data.errors,
+        retry.data.retryAfterSeconds
+      );
     }
   }
 
   if (!response.ok) {
-    throw new ApiError(data.message || 'Something went wrong', response.status, data.errors);
+    throw new ApiError(data.message || 'Something went wrong', response.status, data.errors, data.retryAfterSeconds);
   }
 
   return data as T;

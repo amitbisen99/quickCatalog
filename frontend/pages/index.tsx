@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import Image from 'next/image';
 import Link from 'next/link';
 import Seo, { SITE_URL } from '@/components/Seo';
-import { apiFetch, absoluteApiUrl } from '@/utils/api';
+import { apiFetch, absoluteApiUrl, internalFetch } from '@/utils/api';
 import { currencySymbol } from '@/utils/currency';
 import type { IconType } from 'react-icons';
 import {
@@ -177,7 +177,7 @@ interface HomeProps {
 
 export const getServerSideProps: GetServerSideProps<HomeProps> = async () => {
   try {
-    const res = await fetch(absoluteApiUrl('/public/plan-price'));
+    const res = await internalFetch(absoluteApiUrl('/public/plan-price'));
     const body = await res.json();
     return {
       props: {

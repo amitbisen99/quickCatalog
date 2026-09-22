@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -6,7 +6,7 @@ import withAuth from '@/components/withAuth';
 import Alert from '@/components/Alert';
 import ProgressBar from '@/components/ProgressBar';
 import UpgradePlanModal from '@/components/dashboard/UpgradePlanModal';
-import { apiFetch, ApiError } from '@/utils/api';
+import { apiFetch, ApiError, errorMessage } from '@/utils/api';
 import { currencySymbol } from '@/utils/currency';
 import { isPlanLimitError } from '@/utils/planLimit';
 import { useAuth } from '@/context/AuthContext';
@@ -34,7 +34,7 @@ function AddExistingProduct() {
   const [linkProgress, setLinkProgress] = useState({ done: 0, total: 0 });
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
 
-  useEffect(() => {
+  const loadProducts = useCallback(() => {
     if (!catalogId) return;
     // listVendorProducts now defaults to a 20-per-page slice for the main
     // Products library's pagination — this picker isn't paginated, so it
@@ -42,10 +42,13 @@ function AddExistingProduct() {
     // silently shrinking to 20 results.
     const params = new URLSearchParams({ excludeCatalogId: catalogId, limit: '50' });
     if (search) params.set('search', search);
+    setError('');
     apiFetch<{ products: Product[] }>(`/products?${params}`)
       .then((res) => setProducts(res.products))
-      .catch((err) => setError(err instanceof ApiError ? err.message : 'Could not load products.'));
+      .catch((err) => setError(errorMessage(err, 'Could not load products.')));
   }, [catalogId, search]);
+
+  useEffect(loadProducts, [loadProducts]);
 
   function toggle(id: string) {
     setSelected((prev) => {
@@ -55,6 +58,14 @@ function AddExistingProduct() {
       return next;
     });
   }
+
+  // How many /link requests are ever in flight at once. Selecting 100+
+  // products used to fire all of them at the same instant — one request
+  // per product, no cap — which is exactly the kind of burst a per-visitor
+  // rate limit exists to catch, turning a normal bulk add into a wall of
+  // "Too many requests". A small worker pool gets the same job done at a
+  // steady rate instead of one spike.
+  const LINK_CONCURRENCY = 5;
 
   async function handleAddSelected() {
     const ids = Array.from(selected);
@@ -68,19 +79,26 @@ function AddExistingProduct() {
     let done = 0;
     let failed = 0;
     let hitPlanLimit = false;
-    await Promise.all(
-      ids.map(async (productId) => {
+    let rateLimited = false;
+    let cursor = 0;
+
+    async function worker() {
+      while (cursor < ids.length) {
+        const productId = ids[cursor];
+        cursor += 1;
         try {
           await apiFetch(`/catalogs/${catalogId}/products/${productId}/link`, { method: 'POST' });
         } catch (err) {
           failed += 1;
           if (isPlanLimitError(err)) hitPlanLimit = true;
+          if (err instanceof ApiError && err.status === 429) rateLimited = true;
         } finally {
           done += 1;
           setLinkProgress({ done, total: ids.length });
         }
-      })
-    );
+      }
+    }
+    await Promise.all(Array.from({ length: Math.min(LINK_CONCURRENCY, ids.length) }, worker));
 
     if (hitPlanLimit) {
       // Once the free-tier cap is hit, every remaining link attempt fails
@@ -89,10 +107,11 @@ function AddExistingProduct() {
       setUpgradeModalOpen(true);
       setLinking(false);
     } else if (failed > 0) {
+      const suffix = rateLimited ? ' Wait a minute before adding the rest.' : ' Please try again for the rest.';
       setError(
         failed === ids.length
-          ? 'Could not add the selected products. Please try again.'
-          : `Added ${ids.length - failed} of ${ids.length} products — ${failed} could not be added. Please try again for the rest.`
+          ? `Could not add the selected products.${suffix}`
+          : `Added ${ids.length - failed} of ${ids.length} products — ${failed} could not be added.${suffix}`
       );
       setLinking(false);
     } else {
@@ -127,8 +146,15 @@ function AddExistingProduct() {
       </div>
 
       <div className="mt-6">
-        {products === null ? (
+        {products === null && !error ? (
           <p className="text-sm text-gray-500">Loading…</p>
+        ) : products === null ? (
+          <div className="rounded-2xl border border-gray-200 bg-white p-10 text-center shadow-sm">
+            <p className="text-sm font-medium text-gray-900">Could not load your products</p>
+            <button onClick={loadProducts} className="mt-3 text-sm font-medium text-primary-700 hover:text-primary-800">
+              Try again
+            </button>
+          </div>
         ) : products.length === 0 ? (
           <div className="rounded-2xl border border-gray-200 bg-white p-10 text-center shadow-sm">
             <p className="text-sm font-medium text-gray-900">Nothing to add</p>

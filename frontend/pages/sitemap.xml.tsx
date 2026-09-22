@@ -1,5 +1,5 @@
 import type { GetServerSideProps } from 'next';
-import { absoluteApiUrl } from '@/utils/api';
+import { absoluteApiUrl, internalFetch } from '@/utils/api';
 import { SITE_URL } from '@/components/Seo';
 
 // Static marketing pages worth listing — dashboard/admin/auth pages are
@@ -27,7 +27,7 @@ function buildSitemap(catalogs: { slug: string; updatedAt: string }[]): string {
 export const getServerSideProps: GetServerSideProps = async ({ res }) => {
   let catalogs: { slug: string; updatedAt: string }[] = [];
   try {
-    const apiRes = await fetch(absoluteApiUrl('/public/sitemap-catalogs'));
+    const apiRes = await internalFetch(absoluteApiUrl('/public/sitemap-catalogs'));
     const body = await apiRes.json().catch(() => ({}));
     if (apiRes.ok && Array.isArray(body.catalogs)) {
       catalogs = body.catalogs;
