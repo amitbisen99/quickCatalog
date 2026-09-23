@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const generateOtp = require('../utils/generateOtp');
 const { sendOtpEmail, sendPasswordResetEmail, sendWelcomeEmail } = require('../services/email.service');
+const { syncVendorToBrevoList } = require('../services/brevoContacts.service');
 const asyncHandler = require('../utils/asyncHandler');
 const AppError = require('../utils/AppError');
 const toSafeUser = require('../utils/toSafeUser');
@@ -97,6 +98,14 @@ exports.verifyEmail = asyncHandler(async (req, res) => {
   } catch (err) {
     console.error('Failed to send welcome email:', err);
   }
+
+  // Same best-effort treatment — adds the vendor to the Brevo marketing
+  // list (see brevoContacts.service.js) at the same point the lifecycle
+  // email system and UTM tracking already treat as "registered": email
+  // verified, not just signed up. syncVendorToBrevoList never throws on
+  // its own, but await it anyway so it's never left as an unhandled
+  // background promise.
+  await syncVendorToBrevoList(user);
 
   res.json({ success: true, message: 'Account verified successfully', user: toSafeUser(user) });
 });
