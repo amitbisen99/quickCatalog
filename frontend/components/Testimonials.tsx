@@ -12,18 +12,19 @@ interface Props {
 export default function Testimonials({ items }: Props) {
   if (items.length === 0) return null;
 
-  // One or two cards would look lost stretched across a 3-column grid, so
-  // narrow the container and columns to fit however many there are. Every
-  // variant sets grid-cols-1 explicitly: without it the phone layout gets an
-  // auto-sized column that grows to fit the longest unwrapped line (a long
-  // business name in a truncated caption), pushing the cards wider than the
-  // screen.
-  const layout =
+  // A wrapping flex row rather than a grid, so an incomplete last row (say 2
+  // cards left over after a row of 3) is centered instead of hugging the
+  // left edge. Card widths are set explicitly per breakpoint: 100% on
+  // phones, half (minus half the 24px gap) on tablets, a third (minus a
+  // third of the two gaps) on desktop. One or two testimonials get a
+  // narrower container so they don't look lost.
+  const containerWidth = items.length === 1 ? 'max-w-2xl' : items.length === 2 ? 'max-w-4xl' : 'max-w-6xl';
+  const cardWidth =
     items.length === 1
-      ? 'max-w-2xl grid-cols-1'
+      ? 'w-full'
       : items.length === 2
-        ? 'max-w-4xl grid-cols-1 md:grid-cols-2'
-        : 'max-w-6xl grid-cols-1 md:grid-cols-2 lg:grid-cols-3';
+        ? 'w-full md:w-[calc(50%_-_12px)]'
+        : 'w-full md:w-[calc(50%_-_12px)] lg:w-[calc(33.3333%_-_16px)]';
 
   return (
     <section id="testimonials" className="px-6 pb-0 pt-28 bg-brand-bg">
@@ -40,11 +41,11 @@ export default function Testimonials({ items }: Props) {
           </p>
         </div>
 
-        <div className={`mx-auto grid gap-6 ${layout}`}>
+        <div className={`mx-auto flex flex-wrap justify-center gap-6 ${containerWidth}`}>
           {items.map((item) => (
             <figure
               key={`${item.name}-${item.business}`}
-              className="flex flex-col rounded-3xl border border-brand-border bg-white p-8"
+              className={`flex min-w-0 flex-col rounded-3xl border border-brand-border bg-white p-8 ${cardWidth}`}
             >
               <FaQuoteLeft className="mb-4 text-2xl text-home2-accent-text" aria-hidden="true" />
 
