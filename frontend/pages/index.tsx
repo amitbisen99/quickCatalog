@@ -11,6 +11,7 @@ import { currencySymbol } from '@/utils/currency';
 import type { IconType } from 'react-icons';
 import {
   FaArrowRight,
+  FaArrowsRotate,
   FaBars,
   FaBolt,
   FaCartShopping,
@@ -19,7 +20,6 @@ import {
   FaCircleCheck,
   FaCircleInfo,
   FaCode,
-  FaCodeBranch,
   FaEarthAmericas,
   FaFacebookF,
   FaFileExcel,
@@ -28,7 +28,6 @@ import {
   FaGlobe,
   FaHandPointer,
   FaHeadset,
-  FaHourglassHalf,
   FaInbox,
   FaInfinity,
   FaInstagram,
@@ -49,6 +48,7 @@ import {
   FaTriangleExclamation,
   FaUsers,
   FaUtensils,
+  FaWhatsapp,
   FaXmark,
 } from 'react-icons/fa6';
 
@@ -79,17 +79,18 @@ const FEATURE_TABS: { id: FeatureTabId; label: string; icon: IconType }[] = [
 
 const PROBLEMS: { icon: IconType; label: string }[] = [
   { icon: FaTag, label: 'Updating prices takes hours every time?' },
-  { icon: FaImages, label: 'Every small product change requires redesigning the catalog?' },
-  { icon: FaHourglassHalf, label: 'Dealers and customers keep using outdated catalogs?' },
-  { icon: FaFilePdf, label: 'Multiple versions of catalogs are scattered everywhere?' },
-  { icon: FaCodeBranch, label: 'Still struggling to get sales enquiry?' },
+  { icon: FaPenRuler, label: 'Adding products means redesigning the catalogue?' },
+  { icon: FaImages, label: 'Still sending product photos one by one on WhatsApp?' },
+  { icon: FaFilePdf, label: 'Dealers and customers keep using outdated PDFs?' },
+  { icon: FaWhatsapp, label: 'Sales enquiries are getting lost in WhatsApp?' },
 ];
 
 const SOLUTION_STEPS: { icon: IconType; title: string; body: string }[] = [
-  { icon: FaFileExcel, title: 'Upload Excel', body: 'Your products, images and prices.' },
-  { icon: FaPalette, title: 'Choose Design -> Catalog Ready', body: 'Pick a professional template and catalog generated automatically.' },
-  { icon: FaShareNodes, title: 'Share Everywhere', body: 'Website, WhatsApp, Email, Messages.' },
-  { icon: FaInbox, title: 'Receive Enquiries', body: 'Sales enquiries land straight in your dashboard.' },
+  { icon: FaFileExcel, title: 'Upload Excel', body: 'Products, prices, descriptions & images.' },
+  { icon: FaPalette, title: 'Choose Your Design', body: 'Pick a professional template. Your catalogue is created automatically.' },
+  { icon: FaShareNodes, title: 'Publish & Share', body: 'One live link for WhatsApp, email, website & QR.' },
+  { icon: FaArrowsRotate, title: 'Update Anytime', body: 'Change a product or price once. Everyone sees the latest version.' },
+  { icon: FaInbox, title: 'Capture Enquiries', body: 'Customer enquiries come directly to your dashboard.' },
 ];
 
 const COMPARISON_ROWS: { feature: string; pdf: string; ecommerce: string; instantCatalog: string }[] = [
@@ -452,7 +453,7 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
               <span className="home2-text-gradient">Instant Catalog</span> Fixes That.
             </h2>
             <p className="text-brand-muted max-w-xl mx-auto">
-              See how businesses replace messy, manual catalog work with one simple system.
+              See how businesses replace messy, manual catalogue work with one simple system.
             </p>
           </div>
 
@@ -460,13 +461,15 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
             {/* The Problem */}
             <div className="relative overflow-hidden rounded-3xl border border-brand-border bg-white p-8">
               <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-red-400 to-red-200"></div>
-              <div className="flex items-center gap-3 mb-6">
+              <div className="flex items-start gap-3 mb-6">
                 <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-red-50 text-red-500">
                   <FaTriangleExclamation />
                 </span>
                 <div>
-                  <h3 className="text-xl font-black tracking-tight">The Problem</h3>
-                  <p className="text-xs text-brand-muted">What&apos;s slowing your business down</p>
+                  <p className="text-xs font-bold uppercase tracking-widest text-red-500">The Problem</p>
+                  <h3 className="mt-1 text-xl font-black leading-snug tracking-tight md:text-2xl">
+                    Your products change. Your catalogue shouldn&apos;t become a project.
+                  </h3>
                 </div>
               </div>
               <div className="space-y-3">
@@ -486,13 +489,16 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
               <div className="absolute top-0 right-0 w-48 h-48 bg-black/5 rounded-full -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
               <div className="absolute bottom-0 left-0 w-32 h-32 bg-black/5 rounded-full translate-y-1/2 -translate-x-1/4 pointer-events-none"></div>
               <div className="relative z-10 flex-1">
-                <div className="flex items-center gap-3 mb-6">
+                <div className="flex items-start gap-3 mb-6">
                   <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-black/10 text-brand-text">
                     <FaLightbulb />
                   </span>
                   <div>
-                    <h3 className="text-xl font-black tracking-tight text-brand-text">The Solution</h3>
-                    <p className="text-xs text-brand-text/70">Four simple steps</p>
+                    <p className="text-xs font-bold uppercase tracking-widest text-brand-text/70">The Solution</p>
+                    <h3 className="mt-1 text-xl font-black leading-snug tracking-tight text-brand-text md:text-2xl">
+                      One Catalogue. Always Up to Date.
+                    </h3>
+                    <p className="mt-1 text-sm text-brand-text/70">Create once. Share everywhere. Update anytime.</p>
                   </div>
                 </div>
                 <div className="space-y-2.5">
@@ -516,7 +522,7 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
                 href="/signup"
                 className="relative z-10 mt-8 flex w-full items-center justify-center gap-2 rounded-2xl bg-white py-3.5 text-center text-sm font-bold uppercase tracking-widest text-home2-accent-text shadow-lg transition-all hover:bg-home2-accent-light"
               >
-                Start Building Free
+                Create My Free Catalogue
                 <FaArrowRight className="text-xs" />
               </Link>
             </div>
