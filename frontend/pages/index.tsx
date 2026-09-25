@@ -4,6 +4,8 @@ import { useRouter } from 'next/router';
 import Image from 'next/image';
 import Link from 'next/link';
 import Seo, { SITE_URL } from '@/components/Seo';
+import Testimonials from '@/components/Testimonials';
+import { TESTIMONIALS } from '@/data/testimonials';
 import { apiFetch, absoluteApiUrl, internalFetch } from '@/utils/api';
 import { currencySymbol } from '@/utils/currency';
 import type { IconType } from 'react-icons';
@@ -1007,6 +1009,11 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
           </div>
         </div>
       </section>
+
+      {/* Testimonials — renders nothing while data/testimonials.ts is empty.
+          Sits on the same lavender background as the CTA below it, with no
+          bottom padding of its own, so the CTA's top padding is the only gap. */}
+      <Testimonials items={TESTIMONIALS} />
 
       {/* CTA / Register Section */}
       <section className="py-28 px-6 bg-brand-bg">

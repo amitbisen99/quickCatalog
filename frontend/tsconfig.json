@@ -20,6 +20,7 @@
       "@/utils/*": ["utils/*"],
       "@/styles/*": ["styles/*"],
       "@/context/*": ["context/*"],
+      "@/data/*": ["data/*"],
       "@/types/*": ["types/*"]
     }
   },
