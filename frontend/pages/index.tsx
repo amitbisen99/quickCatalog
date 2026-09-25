@@ -468,7 +468,7 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
                 <div>
                   <p className="text-xs font-bold uppercase tracking-widest text-red-500">The Problem</p>
                   <h3 className="mt-1 text-xl font-black leading-snug tracking-tight md:text-2xl">
-                    Your products change. Your catalogue shouldn&apos;t become a project.
+                    Still managing your products the old way?
                   </h3>
                 </div>
               </div>
@@ -1016,13 +1016,11 @@ export default function Home({ indiaPrice, internationalPrice }: HomeProps) {
         </div>
       </section>
 
-      {/* Testimonials — renders nothing while data/testimonials.ts is empty.
-          Sits on the same lavender background as the CTA below it, with no
-          bottom padding of its own, so the CTA's top padding is the only gap. */}
+      {/* Testimonials slider — renders nothing while data/testimonials.ts is empty. */}
       <Testimonials items={TESTIMONIALS} />
 
       {/* CTA / Register Section */}
-      <section className="py-28 px-6 bg-brand-bg">
+      <section className="py-28 px-6 bg-white">
         <div className="max-w-5xl mx-auto">
           <div className="relative rounded-[3rem] overflow-hidden">
             <div className="absolute inset-0">
